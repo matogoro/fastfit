@@ -1,0 +1,43 @@
+#+TITLE: fastfit
+#+LANGUAGE: en
+#+OPTIONS: toc:1 num:nil ^:nil
+
+* Summary
+
+~fastfit~ is a statistical modeling toolkit built on ~data.table~ for efficient regression workflows.
+
+This package provides ready-made functions designed to streamline the path from descriptive analysis, to regression modeling, to publication-ready tables and visualizations.  These functions are intended to run efficiently in R with minimal dependencies and unified outputs.
+
+Currently, this package supports GLM, Cox, and mixed models.  Additional models and visualizations are planned for the future.
+
+* Function list
+
+This package currently focuses on two points of entry: the ~desctbl()~ and ~fastfit()~ functions.  These meta-functions provide an easy way to incorporate standard summary and regression workflows into a single function for convenience.
+
+** Main functions
+
+- ~desctbl()~: Creates a summary table for descriptive statistics within a given dataset.  Can be customized to include comparison /p/-values, "total" columns, missing values, etc.  [PENDING]
+- ~fastfit()~: Creates a regression table for predictive statistics within a given dataset.  Can be customized to perform a univariable screen, generate downstream multivariable analyses, etc.
+
+** Ancillary functions
+
+- ~uscreen()~: Performs univariable regression analysis for multiple predictors against a single outcome, returning standardized results in ~data.table~ format.
+- ~mmodel()~: Provides a unified interface for fitting various types of regression models with consistent syntax across different model types (GLM, Cox, mixed effects, etc.), returning standardized results in ~data.table~ format.
+- ~m2dt()~: Extracts coefficients, confidence intervals, and model statistics from fitted models and converts them to a standardized ~data.table~ format.
+- ~cmodels()~: Fits multiple multivariable models with different predictor sets and combines results in standardized ~data.table~ format for easy comparison.
+- ~setlabels()~: Assigns labels to objects using ~setattr()~.
+
+** Visualizations
+
+- ~glmforest()~: Creates a combined table/forest plot for generalized linear models
+- ~coxforest()~: Creates a combined table/forest plot for Cox proportional hazards models
+
+* Changelog
+
+*Version 0.1.0 (2025-09-23):* Initial commit
+
+* Acknowledgements
+
+This package is heavily inspired by the ~finalfit~ package, from which it derives its core concept.
+
+This package also draws heavily from the ~arsenal~ package for descriptive tables.
