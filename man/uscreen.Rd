@@ -15,6 +15,7 @@ uscreen(
   keep_qc_stats = TRUE,
   sort_by = NULL,
   add_reference_rows = TRUE,
+  var_labels = NULL,
   ...
 )
 }
@@ -43,6 +44,9 @@ original predictor order. Options include "p_value", "effect", etc. Default is N
 
 \item{add_reference_rows}{Logical. Add reference category rows for factors. 
 Default is TRUE.}
+
+\item{var_labels}{Named character vector for custom variable labels. Names should
+match variable names in predictors, values are display labels.}
 
 \item{...}{Additional arguments passed to model fitting functions.}
 }

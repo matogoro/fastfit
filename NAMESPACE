@@ -3,6 +3,7 @@
 export("%||%")
 export(cmodels)
 export(coxforest)
+export(desctbl)
 export(fastfit)
 export(glmforest)
 export(m2dt)

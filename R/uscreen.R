@@ -18,6 +18,8 @@
 #'   original predictor order. Options include "p_value", "effect", etc. Default is NULL.
 #' @param add_reference_rows Logical. Add reference category rows for factors. 
 #'   Default is TRUE.
+#' @param var_labels Named character vector for custom variable labels. Names should
+#'   match variable names in predictors, values are display labels.
 #' @param ... Additional arguments passed to model fitting functions.
 #'
 #' @return A data.table with one row per coefficient containing:
@@ -62,65 +64,71 @@ uscreen <- function(data, outcome, predictors,
                     keep_qc_stats = TRUE,
                     sort_by = NULL,
                     add_reference_rows = TRUE,
+                    var_labels = NULL,
                     ...) {
     
     if (!data.table::is.data.table(data)) {
         data <- data.table::as.data.table(data)
     }
     
-                                        # Change here: Add fill=TRUE to rbindlist
     results <- data.table::rbindlist(lapply(seq_along(predictors), function(i) {
         var <- predictors[i]
         
-                                        # Build formula
+        ## Build formula with original variable name
         formula <- stats::as.formula(paste(outcome, "~", var))
         
-                                        # Fit model based on type
+        ## Fit model
         if (model_type == "glm") {
             model <- stats::glm(formula, data = data, family = family, ...)
-            
         } else if (model_type == "lm") {
             model <- stats::lm(formula, data = data, ...)
-            
         } else if (model_type == "coxph") {
             if (!requireNamespace("survival", quietly = TRUE)) 
                 stop("Package 'survival' required for Cox models")
             model <- survival::coxph(formula, data = data, ...)
-            
         } else if (model_type == "clogit") {
             if (!requireNamespace("survival", quietly = TRUE)) 
                 stop("Package 'survival' required for conditional logistic")
             model <- survival::clogit(formula, data = data, ...)
-            
         } else {
             stop("Unsupported model type: ", model_type)
         }
         
-                                        # Extract results using m2dt
+        ## Get display label
+        var_display <- if (!is.null(var_labels) && var %in% names(var_labels)) {
+                           var_labels[var]
+                       } else {
+                           var
+                       }
+        
+        ## Extract results using m2dt - use display label for the variable column
         dt <- m2dt(model, 
                    conf_level = conf_level,
                    variable_name = var,
                    keep_qc_stats = keep_qc_stats,
                    add_reference_rows = add_reference_rows)
         
-                                        # Add original order index
+        ## Add original variable name for internal reference
+        dt[, label := var_display]
         dt[, .var_order := i]
         
-                                        # Optionally keep model object
         if (keep_models) {
             dt[, model := list(list(model))]
         }
         
         return(dt)
-    }), fill = TRUE)  # KEY CHANGE: Add fill=TRUE here
+    }), fill = TRUE)
     
-                                        # Sort by original variable order (default)
+    ## Sort by original variable order
     data.table::setorder(results, .var_order)
+    results[, .var_order := NULL]  ## Remove helper column
     
-                                        # Apply additional sorting if requested
+    ## Apply additional sorting if requested
     if (!is.null(sort_by) && sort_by %in% names(results)) {
         data.table::setorder(results, cols = sort_by)
     }
+
+    results[]  # Force finalization
     
     return(results)
 }

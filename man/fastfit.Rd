@@ -2,7 +2,7 @@
 % Please edit documentation in R/fastfit.R
 \name{fastfit}
 \alias{fastfit}
-\title{Perform Regression Analysis with Flexible Options}
+\title{Perform Complete Statistical Analysis with Flexible Options}
 \usage{
 fastfit(
   data,
@@ -16,6 +16,7 @@ fastfit(
   family = "binomial",
   conf_level = 0.95,
   add_reference_rows = TRUE,
+  var_labels = NULL,
   metrics = "both",
   return_type = "table",
   keep_models = FALSE,
@@ -30,13 +31,13 @@ fastfit(
 \item{predictors}{Character vector of predictor variable names for univariable screening.}
 
 \item{method}{Character string specifying the analysis method:
-"screen" - Univariable screen to multivariable analysis based on p-value threshold (default).
-"all" - All predictors in both univariable and multivariable analyses.
-"custom" - All univariable models, followed by multivariable with selected predictors only.}
+"screen" - Univariable to multivariable based on p-value threshold (default).
+"all" - All predictors in both univariable and multivariable.
+"custom" - Univariable all, multivariable with selected predictors only.}
 
-\item{multi_predictors}{For method = "custom", character vector of predictors for multivariable model.}
+\item{multi_predictors}{For method="custom", character vector of predictors for multivariable model.}
 
-\item{p_threshold}{For method = "screen", p-value threshold for selection. Default 0.05.}
+\item{p_threshold}{For method="screen", p-value threshold for selection. Default 0.05.}
 
 \item{columns}{Character string specifying which results to include:
 "both" - Both univariable and multivariable columns (default).
@@ -51,9 +52,12 @@ fastfit(
 
 \item{add_reference_rows}{Add reference category rows. Default TRUE.}
 
+\item{var_labels}{Named character vector for custom variable labels. Names should
+match variable names in predictors, values are display labels.}
+
 \item{metrics}{Character vector of metrics to include per column:
 "effect" - Effect size with CI (OR/HR/RR/Estimate).
-"p" - p-value.
+"p" - P-value.
 "both" - Both effect and p-value (default).}
 
 \item{return_type}{What to return:
@@ -65,10 +69,6 @@ fastfit(
 
 \item{...}{Additional arguments passed to model fitting functions.}
 }
-\value{
-Depending on return_type: data.table, model object, or list with both.
-}
 \description{
-Conducts univariable and/or multivariable regression analysis with multiple
-workflow options and customizable output formats.
+Perform Complete Statistical Analysis with Flexible Options
 }

@@ -6,18 +6,18 @@
 
 ~fastfit~ is a statistical modeling toolkit built on ~data.table~ for efficient regression workflows.
 
-This package provides ready-made functions designed to streamline the path from descriptive analysis, to regression modeling, to publication-ready tables and visualizations.  These functions are intended to run efficiently in R with minimal dependencies and unified outputs.
+This package provides ready-made functions designed to streamline the path from descriptive analysis, to regression modeling, to publication-ready tables and visualizations.  These functions are intended to run efficiently in R with minimal dependencies and standardized outputs.
 
 Currently, this package supports GLM, Cox, and mixed models.  Additional models and visualizations are planned for the future.
 
 * Function list
 
-This package currently focuses on two points of entry: the ~desctbl()~ and ~fastfit()~ functions.  These meta-functions provide an easy way to incorporate standard summary and regression workflows into a single function for convenience.
+This package currently focuses on two main points of entry: the ~desctbl()~ and ~fastfit()~ functions.  These meta-functions provide an easy way to incorporate standard summary and regression workflows into a single function for convenience.
 
 ** Main functions
 
-- ~desctbl()~: Creates a summary table for descriptive statistics within a given dataset.  Can be customized to include comparison /p/-values, "total" columns, missing values, etc.  [PENDING]
-- ~fastfit()~: Creates a regression table for predictive statistics within a given dataset.  Can be customized to perform a univariable screen, generate downstream multivariable analyses, etc.
+- ~desctbl()~: Creates a summary table for descriptive statistics within a given dataset.  It can be modified to include comparison /p/-values, "total" columns, missing values, etc.
+- ~fastfit()~: Creates a regression table for predictive statistics within a given dataset.  It can be modified to perform a univariable screen, generate downstream multivariable analyses, etc.
 
 ** Ancillary functions
 
@@ -34,10 +34,12 @@ This package currently focuses on two points of entry: the ~desctbl()~ and ~fast
 
 * Changelog
 
-*Version 0.1.0 (2025-09-23):* Initial commit
+v0.2.0 (2025-09-26): Added ~desctbl()~ function and documentation
+
+*v0.1.0 (2025-09-23):* Initial commit
 
 * Acknowledgements
 
 This package is heavily inspired by the ~finalfit~ package, from which it derives its core concept.
 
-This package also draws heavily from the ~arsenal~ package for descriptive tables.
+This package also adapts several concepts from the ~arsenal~ package for descriptive tables.

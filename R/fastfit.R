@@ -1,17 +1,14 @@
-#' Perform Regression Analysis with Flexible Options
-#'
-#' Conducts univariable and/or multivariable regression analysis with multiple
-#' workflow options and customizable output formats.
+#' Perform Complete Statistical Analysis with Flexible Options
 #'
 #' @param data Data.frame or data.table containing the dataset.
 #' @param outcome Character string specifying the outcome variable.
 #' @param predictors Character vector of predictor variable names for univariable screening.
 #' @param method Character string specifying the analysis method:
-#'   "screen" - Univariable screen to multivariable analysis based on p-value threshold (default).
-#'   "all" - All predictors in both univariable and multivariable analyses.
-#'   "custom" - All univariable models, followed by multivariable with selected predictors only.
-#' @param multi_predictors For method = "custom", character vector of predictors for multivariable model.
-#' @param p_threshold For method = "screen", p-value threshold for selection. Default 0.05.
+#'   "screen" - Univariable to multivariable based on p-value threshold (default).
+#'   "all" - All predictors in both univariable and multivariable.
+#'   "custom" - Univariable all, multivariable with selected predictors only.
+#' @param multi_predictors For method="custom", character vector of predictors for multivariable model.
+#' @param p_threshold For method="screen", p-value threshold for selection. Default 0.05.
 #' @param columns Character string specifying which results to include:
 #'   "both" - Both univariable and multivariable columns (default).
 #'   "uni" - Univariable results only.
@@ -20,9 +17,11 @@
 #' @param family For GLM models, the family. Default "binomial".
 #' @param conf_level Confidence level. Default 0.95.
 #' @param add_reference_rows Add reference category rows. Default TRUE.
+#' @param var_labels Named character vector for custom variable labels. Names should
+#'   match variable names in predictors, values are display labels.
 #' @param metrics Character vector of metrics to include per column:
 #'   "effect" - Effect size with CI (OR/HR/RR/Estimate).
-#'   "p" - p-value.
+#'   "p" - P-value.
 #'   "both" - Both effect and p-value (default).
 #' @param return_type What to return:
 #'   "table" - Formatted data.table (default).
@@ -30,8 +29,6 @@
 #'   "both" - List with table and model.
 #' @param keep_models Logical. Store model objects in results. Default FALSE.
 #' @param ... Additional arguments passed to model fitting functions.
-#'
-#' @return Depending on return_type: data.table, model object, or list with both.
 #'
 #' @export
 fastfit <- function(data,
@@ -45,6 +42,7 @@ fastfit <- function(data,
                     family = "binomial",
                     conf_level = 0.95,
                     add_reference_rows = TRUE,
+                    var_labels = NULL,  # Add this parameter
                     metrics = "both",
                     return_type = "table",
                     keep_models = FALSE,
@@ -54,20 +52,20 @@ fastfit <- function(data,
     method <- match.arg(method, c("screen", "all", "custom"))
     columns <- match.arg(columns, c("both", "uni", "multi"))
     return_type <- match.arg(return_type, c("table", "model", "both"))
-    
+
     if (method == "custom" && is.null(multi_predictors)) {
         stop("multi_predictors must be specified when method='custom'")
     }
-    
+
     ## Convert metrics to standardized format
     if (length(metrics) == 1 && metrics == "both") {
         metrics <- c("effect", "p")
     }
-    
+
     if (!data.table::is.data.table(data)) {
         data <- data.table::as.data.table(data)
     }
-    
+
     ## Step 1: Univariable analysis (if needed)
     uni_results <- NULL
     if (columns %in% c("both", "uni")) {
@@ -82,15 +80,16 @@ fastfit <- function(data,
             keep_models = keep_models,
             keep_qc_stats = TRUE,
             add_reference_rows = add_reference_rows,
+            var_labels = var_labels,
             ...
         )
     }
-    
+
     ## Step 2: Determine predictors for multivariable model
     multi_vars <- NULL
     multi_model <- NULL
     multi_results <- NULL
-    
+
     if (columns %in% c("both", "multi")) {
         if (method == "screen") {
             ## Screen based on p-value threshold
@@ -141,14 +140,24 @@ fastfit <- function(data,
                 keep_qc_stats = TRUE,
                 add_reference_rows = add_reference_rows
             )
+
+            if (!is.null(var_labels)) {
+                                        # Extract base variable name from term
+                multi_results[, base_var := gsub("^([^0-9]+).*", "\\1", term)]
+                
+                                        # Add label column
+                multi_results[, label := ifelse(base_var %in% names(var_labels),
+                                                var_labels[base_var],
+                                                base_var)]
+            }
         }
     }
-    
+
     ## Step 3: Handle return types
     if (return_type == "model") {
         return(multi_model)
     }
-    
+
     ## Step 4: Format combined output
     result <- format_fastfit_table(
         uni_results = uni_results,
@@ -158,7 +167,7 @@ fastfit <- function(data,
         metrics = metrics,
         model_type = model_type
     )
-    
+
     ## Add attributes
     data.table::setattr(result, "outcome", outcome)
     data.table::setattr(result, "model_type", model_type)
@@ -168,13 +177,13 @@ fastfit <- function(data,
     if (!is.null(multi_model)) {
         data.table::setattr(result, "model", multi_model)
     }
-    
+
     if (columns != "uni") {
         data.table::setattr(result, "n_multi", length(multi_vars))
     }
-    
+
     result[]  # Force finalization
-    
+
     if (return_type == "both") {
         return(list(table = result, model = multi_model))
     } else {
@@ -188,20 +197,27 @@ fastfit <- function(data,
 format_fastfit_table <- function(uni_results, multi_results, predictors,
                                  columns, metrics, model_type) {
     
-    ## Determine effect column name
+                                        # Determine effect column name
     effect_col <- if (model_type == "coxph") "HR" 
                   else if (model_type == "glm") "OR" 
                   else "Estimate"
     
-    ## Build result table
+                                        # Build result table
     result <- data.table::data.table()
     
     for (pred in predictors) {
-        ## Get rows for this predictor
+                                        # Get rows for this predictor from uni_results
         if (!is.null(uni_results)) {
             pred_rows <- uni_results[variable == pred]
+            
+                                        # Use label if available, otherwise use variable name
+            display_name <- if ("label" %in% names(pred_rows) && nrow(pred_rows) > 0) {
+                                pred_rows$label[1]
+                            } else {
+                                pred
+                            }
         } else {
-            ## Create placeholder for structure
+            display_name <- pred
             pred_rows <- data.table::data.table(
                                          term = pred,
                                          reference = ""
@@ -210,14 +226,14 @@ format_fastfit_table <- function(uni_results, multi_results, predictors,
         
         for (i in seq_len(nrow(pred_rows))) {
             row <- data.table::data.table(
-                                   variable = if (i == 1) pred else "",
+                                   variable = if (i == 1) display_name else "",  # Use display_name here
                                    level = gsub(paste0("^", pred), "", pred_rows$term[i])
                                )
             
-            ## Clean up level display
+                                        # Clean up level display
             if (row$level == "") row[, level := "(main effect)"]
             
-            ## Add sample size if available
+                                        # Add sample size if available
             if (!is.null(uni_results) && "n" %in% names(uni_results)) {
                 row[, n := pred_rows$n[i]]
                 if ("events" %in% names(pred_rows)) {
