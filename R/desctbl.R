@@ -45,24 +45,24 @@ desctbl <- function(data,
         data <- data.table::as.data.table(data)
     }
     
-                                        # Set group_var from 'by' parameter
+    ## Set group_var from 'by' parameter
     group_var <- by
     group_var_label <- NULL
     
-                                        # Apply label to group variable if provided
+    ## Apply label to group variable if provided
     if (!is.null(group_var) && !is.null(var_labels) && group_var %in% names(var_labels)) {
         group_var_label <- var_labels[group_var]
     } else if (!is.null(group_var)) {
         group_var_label <- group_var
     }
     
-                                        # Variables are already provided as a vector
+    ## Variables are already provided as a vector
     vars <- variables
     
-                                        # Initialize result table
+    ## Initialize result table
     result <- data.table::data.table()
     
-                                        # Process each variable
+    ## Process each variable
     for (var in vars) {
         var_data <- process_variable(
             data = data,
@@ -86,12 +86,12 @@ desctbl <- function(data,
         result <- rbind(result, var_data, fill = TRUE)
     }
     
-                                        # Add p-value column if tests requested
+    ## Add p-value column if tests requested
     if (test && !is.null(group_var)) {
         result <- format_p_values(result, digits_p)
     }
     
-                                        # Reorder columns if total position specified
+    ## Reorder columns if total position specified
     if (!isFALSE(total) && !is.null(group_var)) {
         result <- reorder_total_column(result, total, total_label)
     }
@@ -108,16 +108,16 @@ process_variable <- function(data, var, group_var = NULL,
                              test, test_continuous, test_categorical,
                              total, total_label, var_labels, na_percent, ...) {
     
-                                        # Get variable label
+    ## Get variable label
     var_label <- if (!is.null(var_labels) && var %in% names(var_labels)) {
                      var_labels[var]
                  } else {
                      var
                  }
     
-                                        # Determine variable type
+    ## Determine variable type
     if (grepl("^Surv\\(", var)) {
-                                        # Survival object
+        ## Survival object
         result <- process_survival(
             data = data,
             var = var,
@@ -130,7 +130,7 @@ process_variable <- function(data, var, group_var = NULL,
             ...
         )
     } else if (is.numeric(data[[var]])) {
-                                        # Continuous variable
+        ## Continuous variable
         result <- process_continuous(
             data = data,
             var = var,
@@ -147,7 +147,7 @@ process_variable <- function(data, var, group_var = NULL,
             ...
         )
     } else {
-                                        # Categorical variable
+        ## Categorical variable
         result <- process_categorical(
             data = data,
             var = var,
@@ -170,8 +170,6 @@ process_variable <- function(data, var, group_var = NULL,
 
 #' Process continuous variable
 #' @keywords internal
-#' Process continuous variable
-#' @keywords internal
 process_continuous <- function(data, var, var_label, group_var, stats, digits,
                                na_include, na_label, test, test_type,
                                total, total_label, ...) {
@@ -185,10 +183,11 @@ process_continuous <- function(data, var, var_label, group_var, stats, digits,
         first_stat <- TRUE
         p_values <- list()
         
-                                        # Calculate all p-values first if testing (but not for range)
+        ## Calculate all p-values first if testing (but not for range)
         if (test) {
             for (stat_type in stats) {
-                                        # Skip p-value calculation for raw range
+                
+                ## Skip p-value calculation for raw range
                 if (stat_type == "range") {
                     p_values[[stat_type]] <- NULL
                 } else {
@@ -202,31 +201,31 @@ process_continuous <- function(data, var, var_label, group_var, stats, digits,
         for (i in seq_along(stats)) {
             stat_type <- stats[i]
             
-                                        # Build row as a list first
+            ## Build row as a list first
             row_list <- list(
                 variable = if (first_stat) var_label else "",
                 level = get_stat_label(stat_type)
             )
             
-                                        # Add total column if requested
+            ## Add total column if requested
             if (!isFALSE(total)) {
                 total_stat <- calc_continuous_stat(data[[var]], stat_type, digits)
                 row_list[[total_label]] <- total_stat
             }
             
-                                        # Add group columns
+            ## Add group columns
             for (grp in groups) {
                 grp_data <- data[get(group_var) == grp, get(var)]
                 grp_stat <- calc_continuous_stat(grp_data, stat_type, digits)
                 row_list[[as.character(grp)]] <- grp_stat
             }
             
-                                        # Add p_value if test is TRUE and we have a value (exclude for raw range)
+            ## Add p_value if test is TRUE and we have a value (exclude for raw range)
             if (test && stat_type != "range" && !is.null(p_values[[stat_type]])) {
                 row_list[["p_value"]] <- p_values[[stat_type]]
             }
             
-                                        # Convert list to data.table
+            ## Convert list to data.table
             row <- data.table::as.data.table(row_list)
             
             first_stat <- FALSE
@@ -234,7 +233,8 @@ process_continuous <- function(data, var, var_label, group_var, stats, digits,
         }
         
     } else {
-                                        # No grouping variable
+        
+        ## No grouping variable
         first_stat <- TRUE
         for (stat_type in stats) {
             row_list <- list(
@@ -248,7 +248,7 @@ process_continuous <- function(data, var, var_label, group_var, stats, digits,
         }
     }
     
-                                        # Missing count handling remains the same...
+    ## Missing count handling
     if (na_include) {
         n_miss <- sum(is.na(data[[var]]))
         if (n_miss > 0) {
@@ -291,7 +291,7 @@ process_categorical <- function(data, var, var_label, group_var, stats,
     
     result <- data.table::data.table()
     
-                                        # Get factor levels in original order
+    ## Get factor levels in original order
     if (is.factor(data[[var]])) {
         levels <- levels(data[[var]])
     } else {
@@ -299,24 +299,24 @@ process_categorical <- function(data, var, var_label, group_var, stats,
         levels <- levels[!is.na(levels)]
     }
     
-                                        # Add NA as a level if requested
+    ## Add NA as a level if requested
     if (na_include && any(is.na(data[[var]]))) {
         levels <- c(levels, na_label)
     }
     
-                                        # Calculate test p-value first if requested (excluding missing values)
+    ## Calculate test p-value first if requested (excluding missing values)
     p_val <- NA_real_
     if (test && !is.null(group_var)) {
         p_val <- perform_categorical_test(data, var, group_var, test_type, ...)
     }
     
-                                        # First row with variable name
+    ## First row with variable name
     first_row <- TRUE
     
     for (i in seq_along(levels)) {
         level <- levels[i]
         
-                                        # Build row as a list first
+        ## Build row as a list first
         row_list <- list(
             variable = if (first_row) var_label else "",
             level = as.character(level)
@@ -326,71 +326,71 @@ process_categorical <- function(data, var, var_label, group_var, stats,
             groups <- unique(data[[group_var]])
             groups <- groups[!is.na(groups)]
             
-                                        # Add total column if requested
+            ## Add total column if requested
             if (!isFALSE(total)) {
                 if (level == na_label) {
-                                        # For missing category
+                    ## For missing category
                     n <- sum(is.na(data[[var]]))
                     if (na_percent) {
-                                        # Show n (%) with total N as denominator
+                        ## Show n (%) with total N as denominator
                         total_n <- nrow(data)
                         row_list[[total_label]] <- format_categorical_stat(n, total_n, "n_percent")
                     } else {
-                                        # Show only n
+                        ## Show only n
                         row_list[[total_label]] <- as.character(n)
                     }
                 } else {
-                                        # For non-missing categories
+                    ## For non-missing categories
                     n <- sum(data[[var]] == level, na.rm = TRUE)
-                                        # Denominator depends on na_percent setting
+                    ## Denominator depends on na_percent setting
                     if (na_percent) {
-                                        # Use total N so all percentages (including missing) sum to 100%
+                        ## Use total N so all percentages (including missing) sum to 100%
                         total_n <- nrow(data)
                     } else {
-                                        # Use non-missing N so only valid categories sum to 100%
+                        ## Use non-missing N so only valid categories sum to 100%
                         total_n <- sum(!is.na(data[[var]]))
                     }
                     row_list[[total_label]] <- format_categorical_stat(n, total_n, stats)
                 }
             }
             
-                                        # Add group columns
+            ## Add group columns
             for (grp in groups) {
                 grp_data <- data[get(group_var) == grp]
                 if (level == na_label) {
-                                        # For missing category
+                    ## For missing category
                     n <- sum(is.na(grp_data[[var]]))
                     if (na_percent) {
-                                        # Show n (%) with group total as denominator
+                        ## Show n (%) with group total as denominator
                         total_n <- nrow(grp_data)
                         row_list[[as.character(grp)]] <- format_categorical_stat(n, total_n, "n_percent")
                     } else {
-                                        # Show only n
+                        ## Show only n
                         row_list[[as.character(grp)]] <- as.character(n)
                     }
                 } else {
-                                        # For non-missing categories
+                    ## For non-missing categories
                     n <- sum(grp_data[[var]] == level, na.rm = TRUE)
-                                        # Denominator depends on na_percent setting
+                    ## Denominator depends on na_percent setting
                     if (na_percent) {
-                                        # Use total group N so all percentages sum to 100%
+                        ## Use total group N so all percentages sum to 100%
                         total_n <- nrow(grp_data)
                     } else {
-                                        # Use non-missing N so only valid categories sum to 100%
+                        ## Use non-missing N so only valid categories sum to 100%
                         total_n <- sum(!is.na(grp_data[[var]]))
                     }
                     row_list[[as.character(grp)]] <- format_categorical_stat(n, total_n, stats)
                 }
             }
             
-                                        # Add p_value to first row only if test is TRUE
+            ## Add p_value to first row only if test is TRUE
             if (first_row && test && !is.na(p_val)) {
                 row_list[["p_value"]] <- p_val
             }
         } else {
-                                        # No grouping
+            ## No grouping
             if (level == na_label) {
-                                        # For missing category
+                ## For missing category
                 n <- sum(is.na(data[[var]]))
                 if (na_percent) {
                     total_n <- nrow(data)
@@ -399,21 +399,21 @@ process_categorical <- function(data, var, var_label, group_var, stats,
                     row_list[["value"]] <- as.character(n)
                 }
             } else {
-                                        # For non-missing categories
+                ## For non-missing categories
                 n <- sum(data[[var]] == level, na.rm = TRUE)
-                                        # Denominator depends on na_percent setting
+                ## Denominator depends on na_percent setting
                 if (na_percent) {
-                                        # Use total N so all percentages sum to 100%
+                    ## Use total N so all percentages sum to 100%
                     total_n <- nrow(data)
                 } else {
-                                        # Use non-missing N so only valid categories sum to 100%
+                    ## Use non-missing N so only valid categories sum to 100%
                     total_n <- sum(!is.na(data[[var]]))
                 }
                 row_list[["value"]] <- format_categorical_stat(n, total_n, stats)
             }
         }
         
-                                        # Convert list to data.table
+        ## Convert list to data.table
         row <- data.table::as.data.table(row_list)
         
         first_row <- FALSE
@@ -434,7 +434,7 @@ process_survival <- function(data, var, var_label, group_var, digits,
     
     result <- data.table::data.table()
     
-                                        # Parse the Surv() expression
+    ## Parse the Surv() expression
     surv_expr <- gsub("Surv\\(|\\)", "", var)
     surv_parts <- trimws(strsplit(surv_expr, ",")[[1]])
     time_var <- surv_parts[1]
@@ -444,13 +444,13 @@ process_survival <- function(data, var, var_label, group_var, digits,
         groups <- unique(data[[group_var]])
         groups <- groups[!is.na(groups)]
         
-                                        # Build row as a list
+        ## Build row as a list
         row_list <- list(
             variable = var_label,
             level = "Median (95% CI)"
         )
         
-                                        # Calculate overall median if requested
+        ## Calculate overall median if requested
         if (!isFALSE(total)) {
             overall_fit <- survival::survfit(
                                          survival::Surv(data[[time_var]], data[[event_var]]) ~ 1
@@ -464,7 +464,7 @@ process_survival <- function(data, var, var_label, group_var, digits,
             )
         }
         
-                                        # Calculate for each group
+        ## Calculate for each group
         for (grp in groups) {
             grp_data <- data[get(group_var) == grp]
             grp_fit <- survival::survfit(
@@ -479,7 +479,7 @@ process_survival <- function(data, var, var_label, group_var, digits,
             )
         }
         
-                                        # Add p_value if test is TRUE
+        ## Add p_value if test is TRUE
         if (test) {
             formula <- as.formula(paste0("survival::Surv(", time_var, ", ", 
                                          event_var, ") ~ ", group_var))
@@ -488,11 +488,11 @@ process_survival <- function(data, var, var_label, group_var, digits,
             row_list[["p_value"]] <- p_val
         }
         
-                                        # Convert list to data.table
+        ## Convert list to data.table
         row <- data.table::as.data.table(row_list)
         
     } else {
-                                        # No grouping variable
+        ## No grouping variable
         overall_fit <- survival::survfit(
                                      survival::Surv(data[[time_var]], data[[event_var]]) ~ 1
                                  )
@@ -579,39 +579,46 @@ perform_continuous_test <- function(data, var, group_var, test_type, stat_type =
     
     if (n_groups < 2) return(NA_real_)
     
-                                        # Remove NA values
+    ## Remove NA values
     clean_data <- data[!is.na(get(var)) & !is.na(get(group_var))]
     
-                                        # Auto-select test based on statistic type and number of groups
+    ## Auto-select test based on statistic type and number of groups
     if (test_type == "auto") {
         if (!is.null(stat_type)) {
             if (grepl("mean", stat_type)) {
-                                        # For means, use parametric tests
+                
+                ## For means, use parametric tests
                 test_type <- if (n_groups == 2) "t" else "aov"
+                
             } else if (grepl("median", stat_type)) {
-                                        # For medians, use non-parametric tests  
+                
+                ## For medians, use non-parametric tests  
                 test_type <- if (n_groups == 2) "wrs" else "kwt"
+                
             } else {
-                                        # Default to non-parametric
-                test_type <- if (n_groups == 2) "wrs" else "kwt"
-                }
-            } else {
-                                        # Original default behavior
+                
+                ## Default to non-parametric
+                
                 test_type <- if (n_groups == 2) "wrs" else "kwt"
             }
+        } else {
+            
+            ## Original default behavior
+            test_type <- if (n_groups == 2) "wrs" else "kwt"
         }
-        
-                                        # Perform test
-        formula <- stats::as.formula(paste(var, "~", group_var))
-        
-        result <- tryCatch({
-            switch(test_type,
-                   "t" = stats::t.test(formula, data = clean_data, ...)$p.value,
-                   "wrs" = stats::wilcox.test(formula, data = clean_data, ...)$p.value,
-                   "aov" = summary(stats::aov(formula, data = clean_data))[[1]][["Pr(>F)"]][1],
-                   "kwt" = stats::kruskal.test(formula, data = clean_data, ...)$p.value,
-                   NA_real_
-                   )
+    }
+    
+    ## Perform test
+    formula <- stats::as.formula(paste(var, "~", group_var))
+    
+    result <- tryCatch({
+        switch(test_type,
+               "t" = stats::t.test(formula, data = clean_data, ...)$p.value,
+               "wrs" = stats::wilcox.test(formula, data = clean_data, ...)$p.value,
+               "aov" = summary(stats::aov(formula, data = clean_data))[[1]][["Pr(>F)"]][1],
+               "kwt" = stats::kruskal.test(formula, data = clean_data, ...)$p.value,
+               NA_real_
+               )
         }, error = function(e) NA_real_)
         
         return(result)
@@ -620,12 +627,12 @@ perform_continuous_test <- function(data, var, group_var, test_type, stat_type =
 #' Perform categorical variable test
 #' @keywords internal
 perform_categorical_test <- function(data, var, group_var, test_type, ...) {
-                                        # Create contingency table
+    ## Create contingency table
     tab <- table(data[[var]], data[[group_var]], useNA = "no")
     
     if (any(dim(tab) < 2)) return(NA_real_)
     
-                                        # Auto-select test
+    ## Auto-select test
     if (test_type == "auto") {
         expected <- stats::chisq.test(tab, simulate.p.value = FALSE)$expected
         if (any(expected < 5)) {
@@ -635,7 +642,7 @@ perform_categorical_test <- function(data, var, group_var, test_type, ...) {
         }
     }
     
-                                        # Perform test
+    ## Perform test
     result <- tryCatch({
         switch(test_type,
                "fisher.test" = stats::fisher.test(tab, ...)$p.value,
@@ -657,7 +664,7 @@ format_p_values <- function(result, digits_p) {
                                        sprintf(paste0("%.", digits_p, "f"), p_value))
                  )]
         
-                                        # Move p-value to last column
+        ## Move p-value to last column
         cols <- names(result)
         cols <- c(cols[!cols %in% c("p_value", "p_formatted")], "p_formatted")
         result <- result[, ..cols]
@@ -672,22 +679,22 @@ reorder_total_column <- function(result, total, total_label) {
     if (total_label %in% names(result)) {
         cols <- names(result)
         
-                                        # Get base columns and group columns
+        ## Get base columns and group columns
         base_cols <- c("variable", "level")
         group_cols <- cols[!cols %in% c(base_cols, total_label, "p-value")]
         p_col <- if ("p-value" %in% cols) "p-value" else NULL
         
-                                        # Modified logic: total = TRUE puts it first, total = "last" puts it last
+        ## Modified logic: total = TRUE puts it first, total = "last" puts it last
         if (isTRUE(total) || (is.character(total) && total == "first")) {
             new_order <- c(base_cols, total_label, group_cols, p_col)
         } else if (is.character(total) && total == "last") {
             new_order <- c(base_cols, group_cols, total_label, p_col)
         } else {
-                                        # Default to first position for any other truthy value
+            ## Default to first position for any other truthy value
             new_order <- c(base_cols, total_label, group_cols, p_col)
         }
         
-                                        # Keep only columns that exist
+        ## Keep only columns that exist
         new_order <- new_order[!is.na(new_order) & new_order %in% cols]
         result <- result[, ..new_order]
     }
