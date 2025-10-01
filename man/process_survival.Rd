@@ -2,7 +2,7 @@
 % Please edit documentation in R/desctbl.R
 \name{process_survival}
 \alias{process_survival}
-\title{Process survival variable}
+\title{Process survival variable - matching column structure}
 \usage{
 process_survival(
   data,
@@ -17,6 +17,6 @@ process_survival(
 )
 }
 \description{
-Process survival variable
+Process survival variable - matching column structure
 }
 \keyword{internal}

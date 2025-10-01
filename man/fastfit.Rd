@@ -2,7 +2,7 @@
 % Please edit documentation in R/fastfit.R
 \name{fastfit}
 \alias{fastfit}
-\title{Perform Complete Statistical Analysis with Flexible Options}
+\title{Perform Complete Statistical Analysis Pipeline}
 \usage{
 fastfit(
   data,
@@ -24,51 +24,124 @@ fastfit(
 )
 }
 \arguments{
-\item{data}{Data.frame or data.table containing the dataset.}
+\item{data}{Data.frame or data.table containing the analysis dataset.}
 
-\item{outcome}{Character string specifying the outcome variable.}
+\item{outcome}{Character string specifying the outcome variable name.}
 
-\item{predictors}{Character vector of predictor variable names for univariable screening.}
+\item{predictors}{Character vector of predictor variable names to analyze.}
 
-\item{method}{Character string specifying the analysis method:
-"screen" - Univariable to multivariable based on p-value threshold (default).
-"all" - All predictors in both univariable and multivariable.
-"custom" - Univariable all, multivariable with selected predictors only.}
+\item{method}{Character string specifying variable selection strategy:
+"screen" (univariable to multivariable based on p-value threshold),
+"all" (all predictors in both analyses), or
+"custom" (all in univariable, selected in multivariable). Default is "screen".}
 
-\item{multi_predictors}{For method="custom", character vector of predictors for multivariable model.}
+\item{multi_predictors}{Character vector of predictors for multivariable
+model when method is "custom". Default is NULL.}
 
-\item{p_threshold}{For method="screen", p-value threshold for selection. Default 0.05.}
+\item{p_threshold}{Numeric p-value threshold for variable selection when
+method is "screen". Default is 0.05.}
 
-\item{columns}{Character string specifying which results to include:
-"both" - Both univariable and multivariable columns (default).
-"uni" - Univariable results only.
-"multi" - Multivariable results only.}
+\item{columns}{Character string specifying which columns to display:
+"both", "uni", or "multi". Default is "both".}
 
-\item{model_type}{Character string: "glm", "lm", "coxph", "clogit". Default "glm".}
+\item{model_type}{Character string: "glm", "lm", "coxph", or "clogit".
+Default is "glm".}
 
-\item{family}{For GLM models, the family. Default "binomial".}
+\item{family}{For GLM models, the error distribution and link function.
+Default is "binomial".}
 
-\item{conf_level}{Confidence level. Default 0.95.}
+\item{conf_level}{Numeric confidence level for intervals. Default is 0.95.}
 
-\item{add_reference_rows}{Add reference category rows. Default TRUE.}
+\item{add_reference_rows}{Logical. If TRUE, includes reference category rows.
+Default is TRUE.}
 
-\item{var_labels}{Named character vector for custom variable labels. Names should
-match variable names in predictors, values are display labels.}
+\item{var_labels}{Named character vector for display labels. Names match
+predictors, values are labels. Default is NULL.}
 
-\item{metrics}{Character vector of metrics to include per column:
-"effect" - Effect size with CI (OR/HR/RR/Estimate).
-"p" - P-value.
-"both" - Both effect and p-value (default).}
+\item{metrics}{Character specification for statistics: "effect" (OR/HR/estimate
+with CI), "p" (p-value only), or "both" (default).}
 
-\item{return_type}{What to return:
-"table" - Formatted data.table (default).
-"model" - Multivariable model object only.
-"both" - List with table and model.}
+\item{return_type}{Character string: "table" (formatted results), "model"
+(multivariable model only), or "both" (list with table and model).
+Default is "table".}
 
-\item{keep_models}{Logical. Store model objects in results. Default FALSE.}
+\item{keep_models}{Logical. If TRUE, stores univariable model objects.
+Default is FALSE.}
 
 \item{...}{Additional arguments passed to model fitting functions.}
 }
+\value{
+A data.table with formatted results (when return_type is "table"),
+  a model object (when "model"), or a list with both (when "both").
+  The table includes Variable, Cohort, sample sizes, and effect/p-value
+  columns as requested. Includes attributes for outcome, model_type,
+  method, columns, model (if fitted), and n_multi.
+}
 \description{
-Perform Complete Statistical Analysis with Flexible Options
+Executes a comprehensive regression analysis workflow including univariable
+screening, automatic or manual variable selection, and multivariable modeling.
+Supports multiple model types with publication-ready output formatting.
+}
+\details{
+The function implements a complete regression workflow:
+
+1. Univariable screening: Each predictor is tested individually against
+   the outcome using the specified model type.
+   
+2. Variable selection: Based on the method parameter, variables are selected
+   for multivariable analysis.
+   
+3. Multivariable modeling: Selected variables are combined in a single model.
+
+4. Output formatting: Results are formatted for publication with appropriate
+   effect measures (OR for logistic, HR for Cox, estimates for linear).
+
+The automatic p-value threshold screening (method = "screen") helps identify
+potentially important predictors while reducing multicollinearity. The custom
+method allows for theory-driven model building.
+}
+\examples{
+\dontrun{
+# Basic logistic regression with screening
+result <- fastfit(data = mydata,
+                  outcome = "disease",
+                  predictors = c("age", "sex", "bmi", "smoking"),
+                  method = "screen",
+                  p_threshold = 0.2)
+
+# Cox regression with all variables
+cox_result <- fastfit(data = survival_data,
+                      outcome = "survival",
+                      predictors = c("age", "stage", "grade"),
+                      model_type = "coxph",
+                      method = "all")
+
+# Custom selection with labels
+labels <- c(age = "Age (years)", sex = "Sex", bmi = "Body Mass Index")
+custom_result <- fastfit(data = mydata,
+                         outcome = "outcome",
+                         predictors = c("age", "sex", "bmi", "smoking"),
+                         method = "custom",
+                         multi_predictors = c("age", "sex"),
+                         var_labels = labels)
+
+# Return both table and model
+both <- fastfit(data = mydata,
+                outcome = "disease",
+                predictors = vars,
+                return_type = "both")
+both$table  # Access table
+summary(both$model)  # Access model
+
+# Export results
+exporttbl(result, "regression_results.pdf")
+}
+
+}
+\seealso{
+\code{\link{uscreen}} for univariable screening only,
+\code{\link{mmodel}} for multivariable modeling only,
+\code{\link{m2dt}} for converting models to tables,
+\code{\link{exporttbl}} for exporting results to PDF/LaTeX/HTML,
+\code{\link{desctbl}} for descriptive statistics
 }

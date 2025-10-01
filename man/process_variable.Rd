@@ -2,7 +2,7 @@
 % Please edit documentation in R/desctbl.R
 \name{process_variable}
 \alias{process_variable}
-\title{Process single variable for descriptive statistics}
+\title{Process variable wrapper - returns both formatted and raw}
 \usage{
 process_variable(
   data,
@@ -24,6 +24,6 @@ process_variable(
 )
 }
 \description{
-Process single variable for descriptive statistics
+Process variable wrapper - returns both formatted and raw
 }
 \keyword{internal}

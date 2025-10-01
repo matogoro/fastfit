@@ -2,7 +2,7 @@
 % Please edit documentation in R/desctbl.R
 \name{process_continuous}
 \alias{process_continuous}
-\title{Process continuous variable}
+\title{Process continuous variable - returns both formatted and raw with matching columns}
 \usage{
 process_continuous(
   data,
@@ -21,9 +21,6 @@ process_continuous(
 )
 }
 \description{
-Process continuous variable
+Process continuous variable - returns both formatted and raw with matching columns
 }
-\keyword{Process}
-\keyword{continuous}
 \keyword{internal}
-\keyword{variable}

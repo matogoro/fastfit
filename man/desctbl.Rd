@@ -2,7 +2,7 @@
 % Please edit documentation in R/desctbl.R
 \name{desctbl}
 \alias{desctbl}
-\title{Create Descriptive Statistics Table}
+\title{Create Descriptive Statistics Table with Group Comparisons}
 \usage{
 desctbl(
   data,
@@ -25,43 +25,114 @@ desctbl(
 )
 }
 \arguments{
-\item{data}{A data.frame or data.table.}
+\item{data}{A data.frame or data.table containing the dataset to summarize.}
 
-\item{by}{Character string for grouping variable. Default NULL.}
+\item{by}{Character string specifying the grouping variable for stratified 
+analysis. When NULL (default), produces overall summaries only.}
 
-\item{variables}{Character vector of variable names to summarize.}
+\item{variables}{Character vector of variable names to summarize. Supports
+standard column names and Surv() expressions (e.g., "Surv(time, status)").}
 
-\item{stats_continuous}{Character vector for continuous stats. Default c("mean_sd", "median_iqr", "range").}
+\item{stats_continuous}{Character vector specifying statistics to compute for
+continuous variables. Options include "mean_sd", "median_iqr", 
+"median_range", and "range". Default is c("mean_sd", "median_iqr", "range").}
 
-\item{stats_categorical}{Character string for categorical format. Default "n_percent".}
+\item{stats_categorical}{Character string specifying format for categorical
+summaries: "n" (count only), "percent" (percentage only), or "n_percent"
+(count with percentage). Default is "n_percent".}
 
-\item{digits}{Integer for decimal places. Default 1.}
+\item{digits}{Integer specifying decimal places for continuous statistics.
+Default is 1.}
 
-\item{digits_p}{Integer for p-value decimal places. Default 3.}
+\item{digits_p}{Integer specifying decimal places for p-values. Values less
+than 10^(-digits_p) display as "< 0.001" etc. Default is 3.}
 
-\item{na_include}{Logical to include missing values. Default FALSE.}
+\item{na_include}{Logical. If TRUE, missing values are displayed as a 
+separate category. Default is FALSE.}
 
-\item{na_label}{Character string for missing label. Default "Unknown".}
+\item{na_label}{Character string used to label missing values when 
+na_include = TRUE. Default is "Unknown".}
 
-\item{na_percent}{Logical for missing percentages. Default FALSE.}
+\item{na_percent}{Logical. Controls percentage calculation when na_include = TRUE.
+If TRUE, percentages include missing in denominator (all sum to 100%).
+If FALSE, percentages exclude missing from denominator. Default is FALSE.}
 
-\item{test}{Logical to perform tests. Default TRUE.}
+\item{test}{Logical. If TRUE, performs appropriate statistical tests for
+group comparisons. Default is TRUE.}
 
-\item{test_continuous}{Character for continuous tests. Default "auto".}
+\item{test_continuous}{Character string specifying test for continuous variables:
+"auto" (automatic selection based on statistic type), "t" (t-test),
+"aov" (ANOVA), "wrs" (Wilcoxon rank-sum), or "kwt" (Kruskal-Wallis).
+Default is "auto".}
 
-\item{test_categorical}{Character for categorical tests. Default "auto".}
+\item{test_categorical}{Character string specifying test for categorical variables:
+"auto" (automatic selection based on expected frequencies), "fisher"
+(Fisher's exact test), or "chisq" (chi-squared test). Default is "auto".}
 
-\item{total}{Logical or character for total column. Default TRUE.}
+\item{total}{Logical or character string. Controls total column placement:
+TRUE or "first" places total column first, "last" places it after groups,
+FALSE excludes it. Default is TRUE.}
 
-\item{total_label}{Character string for total label. Default "Total".}
+\item{total_label}{Character string for the total column header. 
+Default is "Total".}
 
-\item{var_labels}{Named character vector for labels.}
+\item{var_labels}{Named character vector for custom variable labels. Names
+should match variable names, values are display labels.}
 
-\item{...}{Additional arguments.}
+\item{...}{Additional arguments passed to statistical test functions.}
 }
 \value{
-A data.table with descriptive statistics.
+A data.table with class "desctbl" containing formatted descriptive
+  statistics. The table has columns for Variable, Cohort (levels), and 
+  statistics by group. Numeric values >= 1000 are formatted with commas.
+  
+  The returned object includes attributes:
+  - raw_data: Numeric version of the table for further analysis
+  - by_variable: The grouping variable used
+  - variables: Vector of analyzed variables
 }
 \description{
-Generates descriptive statistics tables with group comparisons and statistical tests.
+Generates publication-ready descriptive statistics tables with automatic 
+variable type detection, group comparisons, and statistical testing. 
+Handles continuous, categorical, and survival variables with appropriate
+summary statistics and tests.
+}
+\details{
+The function automatically detects variable types and applies appropriate
+summaries. For continuous variables with test = "auto", t-tests or ANOVA
+are used for means, while Wilcoxon or Kruskal-Wallis tests are used for
+medians. For categorical variables with test = "auto", Fisher's exact test
+is used when expected frequencies are less than 5, otherwise chi-squared.
+
+Survival variables should be specified using Surv() syntax from the survival
+package. These display median survival with 95\% confidence intervals and
+use log-rank tests for group comparisons.
+}
+\examples{
+\dontrun{
+# Basic descriptive table
+desctbl(mtcars, variables = c("mpg", "cyl", "am"))
+
+# Grouped comparison with custom labels
+labels <- c(mpg = "Miles per Gallon", cyl = "Cylinders", am = "Transmission")
+desctbl(mtcars, by = "vs", variables = c("mpg", "cyl", "am"),
+        var_labels = labels)
+
+# Including missing values
+desctbl(data, by = "treatment", variables = c("age", "sex"),
+        na_include = TRUE, na_label = "Missing")
+
+# Survival analysis
+desctbl(lung, by = "sex", 
+        variables = c("age", "ph.ecog", "Surv(time, status)"))
+
+# Access raw numeric data
+result <- desctbl(data, by = "group", variables = vars)
+raw_data <- attr(result, "raw_data")
+}
+
+}
+\seealso{
+\code{\link{exporttbl}} for exporting to PDF/LaTeX/HTML,
+  \code{\link{fastfit}} for regression analysis
 }

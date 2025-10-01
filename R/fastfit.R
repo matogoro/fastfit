@@ -1,34 +1,107 @@
-#' Perform Complete Statistical Analysis with Flexible Options
+#' Perform Complete Statistical Analysis Pipeline
 #'
-#' @param data Data.frame or data.table containing the dataset.
-#' @param outcome Character string specifying the outcome variable.
-#' @param predictors Character vector of predictor variable names for univariable screening.
-#' @param method Character string specifying the analysis method:
-#'   "screen" - Univariable to multivariable based on p-value threshold (default).
-#'   "all" - All predictors in both univariable and multivariable.
-#'   "custom" - Univariable all, multivariable with selected predictors only.
-#' @param multi_predictors For method="custom", character vector of predictors for multivariable model.
-#' @param p_threshold For method="screen", p-value threshold for selection. Default 0.05.
-#' @param columns Character string specifying which results to include:
-#'   "both" - Both univariable and multivariable columns (default).
-#'   "uni" - Univariable results only.
-#'   "multi" - Multivariable results only.
-#' @param model_type Character string: "glm", "lm", "coxph", "clogit". Default "glm".
-#' @param family For GLM models, the family. Default "binomial".
-#' @param conf_level Confidence level. Default 0.95.
-#' @param add_reference_rows Add reference category rows. Default TRUE.
-#' @param var_labels Named character vector for custom variable labels. Names should
-#'   match variable names in predictors, values are display labels.
-#' @param metrics Character vector of metrics to include per column:
-#'   "effect" - Effect size with CI (OR/HR/RR/Estimate).
-#'   "p" - P-value.
-#'   "both" - Both effect and p-value (default).
-#' @param return_type What to return:
-#'   "table" - Formatted data.table (default).
-#'   "model" - Multivariable model object only.
-#'   "both" - List with table and model.
-#' @param keep_models Logical. Store model objects in results. Default FALSE.
+#' Executes a comprehensive regression analysis workflow including univariable
+#' screening, automatic or manual variable selection, and multivariable modeling.
+#' Supports multiple model types with publication-ready output formatting.
+#'
+#' @param data Data.frame or data.table containing the analysis dataset.
+#' @param outcome Character string specifying the outcome variable name.
+#' @param predictors Character vector of predictor variable names to analyze.
+#' @param method Character string specifying variable selection strategy:
+#'   "screen" (univariable to multivariable based on p-value threshold),
+#'   "all" (all predictors in both analyses), or
+#'   "custom" (all in univariable, selected in multivariable). Default is "screen".
+#' @param multi_predictors Character vector of predictors for multivariable
+#'   model when method is "custom". Default is NULL.
+#' @param p_threshold Numeric p-value threshold for variable selection when
+#'   method is "screen". Default is 0.05.
+#' @param columns Character string specifying which columns to display:
+#'   "both", "uni", or "multi". Default is "both".
+#' @param model_type Character string: "glm", "lm", "coxph", or "clogit".
+#'   Default is "glm".
+#' @param family For GLM models, the error distribution and link function.
+#'   Default is "binomial".
+#' @param conf_level Numeric confidence level for intervals. Default is 0.95.
+#' @param add_reference_rows Logical. If TRUE, includes reference category rows.
+#'   Default is TRUE.
+#' @param var_labels Named character vector for display labels. Names match
+#'   predictors, values are labels. Default is NULL.
+#' @param metrics Character specification for statistics: "effect" (OR/HR/estimate
+#'   with CI), "p" (p-value only), or "both" (default).
+#' @param return_type Character string: "table" (formatted results), "model"
+#'   (multivariable model only), or "both" (list with table and model).
+#'   Default is "table".
+#' @param keep_models Logical. If TRUE, stores univariable model objects.
+#'   Default is FALSE.
 #' @param ... Additional arguments passed to model fitting functions.
+#'
+#' @return A data.table with formatted results (when return_type is "table"),
+#'   a model object (when "model"), or a list with both (when "both").
+#'   The table includes Variable, Cohort, sample sizes, and effect/p-value
+#'   columns as requested. Includes attributes for outcome, model_type,
+#'   method, columns, model (if fitted), and n_multi.
+#'
+#' @details
+#' The function implements a complete regression workflow:
+#' 
+#' 1. Univariable screening: Each predictor is tested individually against
+#'    the outcome using the specified model type.
+#'    
+#' 2. Variable selection: Based on the method parameter, variables are selected
+#'    for multivariable analysis.
+#'    
+#' 3. Multivariable modeling: Selected variables are combined in a single model.
+#' 
+#' 4. Output formatting: Results are formatted for publication with appropriate
+#'    effect measures (OR for logistic, HR for Cox, estimates for linear).
+#'
+#' The automatic p-value threshold screening (method = "screen") helps identify
+#' potentially important predictors while reducing multicollinearity. The custom
+#' method allows for theory-driven model building.
+#'
+#' @examples
+#' \dontrun{
+#' # Basic logistic regression with screening
+#' result <- fastfit(data = mydata,
+#'                   outcome = "disease",
+#'                   predictors = c("age", "sex", "bmi", "smoking"),
+#'                   method = "screen",
+#'                   p_threshold = 0.2)
+#' 
+#' # Cox regression with all variables
+#' cox_result <- fastfit(data = survival_data,
+#'                       outcome = "survival",
+#'                       predictors = c("age", "stage", "grade"),
+#'                       model_type = "coxph",
+#'                       method = "all")
+#' 
+#' # Custom selection with labels
+#' labels <- c(age = "Age (years)", sex = "Sex", bmi = "Body Mass Index")
+#' custom_result <- fastfit(data = mydata,
+#'                          outcome = "outcome",
+#'                          predictors = c("age", "sex", "bmi", "smoking"),
+#'                          method = "custom",
+#'                          multi_predictors = c("age", "sex"),
+#'                          var_labels = labels)
+#' 
+#' # Return both table and model
+#' both <- fastfit(data = mydata,
+#'                 outcome = "disease",
+#'                 predictors = vars,
+#'                 return_type = "both")
+#' both$table  # Access table
+#' summary(both$model)  # Access model
+#' 
+#' # Export results
+#' exporttbl(result, "regression_results.pdf")
+#' }
+#'
+#' @seealso 
+#' \code{\link{uscreen}} for univariable screening only,
+#' \code{\link{mmodel}} for multivariable modeling only,
+#' \code{\link{m2dt}} for converting models to tables,
+#' \code{\link{exporttbl}} for exporting results to PDF/LaTeX/HTML,
+#' \code{\link{desctbl}} for descriptive statistics
 #'
 #' @export
 fastfit <- function(data,
@@ -197,20 +270,21 @@ fastfit <- function(data,
 format_fastfit_table <- function(uni_results, multi_results, predictors,
                                  columns, metrics, model_type) {
     
-                                        # Determine effect column name
+    ## Determine effect column name
     effect_col <- if (model_type == "coxph") "HR" 
                   else if (model_type == "glm") "OR" 
                   else "Estimate"
     
-                                        # Build result table
+    ## Build result table
     result <- data.table::data.table()
     
     for (pred in predictors) {
-                                        # Get rows for this predictor from uni_results
+        
+        ## Get rows for this predictor from uni_results
         if (!is.null(uni_results)) {
             pred_rows <- uni_results[variable == pred]
             
-                                        # Use label if available, otherwise use variable name
+            ## Use label if available, otherwise use variable name
             display_name <- if ("label" %in% names(pred_rows) && nrow(pred_rows) > 0) {
                                 pred_rows$label[1]
                             } else {
@@ -226,25 +300,28 @@ format_fastfit_table <- function(uni_results, multi_results, predictors,
         
         for (i in seq_len(nrow(pred_rows))) {
             row <- data.table::data.table(
-                                   variable = if (i == 1) display_name else "",  # Use display_name here
-                                   level = gsub(paste0("^", pred), "", pred_rows$term[i])
+                                   Variable = if (i == 1) display_name else "",  # Changed from "variable"
+                                   Cohort = gsub(paste0("^", pred), "", pred_rows$term[i])  # Changed from "level"
                                )
             
-                                        # Clean up level display
-            if (row$level == "") row[, level := "(main effect)"]
+            ## Clean up level display
+            if (row$Cohort == "") row[, Cohort := "-"]
             
-                                        # Add sample size if available
+            ## Add sample size if available
             if (!is.null(uni_results) && "n" %in% names(uni_results)) {
-                row[, n := pred_rows$n[i]]
-                if ("events" %in% names(pred_rows)) {
-                    row[, events := pred_rows$events[i]]
+                n_val <- pred_rows$n[i]
+                if (!is.na(n_val) && n_val >= 1000) {
+                    row[, n := format(n_val, big.mark = ",")]
+                } else {
+                    row[, n := as.character(n_val)]
                 }
             }
             
             ## Univariable columns
             if (columns %in% c("both", "uni") && !is.null(uni_results)) {
                 if ("effect" %in% metrics) {
-                    ## FIX: Check for NA and handle properly
+
+                    ## Check for NA and handle properly
                     if ("reference" %in% names(pred_rows) && 
                         !is.na(pred_rows$reference[i]) && 
                         pred_rows$reference[i] != "") {
@@ -274,7 +351,8 @@ format_fastfit_table <- function(uni_results, multi_results, predictors,
                 
                 if (nrow(multi_row) > 0) {
                     if ("effect" %in% metrics) {
-                        ## FIX: Check for NA and handle properly
+                        
+                        ## Check for NA and handle properly
                         if ("reference" %in% names(multi_row) && 
                             !is.na(multi_row$reference[1]) && 
                             multi_row$reference[1] != "") {
@@ -297,6 +375,7 @@ format_fastfit_table <- function(uni_results, multi_results, predictors,
                         }
                     }
                 } else {
+                    
                     ## Not in multivariable model
                     if ("effect" %in% metrics) row[, multi_effect := "-"]
                     if ("p" %in% metrics) row[, multi_p := "-"]

@@ -1,17 +1,54 @@
 #' Convert Model Object to Data Table
 #'
-#' Extracts coefficients, confidence intervals, and model statistics from fitted 
-#' models and converts them to a standardized data.table format.
+#' Extracts coefficients, confidence intervals, and comprehensive model statistics 
+#' from fitted regression models and converts them to a standardized data.table 
+#' format suitable for further analysis or publication.
 #'
-#' @param model A fitted model object (glm, lm, coxph, clogit, coxme, or glmer).
-#' @param conf_level Confidence level for intervals (default 0.95).
-#' @param variable_name Character string to identify the model (default NULL).
-#' @param keep_qc_stats Include model quality statistics (default TRUE).
-#' @param terms_to_exclude Terms to exclude (default "(Intercept)").
-#' @param add_reference_rows Add reference category rows (default TRUE).
-#' @param reference_label Label for reference categories (default "reference").
+#' @param model A fitted model object. Supported classes include glm (generalized
+#'   linear models), lm (linear models), coxph (Cox proportional hazards),
+#'   clogit (conditional logistic), coxme (mixed effects Cox), and glmer
+#'   (generalized linear mixed effects). Also accepts models wrapped with mmodel().
+#' @param conf_level Numeric confidence level for confidence intervals. Must be
+#'   between 0 and 1. Default is 0.95 (95\% CI).
+#' @param variable_name Character string to identify the model source in the output.
+#'   Useful when combining results from multiple models. Default is NULL, which
+#'   uses "Multivariable" as the identifier.
+#' @param keep_qc_stats Logical. If TRUE, includes model quality statistics such as
+#'   AIC, BIC, R-squared, concordance, and model fit tests. These appear as 
+#'   additional columns in the output. Default is TRUE.
+#' @param terms_to_exclude Character vector of term names to exclude from output.
+#'   Useful for removing intercepts or other unwanted parameters. Default is
+#'   "(Intercept)".
+#' @param add_reference_rows Logical. If TRUE, adds rows for reference categories
+#'   of factor variables with appropriate labels and baseline values (OR/HR = 1,
+#'   Estimate = 0). Default is TRUE.
+#' @param reference_label Character string used to label reference category rows
+#'   in the output. Default is "reference".
 #'
-#' @return A data.table with model results.
+#' @return A data.table containing extracted model information with the following
+#'   standard columns:
+#'   - variable: Model identifier from variable_name parameter
+#'   - term: Predictor/coefficient name
+#'   - n: Sample size
+#'   - events: Number of events (for survival/logistic models)
+#'   - coefficient: Raw coefficient estimate
+#'   - se: Standard error
+#'   - OR/HR/RR/Estimate: Effect estimate (type depends on model)
+#'   - CI_lower, CI_upper: Confidence interval bounds
+#'   - statistic: Test statistic (z or t value)
+#'   - p_value: P-value for coefficient test
+#'   - sig: Significance markers (*** p<0.001, ** p<0.01, * p<0.05)
+#'   - sig_binary: Logical indicator for p<0.05
+#'   
+#'   Additional quality control columns when keep_qc_stats = TRUE vary by model type:
+#'   - GLM: AIC, BIC, deviance, null_deviance, c_statistic (logistic)
+#'   - LM: R2, adj_R2, sigma, df_residual
+#'   - Cox: concordance, rsq, logtest_stat, wald_test, score_test
+#'   
+#'   The output includes attributes:
+#'   - model_class: The class of the input model
+#'   - model_family: The family for GLM models
+#'   - conf_level: The confidence level used
 #'
 #' @export
 m2dt <- function(model, 

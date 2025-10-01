@@ -19,6 +19,11 @@ This package currently focuses on two main points of entry: the ~desctbl()~ and 
 - ~desctbl()~: Creates a summary table for descriptive statistics within a given dataset.  It can be modified to include comparison /p/-values, "total" columns, missing values, etc.
 - ~fastfit()~: Creates a regression table for predictive statistics within a given dataset.  It can be modified to perform a univariable screen, generate downstream multivariable analyses, etc.
 
+** Visualizations
+
+- ~glmforest()~: Creates a combined table/forest plot for generalized linear models
+- ~coxforest()~: Creates a combined table/forest plot for Cox proportional hazards models
+
 ** Ancillary functions
 
 - ~uscreen()~: Performs univariable regression analysis for multiple predictors against a single outcome, returning standardized results in ~data.table~ format.
@@ -27,16 +32,13 @@ This package currently focuses on two main points of entry: the ~desctbl()~ and 
 - ~cmodels()~: Fits multiple multivariable models with different predictor sets and combines results in standardized ~data.table~ format for easy comparison.
 - ~setlabels()~: Assigns labels to objects using ~setattr()~.
 
-** Visualizations
-
-- ~glmforest()~: Creates a combined table/forest plot for generalized linear models
-- ~coxforest()~: Creates a combined table/forest plot for Cox proportional hazards models
-
 * Changelog
 
-v0.2.1 (2025-09-26): Formatting edits
+*v0.3.0 (2025-09-30):* Edits to ~desctbl()~ and ~fastfit()~, addition of "raw data" outputs, expanded documentation
 
-v0.2.0 (2025-09-26): Added ~desctbl()~ function and documentation
+*v0.2.1 (2025-09-26):* Formatting edits
+
+*v0.2.0 (2025-09-26):* Added ~desctbl()~ function and documentation
 
 *v0.1.0 (2025-09-23):* Initial commit
 
