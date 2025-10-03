@@ -2,7 +2,7 @@
 % Please edit documentation in R/desctbl.R
 \name{process_categorical}
 \alias{process_categorical}
-\title{Process categorical variable - matching column structure}
+\title{Process categorical variable}
 \usage{
 process_categorical(
   data,
@@ -21,6 +21,6 @@ process_categorical(
 )
 }
 \description{
-Process categorical variable - matching column structure
+Process categorical variable
 }
 \keyword{internal}

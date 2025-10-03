@@ -54,8 +54,9 @@ separate category. Default is FALSE.}
 na_include = TRUE. Default is "Unknown".}
 
 \item{na_percent}{Logical. Controls percentage calculation when na_include = TRUE.
-If TRUE, percentages include missing in denominator (all sum to 100%).
-If FALSE, percentages exclude missing from denominator. Default is FALSE.}
+Categorical values only. If TRUE, percentages include missing/NAs in denominator
+(all sum to 100%). If FALSE, percentages exclude missing/NAs from denominator.
+Default is FALSE.}
 
 \item{test}{Logical. If TRUE, performs appropriate statistical tests for
 group comparisons. Default is TRUE.}

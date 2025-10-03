@@ -34,6 +34,8 @@ This package currently focuses on two main points of entry: the ~desctbl()~ and 
 
 * Changelog
 
+*v0.3.1 (2025-10-02):* Fixes for unknown/missing rows, reporting of ranges, and non-grouped tables in ~desctbl()~ 
+
 *v0.3.0 (2025-09-30):* Edits to ~desctbl()~ and ~fastfit()~, addition of "raw data" outputs, expanded documentation
 
 *v0.2.1 (2025-09-26):* Formatting edits
