@@ -37,7 +37,7 @@
 #'
 #' @return A data.table with formatted results (when return_type is "table"),
 #'   a model object (when "model"), or a list with both (when "both").
-#'   The table includes Variable, Cohort, sample sizes, and effect/p-value
+#'   The table includes variable, group, sample sizes, and effect/p-value
 #'   columns as requested. Includes attributes for outcome, model_type,
 #'   method, columns, model (if fitted), and n_multi.
 #'
@@ -115,13 +115,15 @@ fastfit <- function(data,
                     family = "binomial",
                     conf_level = 0.95,
                     add_reference_rows = TRUE,
-                    var_labels = NULL,  # Add this parameter
+                    digits = 2,
+                    digits_p = 3,
+                    var_labels = NULL,
                     metrics = "both",
                     return_type = "table",
                     keep_models = FALSE,
                     ...) {
     
-    ## Input validation
+                                        # Input validation
     method <- match.arg(method, c("screen", "all", "custom"))
     columns <- match.arg(columns, c("both", "uni", "multi"))
     return_type <- match.arg(return_type, c("table", "model", "both"))
@@ -130,7 +132,7 @@ fastfit <- function(data,
         stop("multi_predictors must be specified when method='custom'")
     }
 
-    ## Convert metrics to standardized format
+                                        # Convert metrics to standardized format
     if (length(metrics) == 1 && metrics == "both") {
         metrics <- c("effect", "p")
     }
@@ -139,8 +141,10 @@ fastfit <- function(data,
         data <- data.table::as.data.table(data)
     }
 
-    ## Step 1: Univariable analysis (if needed)
+                                        # Step 1: Univariable analysis (if needed)
     uni_results <- NULL
+    uni_raw <- NULL
+    
     if (columns %in% c("both", "uni")) {
         message("Running univariable analysis...")
         uni_results <- uscreen(
@@ -150,112 +154,111 @@ fastfit <- function(data,
             model_type = model_type,
             family = family,
             conf_level = conf_level,
-            keep_models = keep_models,
-            keep_qc_stats = TRUE,
-            add_reference_rows = add_reference_rows,
+            digits = digits,
+            digits_p = digits_p,
             var_labels = var_labels,
+            add_reference_rows = add_reference_rows,
+            keep_models = keep_models,
             ...
         )
+                                        # Extract raw data for variable selection
+        uni_raw <- attr(uni_results, "raw_data")
     }
 
-    ## Step 2: Determine predictors for multivariable model
+                                        # Step 2: Determine predictors for multivariable model
     multi_vars <- NULL
     multi_model <- NULL
     multi_results <- NULL
+    multi_raw <- NULL
 
     if (columns %in% c("both", "multi")) {
         if (method == "screen") {
-            ## Screen based on p-value threshold
-            if (is.null(uni_results)) {
-                ## Need to run univariable if not already done
+                                        # Screen based on p-value threshold using raw data
+            if (is.null(uni_raw)) {
+                                        # Need to run univariable if not already done
                 uni_temp <- uscreen(data, outcome, predictors, model_type, 
-                                    family, conf_level, FALSE, TRUE, 
-                                    add_reference_rows, ...)
-                multi_vars <- uni_temp[sig_binary == TRUE | p_value <= p_threshold, 
-                                       unique(variable)]
-            } else {
-                multi_vars <- uni_results[sig_binary == TRUE | p_value <= p_threshold, 
-                                          unique(variable)]
+                                    family, conf_level = conf_level,
+                                    add_reference_rows = add_reference_rows, ...)
+                uni_raw <- attr(uni_temp, "raw_data")
             }
             
+                                        # Use raw data for filtering
+            multi_vars <- unique(uni_raw[p_value <= p_threshold]$predictor)
+            
             if (length(multi_vars) == 0) {
-                warning("No significant variables at p <= ", p_threshold)
+                warning("No variables meet p <= ", p_threshold, " threshold")
                 if (return_type == "model") return(NULL)
             }
             
         } else if (method == "all") {
-            ## Use all predictors
+                                        # Use all predictors
             multi_vars <- predictors
             
         } else if (method == "custom") {
-            ## Use specified predictors
+                                        # Use specified predictors
             multi_vars <- multi_predictors
         }
         
-        ## Fit multivariable model if we have predictors
+                                        # Fit multivariable model if we have predictors
         if (length(multi_vars) > 0) {
             message(sprintf("Fitting multivariable model with %d predictors...", 
                             length(multi_vars)))
             
-            multi_model <- mmodel(
+            multi_results <- fit(
                 data = data,
                 outcome = outcome,
                 predictors = multi_vars,
                 model_type = model_type,
                 family = family,
+                conf_level = conf_level,
+                digits = digits,
+                digits_p = digits_p,
+                var_labels = var_labels,
+                keep_qc_stats = FALSE,  # Don't need QC stats for display
+                add_reference_rows = add_reference_rows,
                 ...
             )
             
-            multi_results <- m2dt(
-                multi_model,
-                conf_level = conf_level,
-                variable_name = "Multivariable",
-                keep_qc_stats = TRUE,
-                add_reference_rows = add_reference_rows
-            )
-
-            if (!is.null(var_labels)) {
-                                        # Extract base variable name from term
-                multi_results[, base_var := gsub("^([^0-9]+).*", "\\1", term)]
-                
-                                        # Add label column
-                multi_results[, label := ifelse(base_var %in% names(var_labels),
-                                                var_labels[base_var],
-                                                base_var)]
-            }
+                                        # Extract model and raw data
+            multi_model <- attr(multi_results, "model")
+            multi_raw <- attr(multi_results, "raw_data")
         }
     }
 
-    ## Step 3: Handle return types
+                                        # Step 3: Handle return types
     if (return_type == "model") {
         return(multi_model)
     }
 
-    ## Step 4: Format combined output
-    result <- format_fastfit_table(
-        uni_results = uni_results,
-        multi_results = multi_results,
+                                        # Step 4: Format combined output using the new formatted tables
+    result <- format_fastfit_combined(
+        uni_formatted = uni_results,
+        multi_formatted = multi_results,
+        uni_raw = uni_raw,
+        multi_raw = multi_raw,
         predictors = predictors,
         columns = columns,
         metrics = metrics,
-        model_type = model_type
+        var_labels = var_labels
     )
 
-    ## Add attributes
-    data.table::setattr(result, "outcome", outcome)
-    data.table::setattr(result, "model_type", model_type)
-    data.table::setattr(result, "method", method)
-    data.table::setattr(result, "columns", columns)
+                                        # Add attributes
+    setattr(result, "outcome", outcome)
+    setattr(result, "model_type", model_type)
+    setattr(result, "method", method)
+    setattr(result, "columns", columns)
+    setattr(result, "uni_raw", uni_raw)
+    setattr(result, "multi_raw", multi_raw)
 
     if (!is.null(multi_model)) {
-        data.table::setattr(result, "model", multi_model)
+        setattr(result, "model", multi_model)
     }
 
-    if (columns != "uni") {
-        data.table::setattr(result, "n_multi", length(multi_vars))
+    if (columns != "uni" && length(multi_vars) > 0) {
+        setattr(result, "n_multi", length(multi_vars))
     }
 
-    result[]  # Force finalization
+    class(result) <- c("fastfit_result", class(result))
 
     if (return_type == "both") {
         return(list(table = result, model = multi_model))
@@ -264,166 +267,182 @@ fastfit <- function(data,
     }
 }
 
-#' Format fastfit table output
-#' 
+#' Format combined fastfit output from formatted tables
 #' @keywords internal
-format_fastfit_table <- function(uni_results, multi_results, predictors,
-                                 columns, metrics, model_type) {
+format_fastfit_combined <- function(uni_formatted, multi_formatted, 
+                                    uni_raw, multi_raw,
+                                    predictors, columns, metrics, 
+                                    var_labels) {
     
-    ## Determine effect column name
-    effect_col <- if (model_type == "coxph") "HR" 
-                  else if (model_type == "glm") "OR" 
-                  else "Estimate"
+                                        # Determine effect column name from the formatted tables
+    effect_cols <- grep("\\(95% CI\\)$", names(uni_formatted %||% multi_formatted), value = TRUE)
+    effect_type <- if (length(effect_cols) > 0) {
+                       gsub(" \\(95% CI\\)", "", effect_cols[1])
+                   } else {
+                       "Effect"
+                   }
     
-    ## Build result table
     result <- data.table::data.table()
     
-    for (pred in predictors) {
-        
-        ## Get rows for this predictor from uni_results
-        if (!is.null(uni_results)) {
-            pred_rows <- uni_results[variable == pred]
-            
-            ## Use label if available, otherwise use variable name
-            display_name <- if ("label" %in% names(pred_rows) && nrow(pred_rows) > 0) {
-                                pred_rows$label[1]
+                                        # Get unique variables from both tables
+    all_vars <- unique(c(
+        if (!is.null(uni_formatted)) uni_formatted$Variable[uni_formatted$Variable != ""],
+        if (!is.null(multi_formatted)) multi_formatted$Variable[multi_formatted$Variable != ""]
+    ))
+    
+    for (var in all_vars) {
+                                        # Get rows for this variable from formatted tables
+        uni_var_rows <- if (!is.null(uni_formatted)) {
+                                        # Find the variable and its subsequent rows
+                            var_start <- which(uni_formatted$Variable == var)
+                            if (length(var_start) > 0) {
+                                var_end <- min(c(which(uni_formatted$Variable != "" & 
+                                                       seq_len(nrow(uni_formatted)) > var_start[1]),
+                                                 nrow(uni_formatted) + 1)) - 1
+                                uni_formatted[var_start[1]:var_end]
                             } else {
-                                pred
+                                NULL
                             }
-        } else {
-            display_name <- pred
-            pred_rows <- data.table::data.table(
-                                         term = pred,
-                                         reference = ""
-                                     )
-        }
+                        } else {
+                            NULL
+                        }
         
-        for (i in seq_len(nrow(pred_rows))) {
-            row <- data.table::data.table(
-                                   Variable = if (i == 1) display_name else "",  # Changed from "variable"
-                                   Cohort = gsub(paste0("^", pred), "", pred_rows$term[i])  # Changed from "level"
-                               )
+        multi_var_rows <- if (!is.null(multi_formatted)) {
+                              var_start <- which(multi_formatted$Variable == var)
+                              if (length(var_start) > 0) {
+                                  var_end <- min(c(which(multi_formatted$Variable != "" & 
+                                                         seq_len(nrow(multi_formatted)) > var_start[1]),
+                                                   nrow(multi_formatted) + 1)) - 1
+                                  multi_formatted[var_start[1]:var_end]
+                              } else {
+                                  NULL
+                              }
+                          } else {
+                              NULL
+                          }
+        
+                                        # Determine number of rows needed (max of uni and multi)
+        n_rows <- max(
+            if (!is.null(uni_var_rows)) nrow(uni_var_rows) else 0,
+            if (!is.null(multi_var_rows)) nrow(multi_var_rows) else 0
+        )
+        
+        if (n_rows == 0) next
+        
+                                        # Build combined rows
+        for (i in seq_len(n_rows)) {
+            row <- data.table::data.table()
             
-            ## Clean up level display
-            if (row$Cohort == "") row[, Cohort := "-"]
-            
-            ## Add sample size if available
-            if (!is.null(uni_results) && "n" %in% names(uni_results)) {
-                n_val <- pred_rows$n[i]
-                if (!is.na(n_val) && n_val >= 1000) {
-                    row[, n := format(n_val, big.mark = ",")]
-                } else {
-                    row[, n := as.character(n_val)]
+                                        # Variable and Group columns from either source
+            if (!is.null(uni_var_rows) && i <= nrow(uni_var_rows)) {
+                row[, Variable := uni_var_rows$Variable[i]]
+                row[, Group := uni_var_rows$Group[i]]
+                if ("n" %in% names(uni_var_rows)) {
+                    row[, n := uni_var_rows$n[i]]
+                }
+            } else if (!is.null(multi_var_rows) && i <= nrow(multi_var_rows)) {
+                row[, Variable := multi_var_rows$Variable[i]]
+                row[, Group := multi_var_rows$Group[i]]
+                if ("n" %in% names(multi_var_rows)) {
+                    row[, n := multi_var_rows$n[i]]
                 }
             }
             
-            ## Univariable columns
-            if (columns %in% c("both", "uni") && !is.null(uni_results)) {
-                if ("effect" %in% metrics) {
-
-                    ## Check for NA and handle properly
-                    if ("reference" %in% names(pred_rows) && 
-                        !is.na(pred_rows$reference[i]) && 
-                        pred_rows$reference[i] != "") {
-                        row[, uni_effect := pred_rows$reference[i]]
-                    } else if (!is.na(pred_rows[[effect_col]][i])) {
-                        row[, uni_effect := sprintf("%.2f (%.2f-%.2f)",
-                                                    pred_rows[[effect_col]][i],
-                                                    pred_rows$CI_lower[i],
-                                                    pred_rows$CI_upper[i])]
-                    } else {
-                        row[, uni_effect := ""]
-                    }
+                                        # Univariable columns
+            if (columns %in% c("both", "uni") && !is.null(uni_var_rows) && i <= nrow(uni_var_rows)) {
+                effect_col <- grep("\\(95% CI\\)$", names(uni_var_rows), value = TRUE)[1]
+                if ("effect" %in% metrics && !is.na(effect_col)) {
+                    row[, uni_effect := uni_var_rows[[effect_col]][i]]
                 }
-                
-                if ("p" %in% metrics) {
-                    if (!is.na(pred_rows$p_value[i])) {
-                        row[, uni_p := format_p_value(pred_rows$p_value[i])]
-                    } else {
-                        row[, uni_p := ""]
-                    }
+                if ("p" %in% metrics && "p-value" %in% names(uni_var_rows)) {
+                    row[, uni_p := uni_var_rows[["p-value"]][i]]
                 }
+            } else if (columns %in% c("both", "uni")) {
+                if ("effect" %in% metrics) row[, uni_effect := ""]
+                if ("p" %in% metrics) row[, uni_p := ""]
             }
             
-            ## Multivariable columns
-            if (columns %in% c("both", "multi") && !is.null(multi_results)) {
-                multi_row <- multi_results[term == pred_rows$term[i]]
-                
-                if (nrow(multi_row) > 0) {
-                    if ("effect" %in% metrics) {
-                        
-                        ## Check for NA and handle properly
-                        if ("reference" %in% names(multi_row) && 
-                            !is.na(multi_row$reference[1]) && 
-                            multi_row$reference[1] != "") {
-                            row[, multi_effect := multi_row$reference[1]]
-                        } else if (!is.na(multi_row[[effect_col]][1])) {
-                            row[, multi_effect := sprintf("%.2f (%.2f-%.2f)",
-                                                          multi_row[[effect_col]][1],
-                                                          multi_row$CI_lower[1],
-                                                          multi_row$CI_upper[1])]
-                        } else {
-                            row[, multi_effect := ""]
-                        }
-                    }
-                    
-                    if ("p" %in% metrics) {
-                        if (!is.na(multi_row$p_value[1])) {
-                            row[, multi_p := format_p_value(multi_row$p_value[1])]
-                        } else {
-                            row[, multi_p := ""]
-                        }
-                    }
-                } else {
-                    
-                    ## Not in multivariable model
-                    if ("effect" %in% metrics) row[, multi_effect := "-"]
-                    if ("p" %in% metrics) row[, multi_p := "-"]
+                                        # Multivariable columns
+            if (columns %in% c("both", "multi") && !is.null(multi_var_rows) && i <= nrow(multi_var_rows)) {
+                effect_col <- grep("\\(95% CI\\)$", names(multi_var_rows), value = TRUE)[1]
+                if ("effect" %in% metrics && !is.na(effect_col)) {
+                    row[, multi_effect := multi_var_rows[[effect_col]][i]]
                 }
+                if ("p" %in% metrics && "p-value" %in% names(multi_var_rows)) {
+                    row[, multi_p := multi_var_rows[["p-value"]][i]]
+                }
+            } else if (columns %in% c("both", "multi")) {
+                                        # Variable not in multivariable model
+                if ("effect" %in% metrics) row[, multi_effect := "-"]
+                if ("p" %in% metrics) row[, multi_p := "-"]
             }
             
             result <- rbind(result, row, fill = TRUE)
         }
     }
     
-    ## Clean up column names for display
+                                        # Clean up column names for display
     if (columns == "both") {
         if ("uni_effect" %in% names(result)) {
-            data.table::setnames(result, "uni_effect", 
-                                 paste0("Univariable ", effect_col, " (95% CI)"))
+                                        # Determine the effect type from raw data
+            effect_type <- if (!is.null(uni_raw) && "OR" %in% names(uni_raw)) "OR"
+                           else if (!is.null(uni_raw) && "HR" %in% names(uni_raw)) "HR"
+                           else if (!is.null(uni_raw) && "RR" %in% names(uni_raw)) "RR"
+                           else "Estimate"
+            
+            setnames(result, "uni_effect", paste0("Univariable ", effect_type, " (95% CI)"))
         }
         if ("uni_p" %in% names(result)) {
-            data.table::setnames(result, "uni_p", "Uni p")
+            setnames(result, "uni_p", "Uni p")
         }
         if ("multi_effect" %in% names(result)) {
-            data.table::setnames(result, "multi_effect", 
-                                 paste0("Multivariable ", effect_col, " (95% CI)"))
+                                        # Determine the adjusted effect type
+            effect_type <- if (!is.null(multi_raw) && "OR" %in% names(multi_raw)) "aOR"
+                           else if (!is.null(multi_raw) && "HR" %in% names(multi_raw)) "aHR"
+                           else if (!is.null(multi_raw) && "RR" %in% names(multi_raw)) "aRR"
+                           else "Estimate"
+            
+            setnames(result, "multi_effect", paste0("Multivariable ", effect_type, " (95% CI)"))
         }
         if ("multi_p" %in% names(result)) {
-            data.table::setnames(result, "multi_p", "Multi p")
+            setnames(result, "multi_p", "Multi p")
         }
     } else if (columns == "uni") {
+                                        # Keep as univariable
         if ("uni_effect" %in% names(result)) {
-            data.table::setnames(result, "uni_effect", paste0(effect_col, " (95% CI)"))
-        }
-        if ("uni_p" %in% names(result)) {
-            data.table::setnames(result, "uni_p", "p-value")
+            effect_type <- if (!is.null(uni_raw) && "OR" %in% names(uni_raw)) "OR"
+                           else if (!is.null(uni_raw) && "HR" %in% names(uni_raw)) "HR"
+                           else if (!is.null(uni_raw) && "RR" %in% names(uni_raw)) "RR"
+                           else "Estimate"
+            setnames(result, "uni_effect", paste0("Univariable ", effect_type, " (95% CI)"))
         }
     } else if (columns == "multi") {
+                                        # Use adjusted notation
         if ("multi_effect" %in% names(result)) {
-            data.table::setnames(result, "multi_effect", paste0(effect_col, " (95% CI)"))
-        }
-        if ("multi_p" %in% names(result)) {
-            data.table::setnames(result, "multi_p", "p-value")
+            effect_type <- if (!is.null(multi_raw) && "OR" %in% names(multi_raw)) "aOR"
+                           else if (!is.null(multi_raw) && "HR" %in% names(multi_raw)) "aHR"
+                           else if (!is.null(multi_raw) && "RR" %in% names(multi_raw)) "aRR"
+                           else "Estimate"
+            setnames(result, "multi_effect", paste0("Multivariable ", effect_type, " (95% CI)"))
         }
     }
     
     return(result)
 }
 
-#' Format p-values for display
-#' @keywords internal
-format_p_value <- function(p) {
-    if (p < 0.001) "< 0.001"
-    else sprintf("%.3f", p)
+#' Print method for fastfit results
+#' @export
+print.fastfit_result <- function(x, ...) {
+    cat("\nFastfit Analysis Results\n")
+    cat("Outcome: ", attr(x, "outcome"), "\n", sep = "")
+    cat("Model Type: ", attr(x, "model_type"), "\n", sep = "")
+    cat("Method: ", attr(x, "method"), "\n", sep = "")
+    
+    if (!is.null(attr(x, "n_multi"))) {
+        cat("Multivariable predictors: ", attr(x, "n_multi"), "\n", sep = "")
+    }
+    
+    cat("\n")
+    NextMethod("print", x)
+    invisible(x)
 }

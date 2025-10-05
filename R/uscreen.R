@@ -1,83 +1,146 @@
-#' Univariable Screening Function
+#' Univariable Screening with Formatted Output
 #'
-#' Performs univariable regression analysis for multiple predictors against a 
-#' single outcome, returning standardized results in data.table format.
+#' Performs univariable regression analyses for multiple predictors against a single
+#' outcome, returning publication-ready formatted results. Each predictor is tested
+#' independently in its own model.
 #'
 #' @param data A data.frame or data.table containing the analysis dataset.
-#' @param outcome Character string specifying the outcome variable. For survival 
-#'   analysis, use Surv() syntax, e.g., "Surv(time, status)".
+#' @param outcome Character string specifying the outcome variable name. For survival
+#'   analysis, use Surv() syntax (e.g., "Surv(time, status)").
 #' @param predictors Character vector of predictor variable names to screen.
-#' @param model_type Character string specifying model type. Options: "glm", "lm", 
-#'   "coxph", "clogit". Default is "glm".
-#' @param family For GLM models, the error distribution family. Default is "binomial".
-#' @param conf_level Numeric between 0 and 1 for confidence intervals. Default is 0.95.
-#' @param keep_models Logical. Whether to store fitted model objects in results. 
-#'   Default is FALSE to save memory.
-#' @param keep_qc_stats Logical. Include model quality statistics. Default is TRUE.
-#' @param sort_by Character string naming column to sort by, or NULL to maintain 
-#'   original predictor order. Options include "p_value", "effect", etc. Default is NULL.
-#' @param add_reference_rows Logical. Add reference category rows for factors. 
-#'   Default is TRUE.
+#' @param model_type Character string specifying the regression model type.
+#'   Options: "glm" (generalized linear model), "lm" (linear model),
+#'   "coxph" (Cox proportional hazards), "clogit" (conditional logistic).
+#'   Default is "glm".
+#' @param family For GLM models, the error distribution family. Options include
+#'   "binomial" (logistic regression), "poisson" (count data), "gaussian" (normal),
+#'   "Gamma", etc. See \code{\link[stats]{family}}. Default is "binomial".
+#' @param p_threshold Numeric value between 0 and 1 for filtering results by p-value.
+#'   Only predictors with p <= threshold are returned. Default is 1 (no filtering).
+#' @param conf_level Numeric confidence level for confidence intervals. Must be
+#'   between 0 and 1. Default is 0.95 (95 percent CI).
+#' @param digits Integer specifying decimal places for effect estimates (OR, HR, etc).
+#'   Default is 2.
+#' @param digits_p Integer specifying decimal places for p-values. Values less than
+#'   10^(-digits_p) display as "< 0.001" etc. Default is 3.
 #' @param var_labels Named character vector for custom variable labels. Names should
-#'   match variable names in predictors, values are display labels.
-#' @param ... Additional arguments passed to model fitting functions.
+#'   match predictor names, values are display labels. Default is NULL.
+#' @param add_reference_rows Logical. If TRUE, adds rows for reference categories
+#'   of factor variables with baseline values (OR/HR = 1). Default is TRUE.
+#' @param keep_models Logical. If TRUE, stores all fitted model objects in the output.
+#'   This can consume significant memory for large datasets or many predictors.
+#'   Models are accessible via attr(result, "models"). Default is FALSE.
+#' @param ... Additional arguments passed to the underlying model fitting functions
+#'   (e.g., weights, subset, na.action).
 #'
-#' @return A data.table with one row per coefficient containing:
-#' \itemize{
-#'   \item All columns from \code{m2dt()} output
-#'   \item \code{.var_order}: Integer. Original position in predictors vector
-#'   \item \code{model}: List column with model objects (if keep_models = TRUE)
-#' }
+#' @return A data.table with class "uscreen_result" containing formatted results:
+#'   \item{Variable}{Predictor name (or custom label if provided)}
+#'   \item{Group}{Factor level or statistic type for continuous variables}
+#'   \item{n}{Sample size}
+#'   \item{events}{Number of events (for survival/logistic models)}
+#'   \item{Univariable OR/HR/RR (95 percent CI)}{Formatted effect size with confidence interval}
+#'   \item{p-value}{Formatted p-value}
+#'   
+#'   The returned object includes attributes:
+#'   \item{raw_data}{Unformatted numeric results for further analysis}
+#'   \item{models}{List of fitted model objects (if keep_models = TRUE)}
+#'   \item{outcome}{The outcome variable name}
+#'   \item{model_type}{The type of regression model used}
 #'
 #' @details
-#' This function fits separate univariable models for each predictor and combines
-#' results into a single table for easy comparison and selection of variables for
-#' multivariable models.
-#'
-#' The output preserves the original order of predictors unless sort_by is specified.
-#' This is useful for maintaining logical groupings of variables.
+#' The function iterates through each predictor, fitting a separate univariable
+#' model for each. This is useful for:
+#' \itemize{
+#'   \item Initial variable screening before multivariable modeling
+#'   \item Understanding crude (unadjusted) associations
+#'   \item Identifying multicollinearity issues
+#'   \item Variable selection for further analysis
+#' }
+#' 
+#' For factor variables with add_reference_rows = TRUE, the reference category
+#' is shown with OR/HR = 1.00 (Reference) and no p-value. P-values are displayed
+#' only for non-reference categories.
+#' 
+#' The formatted output is ready for export via tbl2pdf(), tbl2tex(), or tbl2html().
 #'
 #' @examples
-#' # Basic univariable screening
-#' predictors <- c("age", "sex", "bmi", "smoking")
-#' results <- uscreen(data, "outcome", predictors)
+#' \dontrun{
+#' # Basic logistic regression screening
+#' data(mtcars)
+#' results <- uscreen(mtcars, 
+#'                    outcome = "am",
+#'                    predictors = c("mpg", "cyl", "disp", "hp"),
+#'                    model_type = "glm",
+#'                    family = "binomial")
+#' print(results)
 #' 
-#' # View significant predictors only
-#' results[sig_binary == TRUE]
+#' # Cox regression with custom labels
+#' library(survival)
+#' data(lung)
+#' labels <- c(age = "Age (years)", 
+#'             sex = "Sex", 
+#'             ph.ecog = "ECOG Score")
+#' cox_screen <- uscreen(lung,
+#'                       outcome = "Surv(time, status)",
+#'                       predictors = c("age", "sex", "ph.ecog"),
+#'                       model_type = "coxph",
+#'                       var_labels = labels)
 #' 
-#' # Cox model screening
-#' cox_results <- uscreen(lung, "Surv(time, status)", 
-#'                        c("age", "sex", "ph.ecog"),
-#'                        model_type = "coxph")
+#' # Filter by p-value threshold
+#' significant <- uscreen(mydata,
+#'                        outcome = "disease",
+#'                        predictors = c("var1", "var2", "var3"),
+#'                        p_threshold = 0.05)
 #' 
-#' # Sort by p-value
-#' results_sorted <- uscreen(data, "outcome", predictors, 
-#'                           sort_by = "p_value")
+#' # Keep models for diagnostics
+#' with_models <- uscreen(mydata,
+#'                        outcome = "outcome",
+#'                        predictors = vars,
+#'                        keep_models = TRUE)
+#' models <- attr(with_models, "models")
+#' plot(models[["age"]])  # Diagnostic plots
+#' 
+#' # Export to PDF
+#' tbl2pdf(results, "screening_results.pdf")
+#' }
 #'
-#' @seealso \code{\link{m2dt}}, \code{\link{mmodel}}, \code{\link{u2m}}
+#' @seealso 
+#' \code{\link{fit}} for multivariable modeling,
+#' \code{\link{fastfit}} for complete univariable-to-multivariable workflow,
+#' \code{\link{tbl2pdf}} for exporting results
+#'
 #' @export
-uscreen <- function(data, outcome, predictors, 
+uscreen <- function(data,
+                    outcome,
+                    predictors,
                     model_type = "glm",
                     family = "binomial",
-                    conf_level = 0.95, 
-                    keep_models = FALSE,
-                    keep_qc_stats = TRUE,
-                    sort_by = NULL,
-                    add_reference_rows = TRUE,
+                    p_threshold = 1,
+                    conf_level = 0.95,
+                    digits = 2,
+                    digits_p = 3,
                     var_labels = NULL,
+                    add_reference_rows = TRUE,
+                    keep_models = FALSE,
                     ...) {
     
     if (!data.table::is.data.table(data)) {
         data <- data.table::as.data.table(data)
     }
     
-    results <- data.table::rbindlist(lapply(seq_along(predictors), function(i) {
-        var <- predictors[i]
+                                        # Store models only if requested
+    if (keep_models) {
+        models <- list()
+    }
+    raw_results <- list()
+    
+                                        # Fit univariable model for each predictor
+    for (pred in predictors) {
+                                        # Build formula
+        formula_str <- paste(outcome, "~", pred)
+        formula <- stats::as.formula(formula_str)
         
-        ## Build formula with original variable name
-        formula <- stats::as.formula(paste(outcome, "~", var))
-        
-        ## Fit model
+                                        # Fit model based on type
         if (model_type == "glm") {
             model <- stats::glm(formula, data = data, family = family, ...)
         } else if (model_type == "lm") {
@@ -87,48 +150,106 @@ uscreen <- function(data, outcome, predictors,
                 stop("Package 'survival' required for Cox models")
             model <- survival::coxph(formula, data = data, ...)
         } else if (model_type == "clogit") {
-            if (!requireNamespace("survival", quietly = TRUE)) 
-                stop("Package 'survival' required for conditional logistic")
+            if (!requireNamespace("survival", quietly = TRUE))
+                stop("Package 'survival' required for conditional logistic regression")
             model <- survival::clogit(formula, data = data, ...)
         } else {
             stop("Unsupported model type: ", model_type)
         }
         
-        ## Get display label
-        var_display <- if (!is.null(var_labels) && var %in% names(var_labels)) {
-                           var_labels[var]
-                       } else {
-                           var
-                       }
-        
-        ## Extract results using m2dt - use display label for the variable column
-        dt <- m2dt(model, 
-                   conf_level = conf_level,
-                   variable_name = var,
-                   keep_qc_stats = keep_qc_stats,
-                   add_reference_rows = add_reference_rows)
-        
-        ## Add original variable name for internal reference
-        dt[, label := var_display]
-        dt[, .var_order := i]
-        
+                                        # Store the model only if requested
         if (keep_models) {
-            dt[, model := list(list(model))]
+            models[[pred]] <- model
         }
         
-        return(dt)
-    }), fill = TRUE)
-    
-    ## Sort by original variable order
-    data.table::setorder(results, .var_order)
-    results[, .var_order := NULL]  ## Remove helper column
-    
-    ## Apply additional sorting if requested
-    if (!is.null(sort_by) && sort_by %in% names(results)) {
-        data.table::setorder(results, cols = sort_by)
+                                        # Get raw results using m2dt
+        raw_result <- m2dt(model,
+                           conf_level = conf_level,
+                           keep_qc_stats = FALSE,
+                           add_reference_rows = add_reference_rows)
+        
+                                        # Add predictor name for tracking
+        raw_result[, predictor := pred]
+        raw_results[[pred]] <- raw_result
+        
+                                        # Clear model from memory if not keeping
+        if (!keep_models) {
+            rm(model)
+        }
     }
-
-    results[]  # Force finalization
     
-    return(results)
+                                        # Combine all raw results
+    combined_raw <- rbindlist(raw_results, fill = TRUE)
+    
+                                        # Filter by p-value if requested
+    if (p_threshold < 1) {
+        passing_predictors <- unique(combined_raw[p_value <= p_threshold]$predictor)
+        combined_raw <- combined_raw[predictor %in% passing_predictors]
+        
+                                        # If filtering and keeping models, remove non-passing models
+        if (keep_models) {
+            models <- models[names(models) %in% passing_predictors]
+        }
+    }
+    
+                                        # Format the combined results
+    formatted <- format_model_table(combined_raw,
+                                    digits = digits,
+                                    digits_p = digits_p,
+                                    var_labels = var_labels)
+    
+                                        # Attach raw data
+    setattr(formatted, "raw_data", combined_raw)
+    
+                                        # Attach models only if kept
+    if (keep_models) {
+        setattr(formatted, "models", models)
+    }
+    
+    setattr(formatted, "outcome", outcome)
+    setattr(formatted, "model_type", unique(combined_raw$model_type)[1])
+    setattr(formatted, "model_scope", "Univariable")
+    setattr(formatted, "screening_type", "univariable")
+    
+                                        # Add class for methods
+    class(formatted) <- c("uscreen_result", class(formatted))
+    
+    return(formatted)
+}
+
+#' Print method for uscreen results
+#' @export
+print.uscreen_result <- function(x, n = 20, ...) {
+    cat("\nUnivariable Screening Results\n")
+    cat("Outcome: ", attr(x, "outcome"), "\n", sep = "")
+    cat("Model Type: ", attr(x, "model_type"), "\n", sep = "")
+    
+                                        # Get unique predictors from the formatted table
+    n_predictors <- length(unique(x$Variable[x$Variable != ""]))
+    cat("Predictors Screened: ", n_predictors, "\n", sep = "")
+    
+                                        # Count significant from raw data
+    raw <- attr(x, "raw_data")
+    if (!is.null(raw) && "p_value" %in% names(raw)) {
+        sig_predictors <- unique(raw[p_value < 0.05]$predictor)
+        n_sig <- length(sig_predictors)
+        cat("Significant (p<0.05): ", n_sig, "\n", sep = "")
+    }
+    
+                                        # Note if models are stored
+    if (!is.null(attr(x, "models"))) {
+        cat("Models stored: Yes (", length(attr(x, "models")), ")\n", sep = "")
+    }
+    
+    cat("\n")
+    
+                                        # Show results
+    if (nrow(x) > n) {
+        cat("Showing first ", n, " rows (", nrow(x), " total):\n", sep = "")
+        print(head(x, n))
+    } else {
+        NextMethod("print", x)
+    }
+    
+    invisible(x)
 }

@@ -2,7 +2,7 @@
 #'
 #' Generates a publication-ready forest plot combining a data table and 
 #' graphical representation of hazard ratios from a Cox proportional hazards model.
-#' The plot includes variable names, cohort levels, sample sizes, hazard ratios 
+#' The plot includes variable names, group levels, sample sizes, hazard ratios 
 #' with confidence intervals, and p-values.
 #'
 #' @param model A Cox proportional hazards model object of class \code{coxph} 
@@ -31,7 +31,7 @@
 #' @param col_width_var Numeric value specifying the proportion of plot width 
 #'   allocated to the variable column. Default is 0.02.
 #' @param col_width_level Numeric value specifying the proportion of plot width 
-#'   allocated to the level/cohort column. Default is 0.15.
+#'   allocated to the group column. Default is 0.15.
 #' @param col_width_n Numeric value specifying the proportion of plot width 
 #'   allocated to the sample size column. Default is 0.18.
 #' @param col_width_hr Numeric value specifying the proportion of plot width 
@@ -375,7 +375,7 @@ coxforest <- function(model, data = NULL,
     
     ## Calculate dynamic column widths based on content
     max_var_len <- max(nchar(toShowExpClean$var_display) * 0.75, nchar("Variable"), na.rm = TRUE)
-    max_level_len <- max(nchar(toShowExpClean$level) * 0.75, nchar("Cohort"), na.rm = TRUE)
+    max_level_len <- max(nchar(toShowExpClean$level) * 0.75, nchar("Group"), na.rm = TRUE)
     max_n_len <- max(nchar(toShowExpClean$n_formatted), nchar("n"), na.rm = TRUE)
     
     ## For HR column, calculate without expressions
@@ -539,7 +539,7 @@ coxforest <- function(model, data = NULL,
                               if(!is.null(gmodel$concordance.lower) && !is.na(gmodel$concordance.lower) && 
                                  !is.null(gmodel$concordance.upper) && !is.na(gmodel$concordance.upper)) {
                                   paste0("Concordance Index: ", round(gmodel$concordance, 2), 
-                                         " (95% CI: ", round(gmodel$concordance.lower, 2), "-", 
+                                         " (95% CI ", round(gmodel$concordance.lower, 2), "-", 
                                          round(gmodel$concordance.upper, 2), ")")
                               } else {
                                   paste0("Concordance Index: ", round(gmodel$concordance, 2))
@@ -617,13 +617,13 @@ coxforest <- function(model, data = NULL,
                           label = "Variable", fontface = "bold", hjust = 0,
                           size = header_font) +
         ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_level),
-                          label = "Cohort", fontface = "bold", hjust = 0,
+                          label = "Group", fontface = "bold", hjust = 0,
                           size = header_font) +
         ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_n),
                           label = "n", fontface = "bold.italic", hjust = 0.5,
                           size = header_font) +
         ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_hr),
-                          label = "bold('HR (95% CI); '*bolditalic(p)*'-value')",
+                          label = "bold('aHR (95% CI); '*bolditalic(p)*'-value')",
                           hjust = 0, size = header_font, parse = TRUE) +
         
         ## Add centered x-axis "Hazard Ratio" label

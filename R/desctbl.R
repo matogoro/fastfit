@@ -47,8 +47,8 @@
 #' @param ... Additional arguments passed to statistical test functions.
 #'
 #' @return A data.table with class "desctbl" containing formatted descriptive
-#'   statistics. The table has columns for Variable, Cohort (levels), and 
-#'   statistics by group. Numeric values >= 1000 are formatted with commas.
+#'   statistics. The table has columns for variable, group, and statistics by
+#'   group. Numeric values >= 1000 are formatted with commas.
 #'   
 #'   The returned object includes attributes:
 #'   - raw_data: Numeric version of the table for further analysis
@@ -178,8 +178,8 @@ desctbl <- function(data,
         data.table::setnames(raw_result, "variable", "Variable")
     }
     if ("level" %in% names(result)) {
-        data.table::setnames(result, "level", "Cohort")
-        data.table::setnames(raw_result, "level", "Cohort")
+        data.table::setnames(result, "level", "Group")
+        data.table::setnames(raw_result, "level", "Group")
     }
     
     ## Attach raw data and metadata as attributes

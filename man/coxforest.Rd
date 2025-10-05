@@ -64,7 +64,7 @@ based on content and plot dimensions.}
 allocated to the variable column. Default is 0.02.}
 
 \item{col_width_level}{Numeric value specifying the proportion of plot width 
-allocated to the level/cohort column. Default is 0.15.}
+allocated to the group column. Default is 0.15.}
 
 \item{col_width_n}{Numeric value specifying the proportion of plot width 
 allocated to the sample size column. Default is 0.18.}
@@ -90,7 +90,7 @@ A ggplot object containing the forest plot. The object has an attribute
 \description{
 Generates a publication-ready forest plot combining a data table and 
 graphical representation of hazard ratios from a Cox proportional hazards model.
-The plot includes variable names, cohort levels, sample sizes, hazard ratios 
+The plot includes variable names, group levels, sample sizes, hazard ratios 
 with confidence intervals, and p-values.
 }
 \details{

@@ -16,6 +16,8 @@ fastfit(
   family = "binomial",
   conf_level = 0.95,
   add_reference_rows = TRUE,
+  digits = 2,
+  digits_p = 3,
   var_labels = NULL,
   metrics = "both",
   return_type = "table",
@@ -73,7 +75,7 @@ Default is FALSE.}
 \value{
 A data.table with formatted results (when return_type is "table"),
   a model object (when "model"), or a list with both (when "both").
-  The table includes Variable, Cohort, sample sizes, and effect/p-value
+  The table includes variable, group, sample sizes, and effect/p-value
   columns as requested. Includes attributes for outcome, model_type,
   method, columns, model (if fitted), and n_multi.
 }

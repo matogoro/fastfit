@@ -10,9 +10,6 @@
 #'   (generalized linear mixed effects). Also accepts models wrapped with mmodel().
 #' @param conf_level Numeric confidence level for confidence intervals. Must be
 #'   between 0 and 1. Default is 0.95 (95\% CI).
-#' @param variable_name Character string to identify the model source in the output.
-#'   Useful when combining results from multiple models. Default is NULL, which
-#'   uses "Multivariable" as the identifier.
 #' @param keep_qc_stats Logical. If TRUE, includes model quality statistics such as
 #'   AIC, BIC, R-squared, concordance, and model fit tests. These appear as 
 #'   additional columns in the output. Default is TRUE.
@@ -27,8 +24,10 @@
 #'
 #' @return A data.table containing extracted model information with the following
 #'   standard columns:
-#'   - variable: Model identifier from variable_name parameter
-#'   - term: Predictor/coefficient name
+#'   - model_scope: Univariable (unadjusted) or multivariable (adjusted) model
+#'   - model_type: Type of regression model
+#'   - variable: Variable summarized
+#'   - group: Group summarized
 #'   - n: Sample size
 #'   - events: Number of events (for survival/logistic models)
 #'   - coefficient: Raw coefficient estimate
@@ -53,7 +52,6 @@
 #' @export
 m2dt <- function(model, 
                  conf_level = 0.95,
-                 variable_name = NULL,
                  keep_qc_stats = TRUE,
                  terms_to_exclude = "(Intercept)",
                  add_reference_rows = TRUE,
@@ -65,6 +63,12 @@ m2dt <- function(model,
     if (model_class == "mmodel") {
         model_class <- class(model)[2]
     }
+
+    ## Auto-detect model type if not specified
+    model_scope <- detect_model_type(model)
+
+    ## Get model type name
+    model_type_name <- get_model_type_name(model)
     
     ## Initialize base data.table
     dt <- data.table::data.table()
@@ -84,7 +88,8 @@ m2dt <- function(model,
         effect_name <- if (is_logistic) "OR" else if (is_poisson) "RR" else "Estimate"
         
         dt <- data.table::data.table(
-                              variable = variable_name %||% "Multivariable",
+                              model_scope = model_scope %||% "Multivariable",
+                              model_type = model_type_name,
                               term = rownames(coef_summary),
                               n = stats::nobs(model),
                               events = if (is_logistic && !is.null(model$y)) sum(model$y) else NA_integer_,
@@ -173,7 +178,8 @@ m2dt <- function(model,
         conf_int <- stats::confint(model, level = conf_level)
         
         dt <- data.table::data.table(
-                              variable = variable_name %||% "Multivariable",
+                              model_scope = model_scope %||% "Multivariable",
+                              model_type = model_type_name,
                               term = rownames(coef_summary),
                               n = if (!is.null(model$n)) model$n[1] else summ$n,
                               events = if (!is.null(model$nevent)) model$nevent 
@@ -340,6 +346,21 @@ m2dt <- function(model,
                           ),
         sig_binary = !is.na(p_value) & p_value < 0.05
     )]
+
+    ## After creating dt, parse terms into variable and level
+    parsed_terms <- parse_term(dt$term, model$xlevels)
+    dt[, `:=`(
+        variable = parsed_terms$variable,
+        group = parsed_terms$group
+    )]
+    
+    ## Reorder columns to put variable and level early
+    col_order <- c("model_scope", "model_type", "term", "variable", "group")
+    other_cols <- setdiff(names(dt), col_order)
+    setcolorder(dt, c(col_order, other_cols))
+
+    ## Remove term column entirely:
+    dt[, term := NULL]
     
     ## Set attributes for model info
     data.table::setattr(dt, "model_class", model_class)
@@ -350,4 +371,124 @@ m2dt <- function(model,
     dt[]  # This forces data.table to update its internal state
     
     return(dt)
+}
+
+#' Detect if model is univariable or multivariable
+#' @keywords internal
+detect_model_type <- function(model) {
+                                        # Get number of non-intercept terms
+    n_terms <- length(stats::coef(model))
+    
+                                        # Account for intercept
+    if ("(Intercept)" %in% names(stats::coef(model))) {
+        n_terms <- n_terms - 1
+    }
+    
+                                        # For Cox models, no intercept to worry about
+    if (inherits(model, c("coxph", "coxme", "clogit"))) {
+        n_terms <- length(stats::coef(model))
+    }
+    
+                                        # Check for factor expansions - if model has xlevels, count base variables
+    if (!is.null(model$xlevels)) {
+        n_vars <- length(model$xlevels)
+                                        # Add any continuous variables (those not in xlevels)
+        term_names <- names(stats::coef(model))
+        term_names <- term_names[term_names != "(Intercept)"]
+        for (term in term_names) {
+            is_factor_term <- FALSE
+            for (var in names(model$xlevels)) {
+                if (grepl(paste0("^", var), term)) {
+                    is_factor_term <- TRUE
+                    break
+                }
+            }
+            if (!is_factor_term) n_vars <- n_vars + 1
+        }
+        n_terms <- n_vars
+    }
+    
+    return(ifelse(n_terms == 1, "Univariable", "Multivariable"))
+}
+
+#' Parse term into variable and group
+#' @keywords internal
+parse_term <- function(terms, xlevels = NULL) {
+    result <- data.table::data.table(
+                              variable = character(length(terms)),
+                              group = character(length(terms))
+                          )
+    
+    for (i in seq_along(terms)) {
+        term <- terms[i]
+        
+                                        # Check if it's a factor term
+        matched <- FALSE
+        if (!is.null(xlevels)) {
+            for (var in names(xlevels)) {
+                if (grepl(paste0("^", var), term)) {
+                                        # Extract the level
+                    level <- sub(paste0("^", var), "", term)
+                    result$variable[i] <- var
+                    result$group[i] <- level
+                    matched <- TRUE
+                    break
+                }
+            }
+        }
+        
+                                        # If not matched as factor, it's continuous or interaction
+        if (!matched) {
+            result$variable[i] <- term
+            result$group[i] <- ""
+        }
+    }
+    
+    return(result)
+}
+
+#' Get readable model type name
+#' @keywords internal
+get_model_type_name <- function(model) {
+    model_class <- class(model)[1]
+    
+                                        # Remove wrapper classes
+    if (model_class == "mmodel") {
+        model_class <- class(model)[2]
+    }
+    
+                                        # Map to readable names
+    type_map <- c(
+        "glm" = "Logistic",  # Will be refined based on family
+        "lm" = "Linear",
+        "coxph" = "Cox PH",
+        "clogit" = "Conditional Logistic",
+        "coxme" = "Mixed Effects Cox",
+        "glmer" = "Mixed Effects GLM",
+        "lmer" = "Mixed Effects Linear"
+    )
+    
+                                        # For GLM, be more specific based on family
+    if (model_class == "glm") {
+        family <- model$family$family
+        link <- model$family$link
+        
+        if (family == "binomial") {
+            return("Logistic")
+        } else if (family == "poisson") {
+            return("Poisson")
+        } else if (family == "gaussian") {
+            return("Linear (GLM)")
+        } else if (family == "Gamma") {
+            return("Gamma")
+        } else if (family == "quasibinomial") {
+            return("Quasi-Binomial")
+        } else if (family == "quasipoisson") {
+            return("Quasi-Poisson")
+        } else {
+            return(paste0(stringr::str_to_title(family), " GLM"))
+        }
+    }
+    
+    return(type_map[model_class] %||% model_class)
 }

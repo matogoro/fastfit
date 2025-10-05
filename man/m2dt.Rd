@@ -7,7 +7,6 @@
 m2dt(
   model,
   conf_level = 0.95,
-  variable_name = NULL,
   keep_qc_stats = TRUE,
   terms_to_exclude = "(Intercept)",
   add_reference_rows = TRUE,
@@ -22,10 +21,6 @@ clogit (conditional logistic), coxme (mixed effects Cox), and glmer
 
 \item{conf_level}{Numeric confidence level for confidence intervals. Must be
 between 0 and 1. Default is 0.95 (95\% CI).}
-
-\item{variable_name}{Character string to identify the model source in the output.
-Useful when combining results from multiple models. Default is NULL, which
-uses "Multivariable" as the identifier.}
 
 \item{keep_qc_stats}{Logical. If TRUE, includes model quality statistics such as
 AIC, BIC, R-squared, concordance, and model fit tests. These appear as 
@@ -45,8 +40,10 @@ in the output. Default is "reference".}
 \value{
 A data.table containing extracted model information with the following
   standard columns:
-  - variable: Model identifier from variable_name parameter
-  - term: Predictor/coefficient name
+  - model_scope: Univariable (unadjusted) or multivariable (adjusted) model
+  - model_type: Type of regression model
+  - variable: Variable summarized
+  - group: Group summarized
   - n: Sample size
   - events: Number of events (for survival/logistic models)
   - coefficient: Raw coefficient estimate
