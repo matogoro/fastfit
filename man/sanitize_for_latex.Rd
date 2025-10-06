@@ -2,11 +2,11 @@
 % Please edit documentation in R/tbl2helpers.R
 \name{sanitize_for_latex}
 \alias{sanitize_for_latex}
-\title{Sanitize text for LaTeX}
+\title{Sanitize certain symbols for LaTeX}
 \usage{
 sanitize_for_latex(x)
 }
 \description{
-Sanitize text for LaTeX
+Sanitize certain symbols for LaTeX
 }
 \keyword{internal}

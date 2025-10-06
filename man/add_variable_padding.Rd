@@ -2,11 +2,11 @@
 % Please edit documentation in R/tbl2helpers.R
 \name{add_variable_padding}
 \alias{add_variable_padding}
-\title{Add padding between variables}
+\title{Add padding to exported table variables}
 \usage{
 add_variable_padding(df)
 }
 \description{
-Add padding between variables
+Add padding to exported table variables
 }
 \keyword{internal}

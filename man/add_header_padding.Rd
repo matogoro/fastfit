@@ -2,11 +2,11 @@
 % Please edit documentation in R/tbl2helpers.R
 \name{add_header_padding}
 \alias{add_header_padding}
-\title{Add padding to column headers}
+\title{Add padding to exported table headers}
 \usage{
 add_header_padding(col_names)
 }
 \description{
-Add padding to column headers
+Add padding to exported table headers
 }
 \keyword{internal}

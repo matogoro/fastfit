@@ -2,11 +2,11 @@
 % Please edit documentation in R/tbl2helpers.R
 \name{determine_alignment}
 \alias{determine_alignment}
-\title{Determine column alignment}
+\title{Determine alignment for exported tables}
 \usage{
 determine_alignment(df)
 }
 \description{
-Determine column alignment
+Determine alignment for exported tables
 }
 \keyword{internal}

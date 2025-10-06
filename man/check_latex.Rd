@@ -2,14 +2,11 @@
 % Please edit documentation in R/tbl2helpers.R
 \name{check_latex}
 \alias{check_latex}
-\title{Export Helper Functions}
+\title{Check LaTeX installation}
 \usage{
 check_latex()
 }
 \description{
-Various helper functions for exporting fastfit tables to PDF, LaTeX, HTML, etc.
-}
-\details{
-Check if LaTeX is available
+Check LaTeX installation
 }
 \keyword{internal}

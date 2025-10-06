@@ -1,8 +1,8 @@
 Package: fastfit
 Type: Package
 Title: Fast and Convenient Regression Workflows and Visualizations
-Version: 0.4.1
-Authors@R: c(person(given = "Paul", family = "McClelland", role = c("aut", "cre"), email = "PaulHMcClelland@protonmail.com",
+Version: 0.5.0
+Authors@R: c(person(given = "Paul H.", family = "McClelland", role = c("aut", "cre"), email = "PaulHMcClelland@protonmail.com",
            comment = c(ORCID = "0000-0002-3119-6531")))
 Maintainer: Paul H. McClelland <PaulHMcClelland@protonmail.com>
 Description: Fast and lightweight statistical modeling toolkit built on data.table for 
