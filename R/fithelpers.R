@@ -153,7 +153,7 @@ format_model_table <- function(data,
 
 #' Format p-values for display
 #' @keywords internal
-format_pvalue <- function(p, digits = 3) {
+format_pvalues_fit <- function(p, digits = 3) {
     ifelse(is.na(p), "",
     ifelse(p < 0.001, "< 0.001",
            sprintf(paste0("%.", digits, "f"), p)))
