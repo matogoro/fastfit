@@ -10,7 +10,7 @@ format_model_table <- function(data,
     
     result <- data.table::copy(data)
     
-                                        # Standardize column names
+    ## Standardize column names
     if ("variable" %in% names(result)) {
         setnames(result, "variable", "Variable")
     }
@@ -18,7 +18,7 @@ format_model_table <- function(data,
         setnames(result, "group", "Group")
     }
     
-                                        # Auto-detect effect column if not specified
+    ## Auto-detect effect column if not specified
     if (is.null(effect_col)) {
         effect_col <- intersect(c("OR", "HR", "RR", "Estimate"), names(result))[1]
         if (length(effect_col) == 0) {
@@ -26,19 +26,19 @@ format_model_table <- function(data,
         }
     }
     
-                                        # Apply variable labels if provided
+    ## Apply variable labels if provided
     if (!is.null(var_labels) && "Variable" %in% names(result)) {
         for (var_name in names(var_labels)) {
             result[Variable == var_name, Variable := var_labels[var_name]]
         }
     }
     
-                                        # Clean up Group display (handle empty groups for continuous vars)
+    ## Clean up Group display (handle empty groups for continuous vars)
     if ("Group" %in% names(result)) {
         result[Group == "", Group := "-"]
     }
     
-                                        # Eliminate repeated variable names (only show on first row for each variable)
+    ## Eliminate repeated variable names (only show on first row for each variable)
     if ("Variable" %in% names(result)) {
         current_var <- ""
         for (i in seq_len(nrow(result))) {
@@ -50,7 +50,7 @@ format_model_table <- function(data,
         }
     }
     
-                                        # Format sample size columns with commas
+    ## Format sample size columns with commas
     if (show_n && "n" %in% names(result)) {
         result[, n := ifelse(!is.na(n) & as.numeric(n) >= 1000,
                              format(as.numeric(n), big.mark = ","),
@@ -62,39 +62,39 @@ format_model_table <- function(data,
                                   as.character(events))]
     }
     
-                                        # Create effect column label based on model scope
-                                        # Check if this is univariable or multivariable
+    ## Create effect column label based on model scope
+    ## Check if this is univariable or multivariable
     model_scope <- if ("model_scope" %in% names(result)) {
                        unique(result$model_scope)[1]
                    } else {
                        "Effect"
                    }
     
-                                        # Create appropriate label
+    ## Create appropriate label
     if (model_scope == "Univariable") {
         effect_label <- paste0("Univariable ", effect_col, " (95% CI)")
     } else if (model_scope == "Multivariable") {
-                                        # Add 'a' prefix for adjusted measures
+        ## Add 'a' prefix for adjusted measures
         adjusted_col <- if (effect_col == "OR") "aOR" 
                         else if (effect_col == "HR") "aHR"
                         else if (effect_col == "RR") "aRR"
                         else effect_col
         effect_label <- paste0("Multivariable ", adjusted_col, " (95% CI)")
     } else {
-                                        # Fallback for other cases
+        ## Fallback for other cases
         effect_label <- paste0(effect_col, " (95% CI)")
     }
     
-                                        # Format effect sizes with CI
+    ## Format effect sizes with CI
     if ("CI_lower" %in% names(result) && "CI_upper" %in% names(result)) {
-                                        # Check for reference rows
+        ## Check for reference rows
         is_reference <- FALSE
         if ("reference" %in% names(result)) {
             is_reference <- !is.na(result$reference) & result$reference == reference_label
         }
         
         if (effect_col %in% c("OR", "HR", "RR")) {
-                                        # Ratio measures
+            ## Ratio measures
             result[, (effect_label) := ifelse(
                          is_reference,
                          "-",
@@ -106,7 +106,7 @@ format_model_table <- function(data,
                                               "")
                      )]
         } else {
-                                        # Difference measures
+            ## Difference measures
             result[, (effect_label) := ifelse(
                          is_reference,
                          "-",
@@ -120,32 +120,32 @@ format_model_table <- function(data,
         }
     }
     
-                                        # Format p-values
+    ## Format p-values
     if ("p_value" %in% names(result)) {
         result[, `p-value` := format_pvalue(p_value, digits_p)]
         
-                                        # Clear p-values for reference rows
+        ## Clear p-values for reference rows
         if ("reference" %in% names(result)) {
             result[!is.na(reference) & reference == reference_label, `p-value` := ""]
         }
     }
     
-                                        # Select columns for final output
+    ## Select columns for final output
     display_cols <- character()
     
-                                        # Core columns
+    ## Core columns
     if ("Variable" %in% names(result)) display_cols <- c(display_cols, "Variable")
     if ("Group" %in% names(result)) display_cols <- c(display_cols, "Group")
     
-                                        # Sample size columns
+    ## Sample size columns
     if (show_n && "n" %in% names(result)) display_cols <- c(display_cols, "n")
     ## if ("events" %in% names(result)) display_cols <- c(display_cols, "events")
     
-                                        # Effect and p-value
+    ## Effect and p-value
     if (effect_label %in% names(result)) display_cols <- c(display_cols, effect_label)
     if ("p-value" %in% names(result)) display_cols <- c(display_cols, "p-value")
     
-                                        # Keep only display columns
+    ## Keep only display columns
     formatted <- result[, ..display_cols]
     
     return(formatted)

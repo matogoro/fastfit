@@ -123,7 +123,7 @@ fastfit <- function(data,
                     keep_models = FALSE,
                     ...) {
     
-                                        # Input validation
+    ## Input validation
     method <- match.arg(method, c("screen", "all", "custom"))
     columns <- match.arg(columns, c("both", "uni", "multi"))
     return_type <- match.arg(return_type, c("table", "model", "both"))
@@ -132,7 +132,7 @@ fastfit <- function(data,
         stop("multi_predictors must be specified when method='custom'")
     }
 
-                                        # Convert metrics to standardized format
+    ## Convert metrics to standardized format
     if (length(metrics) == 1 && metrics == "both") {
         metrics <- c("effect", "p")
     }
@@ -141,7 +141,7 @@ fastfit <- function(data,
         data <- data.table::as.data.table(data)
     }
 
-                                        # Step 1: Univariable analysis (if needed)
+    ## Step 1: Univariable analysis (if needed)
     uni_results <- NULL
     uni_raw <- NULL
     
@@ -161,11 +161,11 @@ fastfit <- function(data,
             keep_models = keep_models,
             ...
         )
-                                        # Extract raw data for variable selection
+        ## Extract raw data for variable selection
         uni_raw <- attr(uni_results, "raw_data")
     }
 
-                                        # Step 2: Determine predictors for multivariable model
+    ## Step 2: Determine predictors for multivariable model
     multi_vars <- NULL
     multi_model <- NULL
     multi_results <- NULL
@@ -173,16 +173,16 @@ fastfit <- function(data,
 
     if (columns %in% c("both", "multi")) {
         if (method == "screen") {
-                                        # Screen based on p-value threshold using raw data
+            ## Screen based on p-value threshold using raw data
             if (is.null(uni_raw)) {
-                                        # Need to run univariable if not already done
+                ## Need to run univariable if not already done
                 uni_temp <- uscreen(data, outcome, predictors, model_type, 
                                     family, conf_level = conf_level,
                                     add_reference_rows = add_reference_rows, ...)
                 uni_raw <- attr(uni_temp, "raw_data")
             }
             
-                                        # Use raw data for filtering
+            ## Use raw data for filtering
             multi_vars <- unique(uni_raw[p_value <= p_threshold]$predictor)
             
             if (length(multi_vars) == 0) {
@@ -191,15 +191,15 @@ fastfit <- function(data,
             }
             
         } else if (method == "all") {
-                                        # Use all predictors
+            ## Use all predictors
             multi_vars <- predictors
             
         } else if (method == "custom") {
-                                        # Use specified predictors
+            ## Use specified predictors
             multi_vars <- multi_predictors
         }
         
-                                        # Fit multivariable model if we have predictors
+        ## Fit multivariable model if we have predictors
         if (length(multi_vars) > 0) {
             message(sprintf("Fitting multivariable model with %d predictors...", 
                             length(multi_vars)))
@@ -214,23 +214,23 @@ fastfit <- function(data,
                 digits = digits,
                 digits_p = digits_p,
                 var_labels = var_labels,
-                keep_qc_stats = FALSE,  # Don't need QC stats for display
+                keep_qc_stats = FALSE,  ## Don't need QC stats for display
                 add_reference_rows = add_reference_rows,
                 ...
             )
             
-                                        # Extract model and raw data
+            ## Extract model and raw data
             multi_model <- attr(multi_results, "model")
             multi_raw <- attr(multi_results, "raw_data")
         }
     }
 
-                                        # Step 3: Handle return types
+    ## Step 3: Handle return types
     if (return_type == "model") {
         return(multi_model)
     }
 
-                                        # Step 4: Format combined output using the new formatted tables
+    ## Step 4: Format combined output using the new formatted tables
     result <- format_fastfit_combined(
         uni_formatted = uni_results,
         multi_formatted = multi_results,
@@ -242,7 +242,7 @@ fastfit <- function(data,
         var_labels = var_labels
     )
 
-                                        # Add attributes
+    ## Add attributes
     setattr(result, "outcome", outcome)
     setattr(result, "model_type", model_type)
     setattr(result, "method", method)
@@ -274,7 +274,7 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
                                     predictors, columns, metrics, 
                                     var_labels) {
     
-                                        # Determine effect column name from the formatted tables
+    ## Determine effect column name from the formatted tables
     effect_cols <- grep("\\(95% CI\\)$", names(uni_formatted %||% multi_formatted), value = TRUE)
     effect_type <- if (length(effect_cols) > 0) {
                        gsub(" \\(95% CI\\)", "", effect_cols[1])
@@ -284,16 +284,16 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
     
     result <- data.table::data.table()
     
-                                        # Get unique variables from both tables
+    ## Get unique variables from both tables
     all_vars <- unique(c(
         if (!is.null(uni_formatted)) uni_formatted$Variable[uni_formatted$Variable != ""],
         if (!is.null(multi_formatted)) multi_formatted$Variable[multi_formatted$Variable != ""]
     ))
     
     for (var in all_vars) {
-                                        # Get rows for this variable from formatted tables
+        ## Get rows for this variable from formatted tables
         uni_var_rows <- if (!is.null(uni_formatted)) {
-                                        # Find the variable and its subsequent rows
+                            ## Find the variable and its subsequent rows
                             var_start <- which(uni_formatted$Variable == var)
                             if (length(var_start) > 0) {
                                 var_end <- min(c(which(uni_formatted$Variable != "" & 
@@ -321,7 +321,7 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
                               NULL
                           }
         
-                                        # Determine number of rows needed (max of uni and multi)
+        ## Determine number of rows needed (max of uni and multi)
         n_rows <- max(
             if (!is.null(uni_var_rows)) nrow(uni_var_rows) else 0,
             if (!is.null(multi_var_rows)) nrow(multi_var_rows) else 0
@@ -329,11 +329,11 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
         
         if (n_rows == 0) next
         
-                                        # Build combined rows
+        ## Build combined rows
         for (i in seq_len(n_rows)) {
             row <- data.table::data.table()
             
-                                        # Variable and Group columns from either source
+            ## Variable and Group columns from either source
             if (!is.null(uni_var_rows) && i <= nrow(uni_var_rows)) {
                 row[, Variable := uni_var_rows$Variable[i]]
                 row[, Group := uni_var_rows$Group[i]]
@@ -348,7 +348,7 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
                 }
             }
             
-                                        # Univariable columns
+            ## Univariable columns
             if (columns %in% c("both", "uni") && !is.null(uni_var_rows) && i <= nrow(uni_var_rows)) {
                 effect_col <- grep("\\(95% CI\\)$", names(uni_var_rows), value = TRUE)[1]
                 if ("effect" %in% metrics && !is.na(effect_col)) {
@@ -362,7 +362,7 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
                 if ("p" %in% metrics) row[, uni_p := ""]
             }
             
-                                        # Multivariable columns
+            ## Multivariable columns
             if (columns %in% c("both", "multi") && !is.null(multi_var_rows) && i <= nrow(multi_var_rows)) {
                 effect_col <- grep("\\(95% CI\\)$", names(multi_var_rows), value = TRUE)[1]
                 if ("effect" %in% metrics && !is.na(effect_col)) {
@@ -372,7 +372,7 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
                     row[, multi_p := multi_var_rows[["p-value"]][i]]
                 }
             } else if (columns %in% c("both", "multi")) {
-                                        # Variable not in multivariable model
+                ## Variable not in multivariable model
                 if ("effect" %in% metrics) row[, multi_effect := "-"]
                 if ("p" %in% metrics) row[, multi_p := "-"]
             }
@@ -381,10 +381,10 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
         }
     }
     
-                                        # Clean up column names for display
+    ## Clean up column names for display
     if (columns == "both") {
         if ("uni_effect" %in% names(result)) {
-                                        # Determine the effect type from raw data
+            ## Determine the effect type from raw data
             effect_type <- if (!is.null(uni_raw) && "OR" %in% names(uni_raw)) "OR"
                            else if (!is.null(uni_raw) && "HR" %in% names(uni_raw)) "HR"
                            else if (!is.null(uni_raw) && "RR" %in% names(uni_raw)) "RR"
@@ -396,7 +396,7 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
             setnames(result, "uni_p", "Uni p")
         }
         if ("multi_effect" %in% names(result)) {
-                                        # Determine the adjusted effect type
+            ## Determine the adjusted effect type
             effect_type <- if (!is.null(multi_raw) && "OR" %in% names(multi_raw)) "aOR"
                            else if (!is.null(multi_raw) && "HR" %in% names(multi_raw)) "aHR"
                            else if (!is.null(multi_raw) && "RR" %in% names(multi_raw)) "aRR"
@@ -408,7 +408,7 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
             setnames(result, "multi_p", "Multi p")
         }
     } else if (columns == "uni") {
-                                        # Keep as univariable
+        ## Keep as univariable
         if ("uni_effect" %in% names(result)) {
             effect_type <- if (!is.null(uni_raw) && "OR" %in% names(uni_raw)) "OR"
                            else if (!is.null(uni_raw) && "HR" %in% names(uni_raw)) "HR"
@@ -417,7 +417,7 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
             setnames(result, "uni_effect", paste0("Univariable ", effect_type, " (95% CI)"))
         }
     } else if (columns == "multi") {
-                                        # Use adjusted notation
+        ## Use adjusted notation
         if ("multi_effect" %in% names(result)) {
             effect_type <- if (!is.null(multi_raw) && "OR" %in% names(multi_raw)) "aOR"
                            else if (!is.null(multi_raw) && "HR" %in% names(multi_raw)) "aHR"

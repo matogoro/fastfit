@@ -143,15 +143,15 @@ fit <- function(data,
                 var_labels = NULL,
                 ...) {
     
-                                        # Don't create internal variables - work with 'data' directly
+    ## Don't create internal variables - work with 'data' directly
     if (!data.table::is.data.table(data)) {
         data <- data.table::as.data.table(data)
     }
     
-                                        # Store original data name for reference
+    ## Store original data name for reference
     data_name <- deparse(substitute(data))
     
-                                        # Build formula
+    ## Build formula
     if (!is.null(interaction_terms)) {
         formula_str <- paste(outcome, "~", 
                              paste(c(predictors, interaction_terms), collapse = " + "))
@@ -159,14 +159,14 @@ fit <- function(data,
         formula_str <- paste(outcome, "~", paste(predictors, collapse = " + "))
     }
     
-                                        # Add strata if provided (for Cox models)
+    ## Add strata if provided (for Cox models)
     if (!is.null(strata) && model_type %in% c("coxph", "clogit")) {
         formula_str <- paste(formula_str, "+ strata(", strata, ")")
     }
     
     formula <- stats::as.formula(formula_str)
     
-                                        # Fit model based on type - use 'data' directly
+    ## Fit model based on type - use 'data' directly
     if (model_type == "glm") {
         if (!is.null(weights)) {
             model <- stats::glm(formula, data = data, family = family, 
@@ -212,10 +212,10 @@ fit <- function(data,
         stop("Unsupported model type: ", model_type)
     }
     
-                                        # Store the data directly in the model
+    ## Store the data directly in the model
     model$data <- data
     
-                                        # Attach metadata as attributes
+    ## Attach metadata as attributes
     data.table::setattr(model, "formula_str", formula_str)
     data.table::setattr(model, "predictors", predictors)
     data.table::setattr(model, "model_type", model_type)
@@ -233,20 +233,20 @@ fit <- function(data,
     if (!is.null(weights)) {
         data.table::setattr(model, "weights", weights)
     }
-        
-                                        # Convert to readable format using m2dt
+    
+    ## Convert to readable format using m2dt
     raw_data <- m2dt(model, 
                      conf_level = conf_level,
                      keep_qc_stats = keep_qc_stats,
                      add_reference_rows = add_reference_rows)
 
-                                        # Format results for publication
+    ## Format results for publication
     formatted <- format_model_table(raw_data,
                                     digits = digits,
                                     digits_p = digits_p,
                                     var_labels = var_labels)
 
-                                        # Attach metadata
+    ## Attach metadata
     setattr(formatted, "model", model)
     setattr(formatted, "raw_data", raw_data)
     setattr(formatted, "outcome", outcome)
@@ -255,7 +255,7 @@ fit <- function(data,
     setattr(formatted, "model_scope", raw_data$model_scope[1])
     setattr(formatted, "model_type", raw_data$model_type[1])
     
-                                        # Add metadata from model fitting
+    ## Add metadata from model fitting
     if (!is.null(interaction_terms)) {
         setattr(result, "interaction_terms", interaction_terms)
     }
@@ -280,11 +280,11 @@ print.fit_result <- function(x, ...) {
     cat("\n", attr(x, "model_scope"), " ", attr(x, "model_type"), " Model\n", sep = "")
     cat("Formula: ", attr(x, "formula_str"), "\n", sep = "")
     
-                                        # Get sample size from raw results
+    ## Get sample size from raw results
     raw <- attr(x, "raw_data")
     if (!is.null(raw)) {
         cat("N = ", raw$n[1], sep = "")
-        ## if (!is.na(raw$events[1])) cat(", Events = ", raw$events[1], sep = "")
+        if (!is.na(raw$events[1])) cat(", Events = ", raw$events[1], sep = "")
         cat("\n")
     }
     cat("\n")

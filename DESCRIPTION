@@ -1,18 +1,20 @@
 Package: fastfit
 Type: Package
-Title: Fast and convenient statistical workflows: summarize, screen, fit, visualize, and publish
-Version: 0.4.0
-Authors@R: c(person(given = "Paul", family = "McClelland", role = c("aut", "cre"), email = "PaulHMcClelland@protonmail.com"))
+Title: Fast and Convenient Descriptive/Predictive Statistical Workflows and Visualizations
+Version: 0.4.1
+Authors@R: c(person(given = "Paul", family = "McClelland", role = c("aut", "cre"), email = "PaulHMcClelland@protonmail.com"),
+           comment = c(ORCID = "0000-0002-3119-6531"))
 Maintainer: Paul H. McClelland <PaulHMcClelland@protonmail.com>
 Description: Fast and lightweight statistical modeling toolkit built on data.table for 
-    rapid generation of publication-ready statistical tables and figures. Includes descriptive
-    statistics with group comparisons, univariable and multivariable regression workflows, and
-    flexible export to PDF, LaTeX, and HTML formats. Designed for efficiency in medical, 
-    biostatistical, and epidemiological research.
-License: GPL-3
+    rapid generation of publication-ready tables and figures. Includes descriptive statistics
+    with group comparisons, univariable and multivariable regression workflows, and flexible
+    export to PDF, LaTeX, and HTML formats. Also provides convenient visualizations for 
+    regression outputs based on ggplot2.
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 URL: https://codeberg.org/matogoro/fastfit
+BugReports: https://codeberg.org/matogoro/fastfit/issues
 Imports:
     data.table,
     ggplot2,

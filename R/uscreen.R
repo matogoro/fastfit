@@ -128,19 +128,19 @@ uscreen <- function(data,
         data <- data.table::as.data.table(data)
     }
     
-                                        # Store models only if requested
+    ## Store models only if requested
     if (keep_models) {
         models <- list()
     }
     raw_results <- list()
     
-                                        # Fit univariable model for each predictor
+    ## Fit univariable model for each predictor
     for (pred in predictors) {
-                                        # Build formula
+        ## Build formula
         formula_str <- paste(outcome, "~", pred)
         formula <- stats::as.formula(formula_str)
         
-                                        # Fit model based on type
+        ## Fit model based on type
         if (model_type == "glm") {
             model <- stats::glm(formula, data = data, family = family, ...)
         } else if (model_type == "lm") {
@@ -157,51 +157,51 @@ uscreen <- function(data,
             stop("Unsupported model type: ", model_type)
         }
         
-                                        # Store the model only if requested
+        ## Store the model only if requested
         if (keep_models) {
             models[[pred]] <- model
         }
         
-                                        # Get raw results using m2dt
+        ## Get raw results using m2dt
         raw_result <- m2dt(model,
                            conf_level = conf_level,
                            keep_qc_stats = FALSE,
                            add_reference_rows = add_reference_rows)
         
-                                        # Add predictor name for tracking
+        ## Add predictor name for tracking
         raw_result[, predictor := pred]
         raw_results[[pred]] <- raw_result
         
-                                        # Clear model from memory if not keeping
+        ## Clear model from memory if not keeping
         if (!keep_models) {
             rm(model)
         }
     }
     
-                                        # Combine all raw results
+    ## Combine all raw results
     combined_raw <- rbindlist(raw_results, fill = TRUE)
     
-                                        # Filter by p-value if requested
+    ## Filter by p-value if requested
     if (p_threshold < 1) {
         passing_predictors <- unique(combined_raw[p_value <= p_threshold]$predictor)
         combined_raw <- combined_raw[predictor %in% passing_predictors]
         
-                                        # If filtering and keeping models, remove non-passing models
+        ## If filtering and keeping models, remove non-passing models
         if (keep_models) {
             models <- models[names(models) %in% passing_predictors]
         }
     }
     
-                                        # Format the combined results
+    ## Format the combined results
     formatted <- format_model_table(combined_raw,
                                     digits = digits,
                                     digits_p = digits_p,
                                     var_labels = var_labels)
     
-                                        # Attach raw data
+    ## Attach raw data
     setattr(formatted, "raw_data", combined_raw)
     
-                                        # Attach models only if kept
+    ## Attach models only if kept
     if (keep_models) {
         setattr(formatted, "models", models)
     }
@@ -211,7 +211,7 @@ uscreen <- function(data,
     setattr(formatted, "model_scope", "Univariable")
     setattr(formatted, "screening_type", "univariable")
     
-                                        # Add class for methods
+    ## Add class for methods
     class(formatted) <- c("uscreen_result", class(formatted))
     
     return(formatted)
@@ -224,11 +224,11 @@ print.uscreen_result <- function(x, n = 20, ...) {
     cat("Outcome: ", attr(x, "outcome"), "\n", sep = "")
     cat("Model Type: ", attr(x, "model_type"), "\n", sep = "")
     
-                                        # Get unique predictors from the formatted table
+    ## Get unique predictors from the formatted table
     n_predictors <- length(unique(x$Variable[x$Variable != ""]))
     cat("Predictors Screened: ", n_predictors, "\n", sep = "")
     
-                                        # Count significant from raw data
+    ## Count significant from raw data
     raw <- attr(x, "raw_data")
     if (!is.null(raw) && "p_value" %in% names(raw)) {
         sig_predictors <- unique(raw[p_value < 0.05]$predictor)
@@ -236,14 +236,14 @@ print.uscreen_result <- function(x, n = 20, ...) {
         cat("Significant (p<0.05): ", n_sig, "\n", sep = "")
     }
     
-                                        # Note if models are stored
+    ## Note if models are stored
     if (!is.null(attr(x, "models"))) {
         cat("Models stored: Yes (", length(attr(x, "models")), ")\n", sep = "")
     }
     
     cat("\n")
     
-                                        # Show results
+    ## Show results
     if (nrow(x) > n) {
         cat("Showing first ", n, " rows (", nrow(x), " total):\n", sep = "")
         print(head(x, n))
