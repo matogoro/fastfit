@@ -275,6 +275,7 @@ fit <- function(data,
 }
 
 #' Print method for fit results
+#' @keywords internal
 #' @export
 print.fit_result <- function(x, ...) {
     cat("\n", attr(x, "model_scope"), " ", attr(x, "model_type"), " Model\n", sep = "")

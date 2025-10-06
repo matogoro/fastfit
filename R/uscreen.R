@@ -218,6 +218,7 @@ uscreen <- function(data,
 }
 
 #' Print method for uscreen results
+#' @keywords internal
 #' @export
 print.uscreen_result <- function(x, n = 20, ...) {
     cat("\nUnivariable Screening Results\n")

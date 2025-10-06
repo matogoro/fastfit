@@ -431,6 +431,7 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
 }
 
 #' Print method for fastfit results
+#' @keywords internal
 #' @export
 print.fastfit_result <- function(x, ...) {
     cat("\nFastfit Analysis Results\n")

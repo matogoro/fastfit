@@ -9,3 +9,4 @@
 \description{
 Print method for fastfit results
 }
+\keyword{internal}

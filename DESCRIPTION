@@ -2,8 +2,8 @@ Package: fastfit
 Type: Package
 Title: Fast and Convenient Descriptive/Predictive Statistical Workflows and Visualizations
 Version: 0.4.1
-Authors@R: c(person(given = "Paul", family = "McClelland", role = c("aut", "cre"), email = "PaulHMcClelland@protonmail.com"),
-           comment = c(ORCID = "0000-0002-3119-6531"))
+Authors@R: c(person(given = "Paul", family = "McClelland", role = c("aut", "cre"), email = "PaulHMcClelland@protonmail.com",
+           comment = c(ORCID = "0000-0002-3119-6531")))
 Maintainer: Paul H. McClelland <PaulHMcClelland@protonmail.com>
 Description: Fast and lightweight statistical modeling toolkit built on data.table for 
     rapid generation of publication-ready tables and figures. Includes descriptive statistics
@@ -13,7 +13,7 @@ Description: Fast and lightweight statistical modeling toolkit built on data.tab
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-URL: https://codeberg.org/matogoro/fastfit
+URL: https://matogoro.codeberg.page/fastfit
 BugReports: https://codeberg.org/matogoro/fastfit/issues
 Imports:
     data.table,
@@ -21,4 +21,4 @@ Imports:
     stats,
     grDevices,
     xtable
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.3
