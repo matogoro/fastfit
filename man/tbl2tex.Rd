@@ -61,22 +61,45 @@ Converts a data frame or data.table to LaTeX format suitable for inclusion
 in LaTeX documents. Supports various table packages and formatting options.
 }
 \details{
-Tailored to outputs from desctbl(), fastfit(), uscreen(), fit(), and compfit().
-
-
 The function generates a LaTeX tabular environment that can be directly
 included in LaTeX documents using \\input{} or \\include{}. Special characters
 are automatically escaped for LaTeX compatibility.
 
-When booktabs = TRUE, uses \\toprule, \\midrule, and \\bottomrule for
-cleaner table appearance. This requires \\usepackage{booktabs} in the
-LaTeX preamble.
+A comprehensive list of LaTeX packages needed for full functionality is as
+follows (installed by default in most LaTeX distributions, with some
+exceptions):
+\itemize{
+  \item \code{fontenc}
+  \item \code{inputenc}
+  \item \code{array}
+  \item \code{booktabs}
+  \item \code{longtable}
+  \item \code{graphicx}
+  \item \code{geometry}
+  \item \code{pdflscape}
+  \item \code{lscape}
+  \item \code{helvet}
+  \item \code{standalone}
+  \item \code{varwidth}
+  \item \code{float}
+  \item \code{caption}
+  \item \code{xcolor}
+  \item \code{colortbl}
+}
+When \code{booktabs = TRUE}, uses \code{\\toprule}, \code{\\midrule}, and
+    \code{\\bottomrule} for cleaner table appearance. This requires
+    \code{\\usepackage{booktabs}} in the LaTeX preamble.
 
 The indent_groups option is particularly useful for regression tables with
-categorical variables, creating a clear visual hierarchy.
+    categorical variables, creating a clear visual hierarchy.
+
+This function is tailored to outputs from \code{\link{desctbl()}},
+\code{\link{fastfit()}}, \code{\link{uscreen()}}, \code{\link{fit()}},
+and \code{\link{compfit()}}, although it can theoretically be applied to
+any data frame or data.table object.
 }
 \examples{
-\dontrun{
+if (FALSE) {
 # Basic LaTeX export
 tbl2tex(results, "results.tex")
 
@@ -85,6 +108,12 @@ tbl2tex(final_results, "publication.tex",
         booktabs = TRUE,
         caption = "Multivariable regression analysis",
         label = "tab:regression")
+
+# Multi-line caption
+tbl2pdf(table, "results.pdf",
+        caption = "Table 1 - Regression results\\\\\\\\
+                  aHR = adjusted hazard ratio\\\\\\\\
+                  \\\\textsuperscript{1}Note goes here")
 
 # Hierarchical table with indentation
 tbl2tex(model_output, "model.tex",
@@ -95,9 +124,8 @@ tbl2tex(model_output, "model.tex",
 tbl2tex(wide_table, "aligned.tex",
         align = c("l", "l", "r", "r", "c"))
 }
-
 }
 \seealso{
 \code{\link{tbl2pdf}} for PDF output,
-\code{\link{tbl2html}} for HTML output,
+\code{\link{tbl2html}} for HTML output
 }

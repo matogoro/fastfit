@@ -4,8 +4,6 @@
 #' as an intermediate format. Supports automatic page sizing, landscape orientation,
 #' and various formatting options for publication-ready output.
 #'
-#' Tailored to outputs from desctbl(), fastfit(), uscreen(), fit(), and compfit().
-#'
 #' @param table A data.frame, data.table, or matrix to export.
 #' @param file Character string specifying the output PDF filename. Must have
 #'   .pdf extension.
@@ -35,18 +33,47 @@
 #' @return Invisibly returns NULL. Creates a PDF file at the specified location.
 #'
 #' @details
-#' The function uses LaTeX as an intermediate format, requiring a LaTeX distribution
-#' (e.g., TinyTeX, TeX Live, or MiKTeX). The function checks for LaTeX availability
-#' and provides installation guidance if missing.
-#' 
-#' When paper = "auto", the function attempts to size the PDF to content using
+#' This function uses LaTeX as an intermediate format to generate PDFs.  As such,
+#' a working installation of a LaTeX distribution is required (e.g., TinyTeX,
+#' TeX Live, MiKTeX, MacTeX, etc.).  Prior to execution, this function checks
+#' for LaTeX availability and provides installation guidance if missing.
+#'
+#' A comprehensive list of LaTeX packages needed for full functionality is as
+#' follows (installed by default in most LaTeX distributions, with some
+#' exceptions):
+#' \itemize{
+#'   \item \code{fontenc}
+#'   \item \code{inputenc}
+#'   \item \code{array}
+#'   \item \code{booktabs}
+#'   \item \code{longtable}
+#'   \item \code{graphicx}
+#'   \item \code{geometry}
+#'   \item \code{pdflscape}
+#'   \item \code{lscape}
+#'   \item \code{helvet}
+#'   \item \code{standalone}
+#'   \item \code{varwidth}
+#'   \item \code{float}
+#'   \item \code{caption}
+#'   \item \code{xcolor}
+#'   \item \code{colortbl}
+#' }
+#' When \code{paper = "auto"}, the function attempts to size the PDF to content using
 #' either the standalone document class or pdfcrop utility if available.
 #' 
-#' The function automatically handles special characters that need escaping in
-#' LaTeX and formats p-values consistently.
+#' While this function attempts to gracefully handle special characters that need
+#' escaping in LaTeX, user-inputted text needs to be properly escaped for the output
+#' text to render appropriately (\emph{see} the multi-line caption example included
+#' below).
 #'
+#' This function is tailored to outputs from \code{\link{desctbl()}},
+#' \code{\link{fastfit()}}, \code{\link{uscreen()}}, \code{\link{fit()}},
+#' and \code{\link{compfit()}}, although it can theoretically be applied to
+#' any data frame or data.table object.
+#' 
 #' @examples
-#' \dontrun{
+#' if (FALSE) {
 #' # Basic export
 #' tbl2pdf(results_table, "results.pdf")
 #' 
@@ -54,6 +81,12 @@
 #' tbl2pdf(wide_table, "wide_results.pdf",
 #'         orientation = "landscape",
 #'         caption = "Table 1: Regression Results")
+#' 
+#' # Multi-line caption
+#' tbl2pdf(table, "results.pdf",
+#'         caption = "Table 1 - Regression results\\\\
+#'                   aHR = adjusted hazard ratio\\\\
+#'                   \\textsuperscript{1}Note goes here")
 #' 
 #' # Auto-sized output with group indentation
 #' tbl2pdf(grouped_table, "grouped.pdf",
@@ -65,10 +98,9 @@
 #'         margins = c(0.5, 0.5, 0.5, 0.5),
 #'         font_size = 10)
 #' }
-#'
 #' @seealso
 #' \code{\link{tbl2tex}} for LaTeX output,
-#' \code{\link{tbl2html}} for HTML output,
+#' \code{\link{tbl2html}} for HTML output.
 #' 
 #' @export
 tbl2pdf <- function (table,
@@ -106,6 +138,14 @@ tbl2pdf <- function (table,
     orientation <- match.arg(orientation, c("portrait", "landscape"))
     paper_settings <- get_paper_settings(paper, margins)
     df <- as.data.frame(table)
+
+    has_n_row <- FALSE
+    n_row_data <- NULL
+    if (nrow(df) > 0 && "Variable" %in% names(df) && df$Variable[1] == "N") {
+        has_n_row <- TRUE
+        n_row_data <- df[1, ]
+        df <- df[-1, ]
+    }
     
     if (indent_groups) {
         df <- format_indented_groups(df)
@@ -125,7 +165,11 @@ tbl2pdf <- function (table,
     }
     
     if (format_headers) {
-        names(df) <- format_column_headers(names(df))
+        if (has_n_row) {
+            names(df) <- format_column_headers_with_n_tex(names(df), n_row_data)
+        } else {
+            names(df) <- format_column_headers(names(df))
+        }
     }
     
     xt <- xtable::xtable(df, align = align, ...)

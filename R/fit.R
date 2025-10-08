@@ -50,7 +50,7 @@
 #'   \item{Group}{Factor level, interaction term, or statistic label}
 #'   \item{n}{Sample size}
 #'   \item{events}{Number of events (survival/logistic models)}
-#'   \item{Multivariable aOR/aHR/aRR (95 percent CI)}{Adjusted effect with CI}
+#'   \item{Multivariable aOR/aHR/aRR (95\% CI)}{Adjusted effect with CI}
 #'   \item{p-value}{Formatted p-value}
 #'   
 #'   Attributes include:

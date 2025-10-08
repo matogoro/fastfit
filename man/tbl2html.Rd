@@ -55,11 +55,8 @@ Converts a data frame or data.table to HTML format with optional CSS styling
 for web display or inclusion in HTML documents.
 }
 \details{
-Tailored to outputs from desctbl(), fastfit(), uscreen(), fit(), and compfit().
-
-
 The function generates an HTML table that can be viewed directly in web
-browsers or embedded in HTML documents. When include_css = TRUE, adds
+browsers or embedded in HTML documents. When \code{include_css = TRUE}, adds
 minimal styling for borders, padding, and header formatting.
 
 The indent_groups option uses HTML non-breaking spaces (&nbsp;) to create
@@ -67,9 +64,14 @@ visual hierarchy, useful for categorical variables in regression output.
 
 P-values can be automatically highlighted using bold formatting when they
 fall below the significance threshold, making important results easy to identify.
+
+This function is tailored to outputs from \code{\link{desctbl()}},
+\code{\link{fastfit()}}, \code{\link{uscreen()}}, \code{\link{fit()}},
+and \code{\link{compfit()}}, although it can theoretically be applied to
+any data frame or data.table object.
 }
 \examples{
-\dontrun{
+if (FALSE) {
 # Basic HTML export
 tbl2html(results, "results.html")
 
@@ -87,9 +89,8 @@ tbl2html(regression_output, "regression.html",
 tbl2html(summary_table, "summary.html",
          format_headers = FALSE)
 }
-
 }
 \seealso{
-\code{\link{tbl2pdf}} for PDF output
+\code{\link{tbl2pdf}} for PDF output, 
 \code{\link{tbl2tex}} for LaTeX output
 }

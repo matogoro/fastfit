@@ -132,7 +132,7 @@ desctbl <- function(data,
     result <- data.table::data.table()
     raw_result <- data.table::data.table()
     
-    ## Process each variable
+                                        # Process each variable
     for (var in vars) {
         var_data <- process_variable(
             data = data,
@@ -156,23 +156,8 @@ desctbl <- function(data,
         result <- rbind(result, var_data$formatted, fill = TRUE)
         raw_result <- rbind(raw_result, var_data$raw, fill = TRUE)
     }
-    
-    ## Add p-value column if tests requested
-    if (test && !is.null(group_var)) {
-        result <- format_pvalues_desctbl(result, digits_p)
-        ## Raw already has numeric p-values
-    }
-    
-    ## Reorder columns if total position specified
-    if (!isFALSE(total) && !is.null(group_var)) {
-        result <- reorder_total_column(result, total, total_label)
-        ## Apply same ordering to raw
-        col_order <- names(result)
-        raw_cols <- names(raw_result)
-        ## Keep raw columns in similar order where possible
-    }
-    
-    ## Standardize column names
+
+                                        # Standardize column names FIRST (before p-value formatting)
     if ("variable" %in% names(result)) {
         data.table::setnames(result, "variable", "Variable")
         data.table::setnames(raw_result, "variable", "Variable")
@@ -181,12 +166,58 @@ desctbl <- function(data,
         data.table::setnames(result, "level", "Group")
         data.table::setnames(raw_result, "level", "Group")
     }
-    
-    ## Attach raw data and metadata as attributes
+
+                                        # Add p-value column if tests requested (after standardization)
+    if (test && !is.null(group_var)) {
+        result <- format_pvalues_desctbl(result, digits_p)
+    }
+
+                                        # Reorder columns if total position specified
+    if (!isFALSE(total) && !is.null(group_var)) {
+        result <- reorder_total_column(result, total, total_label)
+    }
+
+                                        # Add N row as first row if grouped (after all other processing)
+    if (!is.null(group_var)) {
+                                        # Get the actual group values from the data
+        groups <- unique(data[[group_var]])
+        groups <- groups[!is.na(groups)]
+        
+                                        # Create N row
+        n_row <- data.table::data.table(
+                                 Variable = "N",
+                                 Group = ""
+                             )
+        
+                                        # Calculate and add total if present
+        if (total_label %in% names(result)) {
+            n_total <- nrow(data)
+            n_row[[total_label]] <- format(n_total, big.mark = ",")
+        }
+        
+                                        # Calculate for each group
+        for (grp in groups) {
+            grp_col <- as.character(grp)
+            if (grp_col %in% names(result)) {
+                n_group <- sum(data[[group_var]] == grp, na.rm = TRUE)
+                n_row[[grp_col]] <- format(n_group, big.mark = ",")
+            }
+        }
+        
+                                        # Add empty p-value column if it exists
+        if ("p-value" %in% names(result)) {
+            n_row[["p-value"]] <- ""
+        }
+        
+                                        # Prepend N row
+        result <- rbind(n_row, result, fill = TRUE)
+    }
+
+                                        # Attach raw data and metadata as attributes
     data.table::setattr(result, "raw_data", raw_result)
     data.table::setattr(result, "by_variable", group_var)
     data.table::setattr(result, "variables", variables)
-    
+
     result[]
     return(result)
 }

@@ -852,13 +852,24 @@ perform_categorical_test <- function(data, var, group_var, test_type, ...) {
 #' @keywords internal
 format_pvalues_desctbl <- function(result, digits_p) {
     if ("p_value" %in% names(result)) {
-        result[, p_formatted := ifelse(
-                     is.na(p_value), "",
-                                ifelse(p_value < 0.001, "< 0.001",
-                                       sprintf(paste0("%.", digits_p, "f"), p_value))
-                 )]
+                                        # Process row by row to avoid vectorization issues
+        result[, p_formatted := character(.N)]  # Initialize as character vector
         
-        ## Move p-value to last column
+        for (i in seq_len(nrow(result))) {
+            if (!is.na(result$Variable[i]) && result$Variable[i] == "N") {
+                result$p_formatted[i] <- ""
+            } else if (is.na(result$p_value[i])) {
+                result$p_formatted[i] <- ""
+            } else if (is.character(result$p_value[i])) {
+                result$p_formatted[i] <- result$p_value[i]
+            } else if (result$p_value[i] < 0.001) {
+                result$p_formatted[i] <- "< 0.001"
+            } else {
+                result$p_formatted[i] <- sprintf(paste0("%.", digits_p, "f"), result$p_value[i])
+            }
+        }
+        
+                                        # Move p-value to last column
         cols <- names(result)
         cols <- c(cols[!cols %in% c("p_value", "p_formatted")], "p_formatted")
         result <- result[, ..cols]

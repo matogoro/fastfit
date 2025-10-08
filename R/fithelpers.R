@@ -37,6 +37,47 @@ format_model_table <- function(data,
     if ("Group" %in% names(result)) {
         result[Group == "", Group := "-"]
     }
+
+                                        # Format sample size columns with group-specific counts
+    if (show_n && "n" %in% names(result)) {
+                                        # Check if we have group-specific counts
+        if ("n_group" %in% names(result)) {
+                                        # For rows with n_group, use that; otherwise use n
+            result[, display_n := ifelse(!is.na(n_group), 
+                                         as.character(n_group),
+                                         as.character(n))]
+        } else {
+                                        # No group counts available, use total n
+            result[, display_n := as.character(n)]
+        }
+        
+                                        # Format with commas
+        result[, display_n := ifelse(!is.na(display_n) & as.numeric(display_n) >= 1000,
+                                     format(as.numeric(display_n), big.mark = ","),
+                                     display_n)]
+        
+                                        # Replace the n column with display_n
+        result[, n := display_n]
+        result[, display_n := NULL]
+    }
+
+                                        # Similar for events
+    if ("events" %in% names(result)) {
+        if ("events_group" %in% names(result)) {
+            result[, display_events := ifelse(!is.na(events_group),
+                                              as.character(events_group),
+                                              as.character(events))]
+        } else {
+            result[, display_events := as.character(events)]
+        }
+        
+        result[, display_events := ifelse(!is.na(display_events) & as.numeric(display_events) >= 1000,
+                                          format(as.numeric(display_events), big.mark = ","),
+                                          display_events)]
+        
+        result[, events := display_events]
+        result[, display_events := NULL]
+    }
     
     ## Eliminate repeated variable names (only show on first row for each variable)
     if ("Variable" %in% names(result)) {
@@ -50,20 +91,23 @@ format_model_table <- function(data,
         }
     }
     
-    ## Format sample size columns with commas
-    if (show_n && "n" %in% names(result)) {
-        result[, n := ifelse(!is.na(n) & as.numeric(n) >= 1000,
-                             format(as.numeric(n), big.mark = ","),
-                             as.character(n))]
-    }
+    ## Format events column if present
     if ("events" %in% names(result)) {
-        result[, events := ifelse(!is.na(events) & as.numeric(events) >= 1000,
-                                  format(as.numeric(events), big.mark = ","),
-                                  as.character(events))]
+        ## Similar logic for events_group if available
+        if ("events_group" %in% names(result)) {
+            result[, display_events := ifelse(!is.na(events_group),
+                                              as.character(events_group),
+                                              as.character(events))]
+        } else {
+            result[, display_events := as.character(events)]
+        }
+        
+        result[, display_events := ifelse(!is.na(display_events) & as.numeric(display_events) >= 1000,
+                                          format(as.numeric(display_events), big.mark = ","),
+                                          display_events)]
     }
     
     ## Create effect column label based on model scope
-    ## Check if this is univariable or multivariable
     model_scope <- if ("model_scope" %in% names(result)) {
                        unique(result$model_scope)[1]
                    } else {
@@ -74,27 +118,23 @@ format_model_table <- function(data,
     if (model_scope == "Univariable") {
         effect_label <- paste0("Univariable ", effect_col, " (95% CI)")
     } else if (model_scope == "Multivariable") {
-        ## Add 'a' prefix for adjusted measures
         adjusted_col <- if (effect_col == "OR") "aOR" 
                         else if (effect_col == "HR") "aHR"
                         else if (effect_col == "RR") "aRR"
                         else effect_col
         effect_label <- paste0("Multivariable ", adjusted_col, " (95% CI)")
     } else {
-        ## Fallback for other cases
         effect_label <- paste0(effect_col, " (95% CI)")
     }
     
     ## Format effect sizes with CI
     if ("CI_lower" %in% names(result) && "CI_upper" %in% names(result)) {
-        ## Check for reference rows
         is_reference <- FALSE
         if ("reference" %in% names(result)) {
             is_reference <- !is.na(result$reference) & result$reference == reference_label
         }
         
         if (effect_col %in% c("OR", "HR", "RR")) {
-            ## Ratio measures
             result[, (effect_label) := ifelse(
                          is_reference,
                          "-",
@@ -106,7 +146,6 @@ format_model_table <- function(data,
                                               "")
                      )]
         } else {
-            ## Difference measures
             result[, (effect_label) := ifelse(
                          is_reference,
                          "-",
@@ -122,9 +161,8 @@ format_model_table <- function(data,
     
     ## Format p-values
     if ("p_value" %in% names(result)) {
-        result[, `p-value` := format_pvalue(p_value, digits_p)]
+        result[, `p-value` := format_pvalues_fit(p_value, digits_p)]
         
-        ## Clear p-values for reference rows
         if ("reference" %in% names(result)) {
             result[!is.na(reference) & reference == reference_label, `p-value` := ""]
         }
@@ -133,19 +171,20 @@ format_model_table <- function(data,
     ## Select columns for final output
     display_cols <- character()
     
-    ## Core columns
     if ("Variable" %in% names(result)) display_cols <- c(display_cols, "Variable")
     if ("Group" %in% names(result)) display_cols <- c(display_cols, "Group")
+
+    if (show_n && "n" %in% names(result)) {
+        display_cols <- c(display_cols, "n")
+    }
     
-    ## Sample size columns
-    if (show_n && "n" %in% names(result)) display_cols <- c(display_cols, "n")
-    ## if ("events" %in% names(result)) display_cols <- c(display_cols, "events")
+    if ("events" %in% names(result)) {
+        display_cols <- c(display_cols, "events")
+    }
     
-    ## Effect and p-value
     if (effect_label %in% names(result)) display_cols <- c(display_cols, effect_label)
     if ("p-value" %in% names(result)) display_cols <- c(display_cols, "p-value")
     
-    ## Keep only display columns
     formatted <- result[, ..display_cols]
     
     return(formatted)

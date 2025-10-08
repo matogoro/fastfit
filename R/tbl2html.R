@@ -3,8 +3,6 @@
 #' Converts a data frame or data.table to HTML format with optional CSS styling
 #' for web display or inclusion in HTML documents.
 #'
-#' Tailored to outputs from desctbl(), fastfit(), uscreen(), fit(), and compfit().
-#'  
 #' @param table A data.frame, data.table, or matrix to export.
 #' @param file Character string specifying the output HTML filename. Must have
 #'   .html or .htm extension.
@@ -29,7 +27,7 @@
 #'
 #' @details
 #' The function generates an HTML table that can be viewed directly in web
-#' browsers or embedded in HTML documents. When include_css = TRUE, adds
+#' browsers or embedded in HTML documents. When \code{include_css = TRUE}, adds
 #' minimal styling for borders, padding, and header formatting.
 #' 
 #' The indent_groups option uses HTML non-breaking spaces (&nbsp;) to create
@@ -38,8 +36,13 @@
 #' P-values can be automatically highlighted using bold formatting when they
 #' fall below the significance threshold, making important results easy to identify.
 #'
+#' This function is tailored to outputs from \code{\link{desctbl()}},
+#' \code{\link{fastfit()}}, \code{\link{uscreen()}}, \code{\link{fit()}},
+#' and \code{\link{compfit()}}, although it can theoretically be applied to
+#' any data frame or data.table object.
+#'
 #' @examples
-#' \dontrun{
+#' if (FALSE) {
 #' # Basic HTML export
 #' tbl2html(results, "results.html")
 #' 
@@ -57,9 +60,8 @@
 #' tbl2html(summary_table, "summary.html",
 #'          format_headers = FALSE)
 #' }
-#'
 #' @seealso
-#' \code{\link{tbl2pdf}} for PDF output
+#' \code{\link{tbl2pdf}} for PDF output, 
 #' \code{\link{tbl2tex}} for LaTeX output
 #' 
 #' @export
@@ -83,6 +85,14 @@ tbl2html <- function(table,
     }
     
     df <- as.data.frame(table)
+
+    has_n_row <- FALSE
+    n_row_data <- NULL
+    if (nrow(df) > 0 && "Variable" %in% names(df) && df$Variable[1] == "N") {
+        has_n_row <- TRUE
+        n_row_data <- df[1, ]
+        df <- df[-1, ]  # Remove N row from data
+    }
     
     if (indent_groups) {
         df <- format_indented_groups(df, indent_string = "&nbsp;&nbsp;&nbsp;&nbsp;")
@@ -97,35 +107,43 @@ tbl2html <- function(table,
     }
     
     if (format_headers) {
-        names(df) <- format_column_headers_html(names(df))
+        if (has_n_row) {
+            names(df) <- format_column_headers_with_n_html(names(df), n_row_data)
+        } else {
+            names(df) <- format_column_headers_html(names(df))
+        }
     }
     
     xt <- xtable::xtable(df, caption = caption, ...)
     
     if (include_css) {
         css <- "<style>\n
-                table { \n
-                border-collapse: collapse; \n
-                font-family: Arial, sans-serif;\n
-                margin: 20px;\n
-                }\n
-                th, td { \n
-                padding: 8px 12px; \n
-                text-align: left; \n
-                border: 1px solid #ddd;\n
-                }\n
-                th { \n
-                background-color: #f2f2f2; \n
-                font-weight: bold;\n
-                }\n
-                caption {\n
-                text-align: left;\n
-                margin-top: 10px;\n
-                margin-bottom: 10px;\n
-                font-weight: bold;\n
-                font-size: 1.1em;\n
-                }\n
-                </style>\n"
+            table { \n
+            border-collapse: collapse; \n
+            font-family: Arial, sans-serif;\n
+            margin: 20px;\n
+            }\n
+            th, td { \n
+            padding: 8px 12px; \n
+            text-align: left; \n
+            border: 1px solid #ddd;\n
+            }\n
+            th:not(:nth-child(1)):not(:nth-child(2)), \n
+            td:not(:nth-child(1)):not(:nth-child(2)) { \n
+            text-align: center; \n
+            }\n
+            th { \n
+            background-color: #f2f2f2; \n
+            font-weight: bold;\n
+            }\n
+            caption {\n
+            text-align: left;\n
+            margin-top: 10px;\n
+            margin-bottom: 10px;\n
+            font-weight: bold;\n
+            font-size: 1.1em;\n
+            }\n
+            </style>\n"
         cat(css, file = file)
         append <- TRUE
     } else {

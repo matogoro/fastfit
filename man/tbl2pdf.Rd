@@ -72,21 +72,47 @@ as an intermediate format. Supports automatic page sizing, landscape orientation
 and various formatting options for publication-ready output.
 }
 \details{
-Tailored to outputs from desctbl(), fastfit(), uscreen(), fit(), and compfit().
+This function uses LaTeX as an intermediate format to generate PDFs.  As such,
+a working installation of a LaTeX distribution is required (e.g., TinyTeX,
+TeX Live, MiKTeX, MacTeX, etc.).  Prior to execution, this function checks
+for LaTeX availability and provides installation guidance if missing.
 
-
-The function uses LaTeX as an intermediate format, requiring a LaTeX distribution
-(e.g., TinyTeX, TeX Live, or MiKTeX). The function checks for LaTeX availability
-and provides installation guidance if missing.
-
-When paper = "auto", the function attempts to size the PDF to content using
+A comprehensive list of LaTeX packages needed for full functionality is as
+follows (installed by default in most LaTeX distributions, with some
+exceptions):
+\itemize{
+  \item \code{fontenc}
+  \item \code{inputenc}
+  \item \code{array}
+  \item \code{booktabs}
+  \item \code{longtable}
+  \item \code{graphicx}
+  \item \code{geometry}
+  \item \code{pdflscape}
+  \item \code{lscape}
+  \item \code{helvet}
+  \item \code{standalone}
+  \item \code{varwidth}
+  \item \code{float}
+  \item \code{caption}
+  \item \code{xcolor}
+  \item \code{colortbl}
+}
+When \code{paper = "auto"}, the function attempts to size the PDF to content using
 either the standalone document class or pdfcrop utility if available.
 
-The function automatically handles special characters that need escaping in
-LaTeX and formats p-values consistently.
+While this function attempts to gracefully handle special characters that need
+escaping in LaTeX, user-inputted text needs to be properly escaped for the output
+text to render appropriately (\emph{see} the multi-line caption example included
+below).
+
+This function is tailored to outputs from \code{\link{desctbl()}},
+\code{\link{fastfit()}}, \code{\link{uscreen()}}, \code{\link{fit()}},
+and \code{\link{compfit()}}, although it can theoretically be applied to
+any data frame or data.table object.
 }
 \examples{
-\dontrun{
+if (FALSE) {
 # Basic export
 tbl2pdf(results_table, "results.pdf")
 
@@ -94,6 +120,12 @@ tbl2pdf(results_table, "results.pdf")
 tbl2pdf(wide_table, "wide_results.pdf",
         orientation = "landscape",
         caption = "Table 1: Regression Results")
+
+# Multi-line caption
+tbl2pdf(table, "results.pdf",
+        caption = "Table 1 - Regression results\\\\\\\\
+                  aHR = adjusted hazard ratio\\\\\\\\
+                  \\\\textsuperscript{1}Note goes here")
 
 # Auto-sized output with group indentation
 tbl2pdf(grouped_table, "grouped.pdf",
@@ -105,9 +137,8 @@ tbl2pdf(table, "custom.pdf",
         margins = c(0.5, 0.5, 0.5, 0.5),
         font_size = 10)
 }
-
 }
 \seealso{
 \code{\link{tbl2tex}} for LaTeX output,
-\code{\link{tbl2html}} for HTML output,
+\code{\link{tbl2html}} for HTML output.
 }
