@@ -59,27 +59,27 @@ m2dt <- function(model,
     
     model_class <- class(model)[1]
     
-                                        # Remove mmodel class if present to get underlying model type
+    ## Remove mmodel class if present to get underlying model type
     if (model_class == "mmodel") {
         model_class <- class(model)[2]
     }
 
-                                        # Auto-detect model type if not specified
+    ## Auto-detect model type if not specified
     model_scope <- detect_model_type(model)
 
-                                        # Get model type name
+    ## Get model type name
     model_type_name <- get_model_type_name(model)
     
-                                        # Initialize base data.table
+    ## Initialize base data.table
     dt <- data.table::data.table()
     
-                                        # Extract based on model type
+    ## Extract based on model type
     if (model_class %in% c("glm", "lm")) {
         
         coef_summary <- stats::coef(summary(model))
         z_score <- stats::qnorm((1 + conf_level) / 2)
         
-                                        # Determine effect measure
+        ## Determine effect measure
         is_logistic <- model_class == "glm" && model$family$family == "binomial"
         is_poisson <- model_class == "glm" && model$family$family == "poisson"
         should_exp <- is_logistic || is_poisson || 
@@ -97,7 +97,7 @@ m2dt <- function(model,
                               se = coef_summary[, "Std. Error"]
                           )
         
-                                        # Add effect estimates
+        ## Add effect estimates
         if (should_exp) {
             dt[, `:=`(
                 effect = exp(coefficient),
@@ -112,17 +112,17 @@ m2dt <- function(model,
             )]
         }
         
-                                        # Rename effect column
+        ## Rename effect column
         data.table::setnames(dt, "effect", effect_name)
         
-                                        # Add test statistics
+        ## Add test statistics
         stat_col <- if ("z value" %in% colnames(coef_summary)) "z value" else "t value"
         dt[, `:=`(
             statistic = coef_summary[, stat_col],
             p_value = coef_summary[, ncol(coef_summary)]
         )]
         
-                                        # Add QC stats if requested
+        ## Add QC stats if requested
         if (keep_qc_stats) {
             if (model_class == "glm") {
                 dt[, `:=`(
@@ -133,20 +133,20 @@ m2dt <- function(model,
                     df_residual = stats::df.residual(model)
                 )]
                 
-                                        # Add R-squared for non-binomial GLMs
+                ## Add R-squared for non-binomial GLMs
                 if (model$family$family != "binomial") {
                     dt[, R2 := 1 - (deviance / null_deviance)]
                 }
                 
-                                        # For binomial, add discrimination/calibration metrics
+                ## For binomial, add discrimination/calibration metrics
                 if (is_logistic && keep_qc_stats) {
-                                        # C-statistic (if pROC available)
+                    ## C-statistic (if pROC available)
                     if (requireNamespace("pROC", quietly = TRUE)) {
                         roc_obj <- pROC::roc(model$y, stats::fitted(model), quiet = TRUE)
                         dt[, c_statistic := as.numeric(pROC::auc(roc_obj))]
                     }
                     
-                                        # Hosmer-Lemeshow test (if ResourceSelection available)
+                    ## Hosmer-Lemeshow test (if ResourceSelection available)
                     if (requireNamespace("ResourceSelection", quietly = TRUE)) {
                         hl <- ResourceSelection::hoslem.test(model$y, stats::fitted(model), g = 10)
                         dt[, `:=`(
@@ -194,7 +194,7 @@ m2dt <- function(model,
                               p_value = coef_summary[, "Pr(>|z|)"]
                           )
         
-                                        # Add QC stats
+        ## Add QC stats
         if (keep_qc_stats) {
             dt[, `:=`(
                 concordance = summ$concordance[1],
@@ -209,7 +209,7 @@ m2dt <- function(model,
                 score_p = summ$sctest[3]
             )]
             
-                                        # Add AIC/BIC
+            ## Add AIC/BIC
             dt[, `:=`(
                 AIC = stats::AIC(model),
                 BIC = stats::extractAIC(model, k = log(n))[2]
@@ -254,46 +254,46 @@ m2dt <- function(model,
         stop("Model class '", model_class, "' not yet supported")
     }
     
-                                        # Remove excluded terms
+    ## Remove excluded terms
     if (!is.null(terms_to_exclude)) {
         dt <- dt[!term %in% terms_to_exclude]
     }
     
-                                        # Parse terms into variable and group BEFORE adding reference rows
+    ## Parse terms into variable and group BEFORE adding reference rows
     parsed_terms <- parse_term(dt$term, model$xlevels)
     dt[, `:=`(
         variable = parsed_terms$variable,
         group = parsed_terms$group
     )]
     
-                                        # IMPORTANT: Calculate group-specific n and events for categorical variables
+    ## IMPORTANT: Calculate group-specific n and events for categorical variables
     if (!is.null(model$model)) {
-                                        # Get the model frame
+        ## Get the model frame
         mf <- model$model
         
-                                        # For each factor variable, calculate group counts
+        ## For each factor variable, calculate group counts
         for (var in names(model$xlevels)) {
             if (var %in% names(mf)) {
-                                        # Calculate counts for each level
+                ## Calculate counts for each level
                 level_counts <- table(mf[[var]])
                 
-                                        # Add to dt for matching rows
+                ## Add to dt for matching rows
                 for (level in names(level_counts)) {
                     dt[variable == var & group == level, n_group := as.numeric(level_counts[level])]
                     
-                                        # For logistic/Cox, also calculate events per group
+                    ## For logistic/Cox, also calculate events per group
                     if (model_class == "glm" && model$family$family == "binomial") {
-                                        # Calculate events for this level
+                        ## Calculate events for this level
                         level_events <- sum(model$y[mf[[var]] == level])
                         dt[variable == var & group == level, events_group := level_events]
                     } else if (model_class %in% c("coxph", "clogit")) {
-                                        # For survival, get events from the outcome
+                        ## For survival, get events from the outcome
                         outcome_var <- all.vars(model$formula)[1]
                         if (grepl("^Surv\\(", outcome_var)) {
-                                        # Extract event indicator from Surv object
+                            ## Extract event indicator from Surv object
                             surv_obj <- mf[[outcome_var]]
                             if (!is.null(surv_obj)) {
-                                events_indicator <- surv_obj[, 2]  # Second column is event indicator
+                                events_indicator <- surv_obj[, 2]  ## Second column is event indicator
                                 level_events <- sum(events_indicator[mf[[var]] == level])
                                 dt[variable == var & group == level, events_group := level_events]
                             }
@@ -304,26 +304,26 @@ m2dt <- function(model,
         }
     }
     
-                                        # Add reference rows for factor variables
+    ## Add reference rows for factor variables
     if (add_reference_rows && !is.null(model$xlevels)) {
         
-                                        # Add reference column to existing data
+        ## Add reference column to existing data
         dt[, reference := ""]
         
-                                        # Create a list to hold the final ordered result
+        ## Create a list to hold the final ordered result
         final_dt <- list()
         
-                                        # Track which terms have been processed
+        ## Track which terms have been processed
         processed_terms <- character(0)
         
-                                        # Process each term in the original order
+        ## Process each term in the original order
         for (i in seq_len(nrow(dt))) {
             current_term <- dt$term[i]
             
-                                        # Skip if already processed
+            ## Skip if already processed
             if (current_term %in% processed_terms) next
             
-                                        # Check if this term belongs to a factor variable
+            ## Check if this term belongs to a factor variable
             factor_var <- NULL
             for (var in names(model$xlevels)) {
                 if (grepl(paste0("^", var), current_term)) {
@@ -333,11 +333,11 @@ m2dt <- function(model,
             }
             
             if (!is.null(factor_var)) {
-                                        # This is a factor variable
+                ## This is a factor variable
                 levels_order <- model$xlevels[[factor_var]]
                 ref_level <- levels_order[1]
                 
-                                        # Calculate n and events for reference level
+                ## Calculate n and events for reference level
                 ref_n_group <- NA_real_
                 ref_events_group <- NA_real_
                 
@@ -360,7 +360,7 @@ m2dt <- function(model,
                     }
                 }
                 
-                                        # Create reference row
+                ## Create reference row
                 ref_row <- dt[1, ]
                 ref_row[, `:=`(
                     term = paste0(factor_var, ref_level),
@@ -377,16 +377,16 @@ m2dt <- function(model,
                     reference = reference_label
                 )]
                 
-                                        # Set effect estimates for reference
+                ## Set effect estimates for reference
                 if ("OR" %in% names(dt)) ref_row[, OR := 1]
                 if ("HR" %in% names(dt)) ref_row[, HR := 1]
                 if ("RR" %in% names(dt)) ref_row[, RR := 1]
                 if ("Estimate" %in% names(dt)) ref_row[, Estimate := 0]
                 
-                                        # Add reference row first
+                ## Add reference row first
                 final_dt[[length(final_dt) + 1]] <- ref_row
                 
-                                        # Now add all other levels for this factor in order
+                ## Now add all other levels for this factor in order
                 for (level in levels_order[-1]) {
                     level_term <- paste0(factor_var, level)
                     level_row <- dt[term == level_term]
@@ -397,17 +397,17 @@ m2dt <- function(model,
                 }
                 
             } else {
-                                        # This is not a factor variable (e.g., continuous)
+                ## This is not a factor variable (e.g., continuous)
                 final_dt[[length(final_dt) + 1]] <- dt[term == current_term]
                 processed_terms <- c(processed_terms, current_term)
             }
         }
         
-                                        # Combine all rows
+        ## Combine all rows
         dt <- rbindlist(final_dt, fill = TRUE)
     }
 
-                                        # Add significance markers
+    ## Add significance markers
     dt[, `:=`(
         sig = data.table::fcase(
                               is.na(p_value), "",
@@ -420,10 +420,10 @@ m2dt <- function(model,
         sig_binary = !is.na(p_value) & p_value < 0.05
     )]
     
-                                        # Reorder columns to put variable and level early
+    ## Reorder columns to put variable and level early
     col_order <- c("model_scope", "model_type", "term", "variable", "group")
 
-                                        # Add count columns if they exist
+    ## Add count columns if they exist
     for (col in c("n", "n_group", "events", "events_group")) {
         if (col %in% names(dt)) {
             col_order <- c(col_order, col)
@@ -433,15 +433,15 @@ m2dt <- function(model,
     other_cols <- setdiff(names(dt), col_order)
     setcolorder(dt, c(col_order, other_cols))
 
-                                        # Remove term column entirely
+    ## Remove term column entirely
     dt[, term := NULL]
     
-                                        # Set attributes for model info
+    ## Set attributes for model info
     data.table::setattr(dt, "model_class", model_class)
     data.table::setattr(dt, "model_family", if (model_class == "glm") model$family$family else NA)
     data.table::setattr(dt, "conf_level", conf_level)
 
-                                        # Force data.table to finalize
+    ## Force data.table to finalize
     dt[]
     
     return(dt)

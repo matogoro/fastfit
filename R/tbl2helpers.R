@@ -324,29 +324,29 @@ format_column_headers_with_n_tex <- function(col_names, n_row_data) {
     for (i in seq_along(col_names)) {
         col <- col_names[i]
         
-                                        # Check if this column should have n count
+        ## Check if this column should have n count
         has_n <- col %in% names(n_row_data) && 
             !is.na(n_row_data[[col]]) && 
             n_row_data[[col]] != "" && 
             n_row_data[[col]] != "0"
         
         if (col %in% c("Variable", "Group")) {
-                                        # Standard formatting for these columns
+            ## Standard formatting for these columns
             new_names[i] <- format_column_headers(col)
         } else if (col %in% c("p-value", "p value")) {
-                                        # Format p-value with italics
+            ## Format p-value with italics
             new_names[i] <- format_column_headers(col)
         } else if (has_n) {
-                                        # Column with n count - use tabular for text mode
+            ## Column with n count - use tabular for text mode
             n_value <- n_row_data[[col]]
-                                        # Add vertical padding with struts
+            ## Add vertical padding with struts
             new_names[i] <- paste0("\\begin{tabular}{@{}c@{}}\\rule{0pt}{2.5ex}", 
                                    col, 
                                    "\\\\[-0ex] (\\textit{n} = ", 
                                    format(as.numeric(gsub(",", "", n_value)), big.mark = ","), 
                                    ")\\rule[-1ex]{0pt}{0pt}\\end{tabular}")
         } else {
-                                        # Regular column without n count
+            ## Regular column without n count
             new_names[i] <- format_column_headers(col)
         }
     }
@@ -361,17 +361,17 @@ format_column_headers_with_n_html <- function(col_names, n_row_data) {
     for (i in seq_along(col_names)) {
         col <- col_names[i]
         
-                                        # Skip Variable, Group, and p-value columns
+        ## Skip Variable, Group, and p-value columns
         if (col %in% c("Variable", "Group", "p-value", "p value")) {
             new_names[i] <- format_column_headers_html(col)
             next
         }
         
-                                        # Get n value from the N row
+        ## Get n value from the N row
         if (col %in% names(n_row_data)) {
             n_value <- n_row_data[[col]]
             if (!is.na(n_value) && n_value != "" && n_value != "0") {
-                                        # Format header with only n italicized
+                ## Format header with only n italicized
                 clean_col <- format_column_headers_html(col)
                 new_names[i] <- paste0(clean_col, "<br>(<i>n</i> = ", n_value, ")")
             } else {

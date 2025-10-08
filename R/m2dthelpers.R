@@ -1,23 +1,23 @@
 #' Detect if model is univariable or multivariable
 #' @keywords internal
 detect_model_type <- function(model) {
-                                        # Get number of non-intercept terms
+    ## Get number of non-intercept terms
     n_terms <- length(stats::coef(model))
     
-                                        # Account for intercept
+    ## Account for intercept
     if ("(Intercept)" %in% names(stats::coef(model))) {
         n_terms <- n_terms - 1
     }
     
-                                        # For Cox models, no intercept to worry about
+    ## For Cox models, no intercept to worry about
     if (inherits(model, c("coxph", "coxme", "clogit"))) {
         n_terms <- length(stats::coef(model))
     }
     
-                                        # Check for factor expansions - if model has xlevels, count base variables
+    ## Check for factor expansions - if model has xlevels, count base variables
     if (!is.null(model$xlevels)) {
         n_vars <- length(model$xlevels)
-                                        # Add any continuous variables (those not in xlevels)
+        ## Add any continuous variables (those not in xlevels)
         term_names <- names(stats::coef(model))
         term_names <- term_names[term_names != "(Intercept)"]
         for (term in term_names) {
@@ -41,12 +41,12 @@ detect_model_type <- function(model) {
 get_model_type_name <- function(model) {
     model_class <- class(model)[1]
     
-                                        # Remove wrapper classes
+    ## Remove wrapper classes
     if (model_class == "mmodel") {
         model_class <- class(model)[2]
     }
     
-                                        # Map to readable names
+    ## Map to readable names
     type_map <- c(
         "glm" = "Logistic",  # Will be refined based on family
         "lm" = "Linear",
@@ -57,7 +57,7 @@ get_model_type_name <- function(model) {
         "lmer" = "Mixed Effects Linear"
     )
     
-                                        # For GLM, be more specific based on family
+    ## For GLM, be more specific based on family
     if (model_class == "glm") {
         family <- model$family$family
         link <- model$family$link
@@ -86,32 +86,32 @@ get_model_type_name <- function(model) {
 #' @keywords internal
 parse_term <- function(terms, xlevels = NULL) {
     result <- data.table::data.table(
-                              variable = character(length(terms)),  # lowercase
-                              group = character(length(terms))      # lowercase
+                              variable = character(length(terms)),
+                              group = character(length(terms))
                           )
     
     for (i in seq_along(terms)) {
         term <- terms[i]
         
-                                        # Check if it's a factor term
+        ## Check if it's a factor term
         matched <- FALSE
         if (!is.null(xlevels)) {
             for (var in names(xlevels)) {
                 if (grepl(paste0("^", var), term)) {
-                                        # Extract the level
+                    ## Extract the level
                     level <- sub(paste0("^", var), "", term)
-                    result$variable[i] <- var  # lowercase
-                    result$group[i] <- level    # lowercase
+                    result$variable[i] <- var  ## lowercase
+                    result$group[i] <- level    ## lowercase
                     matched <- TRUE
                     break
                 }
             }
         }
         
-                                        # If not matched as factor, it's continuous or interaction
+        ## If not matched as factor, it's continuous or interaction
         if (!matched) {
-            result$variable[i] <- term  # lowercase
-            result$group[i] <- ""       # lowercase
+            result$variable[i] <- term
+            result$group[i] <- ""
         }
     }
     

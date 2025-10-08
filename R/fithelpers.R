@@ -38,30 +38,30 @@ format_model_table <- function(data,
         result[Group == "", Group := "-"]
     }
 
-                                        # Format sample size columns with group-specific counts
+    ## Format sample size columns with group-specific counts
     if (show_n && "n" %in% names(result)) {
-                                        # Check if we have group-specific counts
+        ## Check if we have group-specific counts
         if ("n_group" %in% names(result)) {
-                                        # For rows with n_group, use that; otherwise use n
+            ## For rows with n_group, use that; otherwise use n
             result[, display_n := ifelse(!is.na(n_group), 
                                          as.character(n_group),
                                          as.character(n))]
         } else {
-                                        # No group counts available, use total n
+            ## No group counts available, use total n
             result[, display_n := as.character(n)]
         }
         
-                                        # Format with commas
+        ## Format with commas
         result[, display_n := ifelse(!is.na(display_n) & as.numeric(display_n) >= 1000,
                                      format(as.numeric(display_n), big.mark = ","),
                                      display_n)]
         
-                                        # Replace the n column with display_n
+        ## Replace the n column with display_n
         result[, n := display_n]
         result[, display_n := NULL]
     }
 
-                                        # Similar for events
+    ## Similar for events
     if ("events" %in% names(result)) {
         if ("events_group" %in% names(result)) {
             result[, display_events := ifelse(!is.na(events_group),

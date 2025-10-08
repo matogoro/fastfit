@@ -139,18 +139,18 @@ coxforest <- function(model, data = NULL,
     if(is.null(data)){
         warning("The `data` argument is not provided. Data will be extracted from model fit.")
         
-                                        # First try to get data from model$data (stored by mmodel)
+        ## First try to get data from model$data (stored by mmodel)
         if (!is.null(model$data)) {
             data <- model$data
         } else {
-                                        # Try to evaluate the call
+            ## Try to evaluate the call
             tryCatch({
                 data <- eval(model$call$data)
             }, error = function(e) {
                 data <- NULL
             })
             
-                                        # Try model$model as fallback
+            ## Try model$model as fallback
             if (is.null(data))
                 data <- model$model
         }

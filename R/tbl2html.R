@@ -91,7 +91,7 @@ tbl2html <- function(table,
     if (nrow(df) > 0 && "Variable" %in% names(df) && df$Variable[1] == "N") {
         has_n_row <- TRUE
         n_row_data <- df[1, ]
-        df <- df[-1, ]  # Remove N row from data
+        df <- df[-1, ]
     }
     
     if (indent_groups) {

@@ -145,7 +145,6 @@ tbl2tex <- function (table,
     
     if (format_headers) {
         if (has_n_row) {
-                                        # Add n values to headers
             names(df) <- format_column_headers_with_n_tex(names(df), n_row_data)
         } else {
             names(df) <- format_column_headers(names(df))

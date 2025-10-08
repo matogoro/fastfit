@@ -202,9 +202,9 @@ build_comparison_table <- function(comparison, model_type) {
 #' Format comparison table for display
 #' @keywords internal  
 format_model_comparison <- function(dt) {
-                                        # Round appropriately based on metric type
+    ## Round appropriately based on metric type
     
-                                        # 3 decimal places for proportions/probabilities
+    ## 3 decimal places for proportions/probabilities
     for (col in c("C-statistic", "C-index", "Brier Score", "R2", "Adj R2", 
                   "McFadden R2", "Nagelkerke R2", "Tjur R2", "R2 max")) {
         if (col %in% names(dt)) {
@@ -212,14 +212,14 @@ format_model_comparison <- function(dt) {
         }
     }
     
-                                        # 1 decimal for information criteria
+    ## 1 decimal for information criteria
     for (col in c("AIC", "BIC", "AICc")) {
         if (col %in% names(dt)) {
             dt[[col]] <- round(dt[[col]], 1)
         }
     }
     
-                                        # Format p-values
+    ## Format p-values
     for (col in grep("\\sp$|^Global p$|^Hoslem p$|^PH test p$", names(dt), value = TRUE)) {
         dt[[col]] <- format_pvalue(dt[[col]], 3)
     }
