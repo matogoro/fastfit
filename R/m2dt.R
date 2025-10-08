@@ -86,13 +86,24 @@ m2dt <- function(model,
             (model_class == "glm" && model$family$link == "log")
         
         effect_name <- if (is_logistic) "OR" else if (is_poisson) "RR" else "Estimate"
+
+                                        # Events calculation for logistic regression
+        events_value <- NA_integer_
+        if (is_logistic && !is.null(model$y)) {
+            if (is.factor(model$y)) {
+                                        # Convert factor to numeric (assumes binary factor with levels 0/1 or similar)
+                events_value <- sum(as.numeric(model$y) == 2)  # Second level is typically "Yes" or "1"
+            } else {
+                events_value <- sum(model$y)
+            }
+        }
         
         dt <- data.table::data.table(
                               model_scope = model_scope %||% "Multivariable",
                               model_type = model_type_name,
                               term = rownames(coef_summary),
                               n = stats::nobs(model),
-                              events = if (is_logistic && !is.null(model$y)) sum(model$y) else NA_integer_,
+                              events = events_value,
                               coefficient = coef_summary[, "Estimate"],
                               se = coef_summary[, "Std. Error"]
                           )
@@ -267,35 +278,65 @@ m2dt <- function(model,
     )]
     
     ## IMPORTANT: Calculate group-specific n and events for categorical variables
-    if (!is.null(model$model)) {
-        ## Get the model frame
-        mf <- model$model
+    if (!is.null(model$xlevels)) {
+        ## We need the full dataset to get accurate counts
+        ## Try multiple sources to find it
+        data_source <- NULL
         
-        ## For each factor variable, calculate group counts
-        for (var in names(model$xlevels)) {
-            if (var %in% names(mf)) {
-                ## Calculate counts for each level
-                level_counts <- table(mf[[var]])
-                
-                ## Add to dt for matching rows
-                for (level in names(level_counts)) {
-                    dt[variable == var & group == level, n_group := as.numeric(level_counts[level])]
+        ## First try: stored data in model
+        if (!is.null(model$data)) {
+            data_source <- model$data
+        }
+        ## Second try: get from model frame's environment
+        else if (!is.null(environment(model$terms))) {
+            ## Try to get the data from the environment where the model was created
+            data_name <- as.character(model$call$data)
+            if (length(data_name) > 0) {
+                data_source <- tryCatch(
+                    get(data_name, envir = environment(model$terms)),
+                    error = function(e) NULL
+                )
+            }
+        }
+        
+        if (!is.null(data_source)) {
+                                        # For each factor variable, calculate group counts
+            for (var in names(model$xlevels)) {
+                if (var %in% names(data_source)) {
+                                        # Calculate counts for each level
+                    level_counts <- table(data_source[[var]], useNA = "no")
                     
-                    ## For logistic/Cox, also calculate events per group
-                    if (model_class == "glm" && model$family$family == "binomial") {
-                        ## Calculate events for this level
-                        level_events <- sum(model$y[mf[[var]] == level])
-                        dt[variable == var & group == level, events_group := level_events]
-                    } else if (model_class %in% c("coxph", "clogit")) {
-                        ## For survival, get events from the outcome
-                        outcome_var <- all.vars(model$formula)[1]
-                        if (grepl("^Surv\\(", outcome_var)) {
-                            ## Extract event indicator from Surv object
-                            surv_obj <- mf[[outcome_var]]
-                            if (!is.null(surv_obj)) {
-                                events_indicator <- surv_obj[, 2]  ## Second column is event indicator
-                                level_events <- sum(events_indicator[mf[[var]] == level])
+                                        # Add to dt for matching rows
+                    for (level in names(level_counts)) {
+                        dt[variable == var & group == level, n_group := as.numeric(level_counts[level])]
+                        
+                                        # For logistic/Cox, also calculate events per group
+                        if (model_class == "glm" && model$family$family == "binomial") {
+                                        # Get the outcome variable
+                            outcome_var <- all.vars(model$formula)[1]
+                            if (outcome_var %in% names(data_source)) {
+                                level_data <- data_source[data_source[[var]] == level & !is.na(data_source[[var]]), ]
+                                        # FIX: Handle factor outcomes
+                                if (is.factor(level_data[[outcome_var]])) {
+                                    level_events <- sum(as.numeric(level_data[[outcome_var]]) == 2, na.rm = TRUE)
+                                } else {
+                                    level_events <- sum(level_data[[outcome_var]], na.rm = TRUE)
+                                }
                                 dt[variable == var & group == level, events_group := level_events]
+                            }
+                        } else if (model_class %in% c("coxph", "clogit")) {
+                            ## For survival, extract from Surv() formula
+                            outcome_str <- as.character(model$formula)[2]
+                            if (grepl("^Surv\\(", outcome_str)) {
+                                surv_expr <- gsub("Surv\\(|\\)", "", outcome_str)
+                                surv_parts <- trimws(strsplit(surv_expr, ",")[[1]])
+                                event_var <- surv_parts[2]
+                                
+                                if (event_var %in% names(data_source)) {
+                                    level_data <- data_source[data_source[[var]] == level & !is.na(data_source[[var]]), ]
+                                    level_events <- sum(level_data[[event_var]], na.rm = TRUE)
+                                    dt[variable == var & group == level, events_group := level_events]
+                                }
                             }
                         }
                     }
@@ -303,7 +344,7 @@ m2dt <- function(model,
             }
         }
     }
-    
+
     ## Add reference rows for factor variables
     if (add_reference_rows && !is.null(model$xlevels)) {
         
@@ -341,32 +382,54 @@ m2dt <- function(model,
                 ref_n_group <- NA_real_
                 ref_events_group <- NA_real_
                 
-                if (!is.null(model$model) && factor_var %in% names(model$model)) {
-                    mf <- model$model
-                    ref_counts <- sum(mf[[factor_var]] == ref_level)
-                    ref_n_group <- ref_counts
+                ## Get the data source (same as used for other levels)
+                data_source <- NULL
+                if (!is.null(model$data)) {
+                    data_source <- model$data
+                } else if (!is.null(model$model) && factor_var %in% names(model$model)) {
+                    data_source <- model$model
+                }
+                
+                if (!is.null(data_source) && factor_var %in% names(data_source)) {
+                    ## Calculate reference level counts
+                    ref_n_group <- sum(data_source[[factor_var]] == ref_level, na.rm = TRUE)
                     
                     if (model_class == "glm" && model$family$family == "binomial") {
-                        ref_events_group <- sum(model$y[mf[[factor_var]] == ref_level])
-                    } else if (model_class %in% c("coxph", "clogit")) {
+                        ## Get outcome variable and calculate events
                         outcome_var <- all.vars(model$formula)[1]
-                        if (grepl("^Surv\\(", outcome_var)) {
-                            surv_obj <- mf[[outcome_var]]
-                            if (!is.null(surv_obj)) {
-                                events_indicator <- surv_obj[, 2]
-                                ref_events_group <- sum(events_indicator[mf[[factor_var]] == ref_level])
+                        if (outcome_var %in% names(data_source)) {
+                            ref_data <- data_source[data_source[[factor_var]] == ref_level & !is.na(data_source[[factor_var]]), ]
+                                        # FIX: Handle factor outcomes
+                            if (is.factor(ref_data[[outcome_var]])) {
+                                ref_events_group <- sum(as.numeric(ref_data[[outcome_var]]) == 2, na.rm = TRUE)
+                            } else {
+                                ref_events_group <- sum(ref_data[[outcome_var]], na.rm = TRUE)
+                            }
+                        }
+                    } else if (model_class %in% c("coxph", "clogit")) {
+                        outcome_str <- as.character(model$formula)[2]
+                        if (grepl("^Surv\\(", outcome_str)) {
+                            surv_expr <- gsub("Surv\\(|\\)", "", outcome_str)
+                            surv_parts <- trimws(strsplit(surv_expr, ",")[[1]])
+                            event_var <- surv_parts[2]
+                            
+                            if (event_var %in% names(data_source)) {
+                                ref_data <- data_source[data_source[[factor_var]] == ref_level & !is.na(data_source[[factor_var]]), ]
+                                ref_events_group <- sum(ref_data[[event_var]], na.rm = TRUE)
                             }
                         }
                     }
                 }
                 
-                ## Create reference row
+                ## Create reference row with correct counts
                 ref_row <- dt[1, ]
                 ref_row[, `:=`(
                     term = paste0(factor_var, ref_level),
                     variable = factor_var,
                     group = ref_level,
+                    n = n,
                     n_group = ref_n_group,
+                    events = events,
                     events_group = ref_events_group,
                     coefficient = 0,
                     se = NA_real_,
@@ -430,6 +493,7 @@ m2dt <- function(model,
         }
     }
 
+    ## Add remaining columns
     other_cols <- setdiff(names(dt), col_order)
     setcolorder(dt, c(col_order, other_cols))
 

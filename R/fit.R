@@ -32,16 +32,20 @@
 #'   column should contain numeric values. Default is NULL.
 #' @param conf_level Numeric confidence level for confidence intervals. Must be
 #'   between 0 and 1. Default is 0.95 (95 percent CI).
-#' @param keep_qc_stats Logical. If TRUE, includes model quality statistics
-#'   (AIC, BIC, concordance, etc) in the raw data attribute. Default is TRUE.
 #' @param add_reference_rows Logical. If TRUE, adds rows for reference categories
 #'   of factor variables. Default is TRUE.
+#' @param show_n_events Character vector specifying which optional columns to display.
+#'   Options: "n", "events" (or "Events"). Default is c("n", "events") for 
+#'   survival/logistic models, "n" only for other models. Set to NULL to hide
+#'   these columns entirely.
 #' @param digits Integer specifying decimal places for effect estimates.
 #'   Default is 2.
 #' @param digits_p Integer specifying decimal places for p-values.
 #'   Default is 3.
 #' @param var_labels Named character vector for custom variable labels.
 #'   Default is NULL.
+#' @param keep_qc_stats Logical. If TRUE, includes model quality statistics
+#'   (AIC, BIC, concordance, etc) in the raw data attribute. Default is TRUE.
 #' @param ... Additional arguments passed to the underlying model function
 #'   (e.g., subset, na.action, control parameters).
 #'
@@ -136,11 +140,12 @@ fit <- function(data,
                 cluster = NULL,
                 weights = NULL,
                 conf_level = 0.95,
-                keep_qc_stats = TRUE,
                 add_reference_rows = TRUE,
+                show_n_events = c("n", "events"),
                 digits = 2,
                 digits_p = 3,
                 var_labels = NULL,
+                keep_qc_stats = TRUE,
                 ...) {
     
     ## Don't create internal variables - work with 'data' directly
@@ -242,18 +247,19 @@ fit <- function(data,
 
     ## Format results for publication
     formatted <- format_model_table(raw_data,
+                                    show_n_events = show_n_events,
                                     digits = digits,
                                     digits_p = digits_p,
                                     var_labels = var_labels)
 
     ## Attach metadata
-    setattr(formatted, "model", model)
-    setattr(formatted, "raw_data", raw_data)
-    setattr(formatted, "outcome", outcome)
-    setattr(formatted, "predictors", predictors)
-    setattr(formatted, "formula_str", formula_str)
-    setattr(formatted, "model_scope", raw_data$model_scope[1])
-    setattr(formatted, "model_type", raw_data$model_type[1])
+    data.table::setattr(formatted, "model", model)
+    data.table::setattr(formatted, "raw_data", raw_data)
+    data.table::setattr(formatted, "outcome", outcome)
+    data.table::setattr(formatted, "predictors", predictors)
+    data.table::setattr(formatted, "formula_str", formula_str)
+    data.table::setattr(formatted, "model_scope", raw_data$model_scope[1])
+    data.table::setattr(formatted, "model_type", raw_data$model_type[1])
     
     ## Add metadata from model fitting
     if (!is.null(interaction_terms)) {

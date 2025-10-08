@@ -10,7 +10,7 @@ format_model_table(
   digits = 2,
   digits_p = 3,
   var_labels = NULL,
-  show_n = TRUE,
+  show_n_events = c("n", "Events"),
   reference_label = "reference"
 )
 }

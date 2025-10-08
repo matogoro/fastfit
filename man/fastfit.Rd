@@ -16,6 +16,7 @@ fastfit(
   family = "binomial",
   conf_level = 0.95,
   add_reference_rows = TRUE,
+  show_n_events = c("n", "events"),
   digits = 2,
   digits_p = 3,
   var_labels = NULL,
@@ -56,6 +57,17 @@ Default is "binomial".}
 
 \item{add_reference_rows}{Logical. If TRUE, includes reference category rows.
 Default is TRUE.}
+
+\item{show_n_events}{Character vector specifying which optional columns to display.
+Options: "n", "events" (or "Events"). Default is c("n", "events") for 
+survival/logistic models, "n" only for other models. Set to NULL to hide
+these columns entirely.}
+
+\item{digits}{Integer specifying decimal places for effect estimates.
+Default is 2.}
+
+\item{digits_p}{Integer specifying decimal places for p-values.
+Default is 3.}
 
 \item{var_labels}{Named character vector for display labels. Names match
 predictors, values are labels. Default is NULL.}

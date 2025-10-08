@@ -19,14 +19,18 @@
 #'   Only predictors with p <= threshold are returned. Default is 1 (no filtering).
 #' @param conf_level Numeric confidence level for confidence intervals. Must be
 #'   between 0 and 1. Default is 0.95 (95 percent CI).
+#' @param add_reference_rows Logical. If TRUE, adds rows for reference categories
+#'   of factor variables with baseline values (OR/HR = 1). Default is TRUE.
+#' @param show_n_events Character vector specifying which optional columns to display.
+#'   Options: "n", "events" (or "Events"). Default is c("n", "events") for 
+#'   survival/logistic models, "n" only for other models. Set to NULL to hide
+#'   these columns entirely.
 #' @param digits Integer specifying decimal places for effect estimates (OR, HR, etc).
 #'   Default is 2.
 #' @param digits_p Integer specifying decimal places for p-values. Values less than
 #'   10^(-digits_p) display as "< 0.001" etc. Default is 3.
 #' @param var_labels Named character vector for custom variable labels. Names should
 #'   match predictor names, values are display labels. Default is NULL.
-#' @param add_reference_rows Logical. If TRUE, adds rows for reference categories
-#'   of factor variables with baseline values (OR/HR = 1). Default is TRUE.
 #' @param keep_models Logical. If TRUE, stores all fitted model objects in the output.
 #'   This can consume significant memory for large datasets or many predictors.
 #'   Models are accessible via attr(result, "models"). Default is FALSE.
@@ -117,10 +121,11 @@ uscreen <- function(data,
                     family = "binomial",
                     p_threshold = 1,
                     conf_level = 0.95,
+                    add_reference_rows = TRUE,
+                    show_n_events = c("n", "events"),
                     digits = 2,
                     digits_p = 3,
                     var_labels = NULL,
-                    add_reference_rows = TRUE,
                     keep_models = FALSE,
                     ...) {
     
@@ -156,6 +161,9 @@ uscreen <- function(data,
         } else {
             stop("Unsupported model type: ", model_type)
         }
+
+        ## Store the data directly in the model
+        model$data <- data
         
         ## Store the model only if requested
         if (keep_models) {
@@ -194,6 +202,7 @@ uscreen <- function(data,
     
     ## Format the combined results
     formatted <- format_model_table(combined_raw,
+                                    show_n_events = show_n_events,
                                     digits = digits,
                                     digits_p = digits_p,
                                     var_labels = var_labels)
@@ -234,7 +243,7 @@ print.uscreen_result <- function(x, n = 20, ...) {
     if (!is.null(raw) && "p_value" %in% names(raw)) {
         sig_predictors <- unique(raw[p_value < 0.05]$predictor)
         n_sig <- length(sig_predictors)
-        cat("Significant (p<0.05): ", n_sig, "\n", sep = "")
+        cat("Significant (p < 0.05): ", n_sig, "\n", sep = "")
     }
     
     ## Note if models are stored

@@ -15,11 +15,12 @@ fit(
   cluster = NULL,
   weights = NULL,
   conf_level = 0.95,
-  keep_qc_stats = TRUE,
   add_reference_rows = TRUE,
+  show_n_events = c("n", "events"),
   digits = 2,
   digits_p = 3,
   var_labels = NULL,
+  keep_qc_stats = TRUE,
   ...
 )
 }
@@ -62,11 +63,13 @@ column should contain numeric values. Default is NULL.}
 \item{conf_level}{Numeric confidence level for confidence intervals. Must be
 between 0 and 1. Default is 0.95 (95 percent CI).}
 
-\item{keep_qc_stats}{Logical. If TRUE, includes model quality statistics
-(AIC, BIC, concordance, etc) in the raw data attribute. Default is TRUE.}
-
 \item{add_reference_rows}{Logical. If TRUE, adds rows for reference categories
 of factor variables. Default is TRUE.}
+
+\item{show_n_events}{Character vector specifying which optional columns to display.
+Options: "n", "events" (or "Events"). Default is c("n", "events") for 
+survival/logistic models, "n" only for other models. Set to NULL to hide
+these columns entirely.}
 
 \item{digits}{Integer specifying decimal places for effect estimates.
 Default is 2.}
@@ -76,6 +79,9 @@ Default is 3.}
 
 \item{var_labels}{Named character vector for custom variable labels.
 Default is NULL.}
+
+\item{keep_qc_stats}{Logical. If TRUE, includes model quality statistics
+(AIC, BIC, concordance, etc) in the raw data attribute. Default is TRUE.}
 
 \item{...}{Additional arguments passed to the underlying model function
 (e.g., subset, na.action, control parameters).}

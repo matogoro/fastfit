@@ -5,7 +5,7 @@ format_model_table <- function(data,
                                digits = 2, 
                                digits_p = 3, 
                                var_labels = NULL,
-                               show_n = TRUE,
+                               show_n_events = c("n", "Events"),
                                reference_label = "reference") {
     
     result <- data.table::copy(data)
@@ -38,48 +38,34 @@ format_model_table <- function(data,
         result[Group == "", Group := "-"]
     }
 
-    ## Format sample size columns with group-specific counts
-    if (show_n && "n" %in% names(result)) {
-        ## Check if we have group-specific counts
+    ## Format sample size BEFORE eliminating repeated variable names
+    ## This preserves the group-specific counts
+    if ("n" %in% names(result)) {
         if ("n_group" %in% names(result)) {
-            ## For rows with n_group, use that; otherwise use n
-            result[, display_n := ifelse(!is.na(n_group), 
-                                         as.character(n_group),
-                                         as.character(n))]
-        } else {
-            ## No group counts available, use total n
-            result[, display_n := as.character(n)]
+            ## Use group-specific n where available
+            result[, n := ifelse(!is.na(n_group), 
+                                 as.character(n_group),
+                                 as.character(n))]
         }
-        
         ## Format with commas
-        result[, display_n := ifelse(!is.na(display_n) & as.numeric(display_n) >= 1000,
-                                     format(as.numeric(display_n), big.mark = ","),
-                                     display_n)]
-        
-        ## Replace the n column with display_n
-        result[, n := display_n]
-        result[, display_n := NULL]
+        result[, n := ifelse(!is.na(n) & as.numeric(n) >= 1000,
+                             format(as.numeric(n), big.mark = ","),
+                             as.character(n))]
     }
 
     ## Similar for events
     if ("events" %in% names(result)) {
         if ("events_group" %in% names(result)) {
-            result[, display_events := ifelse(!is.na(events_group),
-                                              as.character(events_group),
-                                              as.character(events))]
-        } else {
-            result[, display_events := as.character(events)]
+            result[, events := ifelse(!is.na(events_group),
+                                      as.character(events_group),
+                                      as.character(events))]
         }
-        
-        result[, display_events := ifelse(!is.na(display_events) & as.numeric(display_events) >= 1000,
-                                          format(as.numeric(display_events), big.mark = ","),
-                                          display_events)]
-        
-        result[, events := display_events]
-        result[, display_events := NULL]
+        result[, events := ifelse(!is.na(events) & as.numeric(events) >= 1000,
+                                  format(as.numeric(events), big.mark = ","),
+                                  as.character(events))]
     }
     
-    ## Eliminate repeated variable names (only show on first row for each variable)
+    ## NOW eliminate repeated variable names (AFTER processing n and events)
     if ("Variable" %in% names(result)) {
         current_var <- ""
         for (i in seq_len(nrow(result))) {
@@ -89,22 +75,6 @@ format_model_table <- function(data,
                 current_var <- result$Variable[i]
             }
         }
-    }
-    
-    ## Format events column if present
-    if ("events" %in% names(result)) {
-        ## Similar logic for events_group if available
-        if ("events_group" %in% names(result)) {
-            result[, display_events := ifelse(!is.na(events_group),
-                                              as.character(events_group),
-                                              as.character(events))]
-        } else {
-            result[, display_events := as.character(events)]
-        }
-        
-        result[, display_events := ifelse(!is.na(display_events) & as.numeric(display_events) >= 1000,
-                                          format(as.numeric(display_events), big.mark = ","),
-                                          display_events)]
     }
     
     ## Create effect column label based on model scope
@@ -164,8 +134,24 @@ format_model_table <- function(data,
         result[, `p-value` := format_pvalues_fit(p_value, digits_p)]
         
         if ("reference" %in% names(result)) {
-            result[!is.na(reference) & reference == reference_label, `p-value` := ""]
+            result[!is.na(reference) & reference == reference_label, `p-value` := "-"]
         }
+    }
+
+    ## Handle show_n_events parameter
+    if (is.null(show_n_events)) {
+        ## User explicitly wants no n or events columns
+        show_n_events <- character(0)
+    } else if (is.character(show_n_events)) {
+        ## Validate the input
+        valid_options <- c("n", "Events", "events")
+        invalid <- setdiff(show_n_events, valid_options)
+        if (length(invalid) > 0) {
+            warning("Invalid show_n_events options ignored: ", paste(invalid, collapse = ", "))
+            show_n_events <- intersect(show_n_events, valid_options)
+        }
+        ## Normalize "events" to "Events"
+        show_n_events[show_n_events == "events"] <- "Events"
     }
     
     ## Select columns for final output
@@ -174,11 +160,11 @@ format_model_table <- function(data,
     if ("Variable" %in% names(result)) display_cols <- c(display_cols, "Variable")
     if ("Group" %in% names(result)) display_cols <- c(display_cols, "Group")
 
-    if (show_n && "n" %in% names(result)) {
+    if (("n" %in% show_n_events) && ("n" %in% names(result))) {
         display_cols <- c(display_cols, "n")
     }
     
-    if ("events" %in% names(result)) {
+    if (("Events" %in% show_n_events || "events" %in% show_n_events) && ("events" %in% names(result))) {
         display_cols <- c(display_cols, "events")
     }
     
@@ -186,14 +172,18 @@ format_model_table <- function(data,
     if ("p-value" %in% names(result)) display_cols <- c(display_cols, "p-value")
     
     formatted <- result[, ..display_cols]
-    
+
+    if ("events" %in% names(formatted)) {
+        setnames(formatted, "events", "Events")
+    }
+
     return(formatted)
 }
 
 #' Format p-values for display
 #' @keywords internal
 format_pvalues_fit <- function(p, digits = 3) {
-    ifelse(is.na(p), "",
+    ifelse(is.na(p), "-",
     ifelse(p < 0.001, "< 0.001",
            sprintf(paste0("%.", digits, "f"), p)))
 }

@@ -12,10 +12,11 @@ uscreen(
   family = "binomial",
   p_threshold = 1,
   conf_level = 0.95,
+  add_reference_rows = TRUE,
+  show_n_events = c("n", "events"),
   digits = 2,
   digits_p = 3,
   var_labels = NULL,
-  add_reference_rows = TRUE,
   keep_models = FALSE,
   ...
 )
@@ -43,6 +44,14 @@ Only predictors with p <= threshold are returned. Default is 1 (no filtering).}
 \item{conf_level}{Numeric confidence level for confidence intervals. Must be
 between 0 and 1. Default is 0.95 (95 percent CI).}
 
+\item{add_reference_rows}{Logical. If TRUE, adds rows for reference categories
+of factor variables with baseline values (OR/HR = 1). Default is TRUE.}
+
+\item{show_n_events}{Character vector specifying which optional columns to display.
+Options: "n", "events" (or "Events"). Default is c("n", "events") for 
+survival/logistic models, "n" only for other models. Set to NULL to hide
+these columns entirely.}
+
 \item{digits}{Integer specifying decimal places for effect estimates (OR, HR, etc).
 Default is 2.}
 
@@ -51,9 +60,6 @@ Default is 2.}
 
 \item{var_labels}{Named character vector for custom variable labels. Names should
 match predictor names, values are display labels. Default is NULL.}
-
-\item{add_reference_rows}{Logical. If TRUE, adds rows for reference categories
-of factor variables with baseline values (OR/HR = 1). Default is TRUE.}
 
 \item{keep_models}{Logical. If TRUE, stores all fitted model objects in the output.
 This can consume significant memory for large datasets or many predictors.

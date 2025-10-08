@@ -12,6 +12,7 @@ format_fastfit_combined(
   predictors,
   columns,
   metrics,
+  show_n_events,
   var_labels
 )
 }
