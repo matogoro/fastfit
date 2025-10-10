@@ -30,11 +30,13 @@
 #' @param plot_height Numeric value specifying the intended plot height in inches.
 #'   Default is NULL.
 #' @param col_width_var Numeric value specifying the proportion of plot width 
-#'   allocated to the variable column. Default is 0.02.
+#'   allocated to the variable column. Default is 0.01.
 #' @param col_width_level Numeric value specifying the proportion of plot width 
-#'   allocated to the group column. Default is 0.15.
+#'   allocated to the group column. Default is 0.17.
 #' @param col_width_n Numeric value specifying the proportion of plot width 
-#'   allocated to the sample size column. Default is 0.15.
+#'   allocated to the sample size column. Default is 0.17.
+#' @param col_width_events Numeric value specifying the proportion of plot width 
+#'   allocated to the sample size column. Default is 0.06.
 #' @param col_width_or Numeric value specifying the proportion of plot width 
 #'   allocated to the effect estimate column. Default is 0.05.
 #' @param ref_label Character string to display for reference categories. 
@@ -116,9 +118,11 @@ glmforest <- function(model, data = NULL,
                       plot_height = NULL,
                       tbl_width = 0.6,
                       col_width_var = 0.01,
-                      col_width_level = 0.18,
-                      col_width_n = 0.2,
-                      col_width_or = 0.06,
+                      col_width_level = 0.17,
+                      col_width_n = 0.17,
+                      col_width_events = 0.06,
+                      col_width_or = 0.05,
+                      show_n_events = c("n", "Events"),
                       ref_label = "reference",
                       var_labels = NULL,
                       color = "#3A7E8A",
@@ -187,28 +191,28 @@ glmforest <- function(model, data = NULL,
     coef <- data.table::data.table(
                             term = rownames(coef_summary),
                             estimate = coef_summary[, "Estimate"],
-                            std.error = coef_summary[, "Std. Error"],
+                            std_error = coef_summary[, "Std. Error"],
                             statistic = coef_summary[, "z value"],
-                            p.value = coef_summary[, "Pr(>|z|)"],
-                            conf.low = conf_int[, 1],
-                            conf.high = conf_int[, 2]
+                            p_value = coef_summary[, "Pr(>|z|)"],
+                            conf_low = conf_int[, 1],
+                            conf_high = conf_int[, 2]
                         )
     
     ## Get model statistics
     gmodel <- list(
         nobs = nobs(model),
-        null.deviance = model$null.deviance,
-        residual.deviance = model$deviance,
+        null_deviance = model$null.deviance,
+        residual_deviance = model$deviance,
         AIC = stats::AIC(model),
         family = paste0(model$family$family, " (", model$family$link, " link)")
     )
     
     ## Format observations and AIC with commas
-    gmodel$nobs.formatted <- format(gmodel$nobs, big.mark = ",", scientific = FALSE)
-    gmodel$AIC.formatted <- format(round(gmodel$AIC, 2), big.mark = ",", scientific = FALSE, nsmall = 2)
+    gmodel$nobs_formatted <- format(gmodel$nobs, big.mark = ",", scientific = FALSE)
+    gmodel$AIC_formatted <- format(round(gmodel$AIC, 2), big.mark = ",", scientific = FALSE, nsmall = 2)
     
     ## Calculate pseudo R-squared (McFadden's)
-    gmodel$pseudo.r2 <- 1 - (model$deviance / model$null.deviance)
+    gmodel$pseudo_r2 <- 1 - (model$deviance / model$null.deviance)
     
     ## Extract statistics for every variable - preserving order
     allTerms <- lapply(seq_along(terms), function(i){
@@ -251,7 +255,7 @@ glmforest <- function(model, data = NULL,
             }
         }
         else if (terms[i] == "numeric") {
-            data.table::data.table(var = var, level = "", Freq = sum(!is.na(data[[var]])), 
+            data.table::data.table(var = var, level = "-", Freq = sum(!is.na(data[[var]])), 
                                    pos = 1, var_order = i)
         }
         else {
@@ -262,10 +266,53 @@ glmforest <- function(model, data = NULL,
     })
     
     allTermsDF <- data.table::rbindlist(allTerms)
+    
     data.table::setnames(allTermsDF, c("var", "level", "N", "pos", "var_order"))
+
+    if (model$family$family == "binomial") {
+        ## Get the outcome variable
+        outcome_var <- all.vars(model$formula)[1]
+        
+        ## Check if outcome variable exists in data
+        if (!outcome_var %in% names(data)) {
+            warning(paste("Outcome variable", outcome_var, "not found in data. Events column will not be created."))
+            allTermsDF[, Events := NA_integer_]
+        } else {
+            ## Calculate events for each term
+            outcome_data <- data[[outcome_var]]
+            
+                                        # Convert outcome to binary
+            if (is.factor(outcome_data)) {
+                                        # Convert to binary (assuming second level is the event)
+                outcome_binary <- as.numeric(outcome_data) == 2
+            } else {
+                                        # Already numeric
+                outcome_binary <- outcome_data
+            }
+            
+                                        # Now calculate events for each row in allTermsDF
+            allTermsDF[, Events := {
+                if (level == "-") {
+                                        # Continuous variable - total events
+                    sum(outcome_binary, na.rm = TRUE)
+                } else {
+                                        # Factor level - events in that group
+                                        # Need to check if var exists in data
+                    if (var %in% names(data)) {
+                        sum(outcome_binary[data[[var]] == level], na.rm = TRUE)
+                    } else {
+                        NA_integer_
+                    }
+                }
+            }, by = seq_len(nrow(allTermsDF))]  # Process row by row
+        }
+    } else {
+        ## No events column for non-binomial models
+        allTermsDF[, Events := NA_integer_]
+    }
     
     ## Create matching index
-    allTermsDF[, inds := ifelse(level == "", var, paste0(var, level))]
+    allTermsDF[, inds := ifelse(level == "-", var, paste0(var, level))]
     
     ## Process coefficients
     coef[, term := gsub(term, pattern = "`", replacement = "")]
@@ -281,7 +328,7 @@ glmforest <- function(model, data = NULL,
     toShow[, shade_group := var_order %% 2]
     
     ## Select columns
-    toShow <- toShow[, .(var, level, N, p.value, estimate, conf.low, conf.high, pos, var_order, shade_group)]
+    toShow <- toShow[, .(var, level, N, Events, p_value, estimate, conf_low, conf_high, pos, var_order, shade_group)]
     
     ## Format the values based on exponentiate setting
     toShowExpClean <- data.table::copy(toShow)
@@ -291,50 +338,60 @@ glmforest <- function(model, data = NULL,
         toShowExpClean[, effect := ifelse(is.na(estimate), 
                                           NA_real_,
                                           exp(estimate))]
-        toShowExpClean[, effect.formatted := ifelse(is.na(estimate), 
+        toShowExpClean[, effect_formatted := ifelse(is.na(estimate), 
                                                     ref_label,
                                                     format(round(exp(estimate), digits), nsmall = digits))]
-        toShowExpClean[, conf.low.formatted := ifelse(is.na(conf.low), 
+        toShowExpClean[, conf_low_formatted := ifelse(is.na(conf_low), 
                                                       NA_character_,
-                                                      format(round(exp(conf.low), digits), nsmall = digits))]
-        toShowExpClean[, conf.high.formatted := ifelse(is.na(conf.high), 
+                                                      format(round(exp(conf_low), digits), nsmall = digits))]
+        toShowExpClean[, conf_high_formatted := ifelse(is.na(conf_high), 
                                                        NA_character_,
-                                                       format(round(exp(conf.high), digits), nsmall = digits))]
+                                                       format(round(exp(conf_high), digits), nsmall = digits))]
     } else {
         toShowExpClean[, effect := estimate]
-        toShowExpClean[, effect.formatted := ifelse(is.na(estimate), 
+        toShowExpClean[, effect_formatted := ifelse(is.na(estimate), 
                                                     ref_label,
                                                     format(round(estimate, digits), nsmall = digits))]
-        toShowExpClean[, conf.low.formatted := ifelse(is.na(conf.low), 
+        toShowExpClean[, conf_low_formatted := ifelse(is.na(conf_low), 
                                                       NA_character_,
-                                                      format(round(conf.low, digits), nsmall = digits))]
-        toShowExpClean[, conf.high.formatted := ifelse(is.na(conf.high), 
+                                                      format(round(conf_low, digits), nsmall = digits))]
+        toShowExpClean[, conf_high_formatted := ifelse(is.na(conf_high), 
                                                        NA_character_,
-                                                       format(round(conf.high, digits), nsmall = digits))]
+                                                       format(round(conf_high, digits), nsmall = digits))]
     }
     
     ## Format p-values
-    toShowExpClean[, p.formatted := ifelse(is.na(p.value), 
+    toShowExpClean[, p_formatted := ifelse(is.na(p_value), 
                                            NA_character_,
-                                    ifelse(p.value < 0.001, 
+                                    ifelse(p_value < 0.001, 
                                            "< 0.001",
-                                           format(round(p.value, 3), nsmall = 3)))]
+                                           format(round(p_value, 3), nsmall = 3)))]
     
     ## Create the combined effect string with expression for italic p
     effect_abbrev <- if(effect_label == "Odds Ratio") "aOR" else if(effect_label == "Risk Ratio") "aRR" else "Coef"
-    
-    toShowExpClean[, effect_string_expr := ifelse(
-                         is.na(estimate),
-                         paste0("'", ref_label, "'"),
-                                           ifelse(p.value < 0.001,
-                                                  paste0("'", effect.formatted, " (", conf.low.formatted, "-", 
-                                                         conf.high.formatted, "); '*~italic(p)~'< 0.001'"),
-                                                  paste0("'", effect.formatted, " (", conf.low.formatted, "-", 
-                                                         conf.high.formatted, "); '*~italic(p)~'= ", p.formatted, "'"))
+
+    toShowExpClean[, effect_string_expr := fcase(
+                         is.na(estimate), paste0("'", ref_label, "'"),
+                         
+                         p_value < 0.001 & !exponentiate & (conf_low < 0 | conf_high < 0),
+                         paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
+                                conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
+                         
+                         p_value < 0.001,
+                         paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
+                                conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
+                         
+                         !exponentiate & (conf_low < 0 | conf_high < 0),
+                         paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
+                                conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'"),
+                         
+                         default = paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
+                                          conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'")
                      )]
     
-    ## Format N with thousands separator
+    ## Format N and events with thousands separator
     toShowExpClean[, n_formatted := format(N, big.mark = ",", scientific = FALSE)]
+    toShowExpClean[, events_formatted := format(Events, big.mark = ",", scientific = FALSE)]
     
     ## Clean up variable names for display
     toShowExpClean[, var_display := as.character(var)]
@@ -375,12 +432,12 @@ glmforest <- function(model, data = NULL,
     
     ## Calculate plot ranges with better handling of extreme cases
     if(exponentiate) {
-        rangeb <- range(toShow$conf.low, toShow$conf.high, na.rm = TRUE)
+        rangeb <- range(toShow$conf_low, toShow$conf_high, na.rm = TRUE)
         breaks <- grDevices::axisTicks(rangeb/2, log = TRUE, nint = 7)
         
         ## Get min and max CI values
-        min_ci <- min(toShow$conf.low, na.rm = TRUE)
-        max_ci <- max(toShow$conf.high, na.rm = TRUE)
+        min_ci <- min(toShow$conf_low, na.rm = TRUE)
+        max_ci <- max(toShow$conf_high, na.rm = TRUE)
         
         ## Check for one-sided case BEFORE modifying range
         is_one_sided <- (min_ci > 0) || (max_ci < 0)
@@ -401,8 +458,17 @@ glmforest <- function(model, data = NULL,
         breaks <- breaks[breaks >= exp(rangeb[1]) & breaks <= exp(rangeb[2])]
         reference_value <- 1
     } else {
-        rangeb <- range(toShow$conf.low, toShow$conf.high, na.rm = TRUE)
+        rangeb <- range(toShow$conf_low, toShow$conf_high, na.rm = TRUE)
         breaks <- pretty(rangeb, n = 7)
+
+        breaks <- breaks[breaks >= rangeb[1] & breaks <= rangeb[2]]
+
+        ticks_df <- data.frame(
+            x = -0.5,
+            xend = -0.7,
+            y = breaks,
+            yend = breaks
+        )
         
         ## Check for one-sided case
         is_one_sided <- (min(rangeb) > 0) || (max(rangeb) < 0)
@@ -430,10 +496,10 @@ glmforest <- function(model, data = NULL,
     ## For effect column, calculate without expressions
     effect_display_len <- ifelse(toShowExpClean$effect_string_expr == paste0("'", ref_label, "'"),
                                  nchar(ref_label),
-                                 nchar(paste0(toShowExpClean$effect.formatted, " (", 
-                                              toShowExpClean$conf.low.formatted, "-",
-                                              toShowExpClean$conf.high.formatted, "); p = ",
-                                              toShowExpClean$p.formatted)))
+                                 nchar(paste0(toShowExpClean$effect_formatted, " (", 
+                                              toShowExpClean$conf_low_formatted, "-",
+                                              toShowExpClean$conf_high_formatted, "); p = ",
+                                              toShowExpClean$p_formatted)))
     max_effect_len <- max(effect_display_len, nchar(paste0(effect_abbrev, " (95% CI); p-value")), na.rm = TRUE) * 1.1
     
     ## Calculate total character width needed
@@ -448,11 +514,11 @@ glmforest <- function(model, data = NULL,
         
         ## Calculate the actual forest plot range based on data
         if(exponentiate) {
-            min_ci_value <- min(toShow$conf.low, na.rm = TRUE)
-            max_ci_value <- max(toShow$conf.high, na.rm = TRUE)
+            min_ci_value <- min(toShow$conf_low, na.rm = TRUE)
+            max_ci_value <- max(toShow$conf_high, na.rm = TRUE)
         } else {
-            min_ci_value <- min(toShow$conf.low, na.rm = TRUE)
-            max_ci_value <- max(toShow$conf.high, na.rm = TRUE)
+            min_ci_value <- min(toShow$conf_low, na.rm = TRUE)
+            max_ci_value <- max(toShow$conf_high, na.rm = TRUE)
         }
         
         ## The actual forest plot width is from min CI to max CI plus some padding
@@ -517,11 +583,11 @@ glmforest <- function(model, data = NULL,
         
         ## Calculate forest width based on data range with extra safety margin
         if(exponentiate) {
-            min_ci_value <- min(toShow$conf.low, na.rm = TRUE)
-            max_ci_value <- max(toShow$conf.high, na.rm = TRUE)
+            min_ci_value <- min(toShow$conf_low, na.rm = TRUE)
+            max_ci_value <- max(toShow$conf_high, na.rm = TRUE)
         } else {
-            min_ci_value <- min(toShow$conf.low, na.rm = TRUE) 
-            max_ci_value <- max(toShow$conf.high, na.rm = TRUE)
+            min_ci_value <- min(toShow$conf_low, na.rm = TRUE) 
+            max_ci_value <- max(toShow$conf_high, na.rm = TRUE)
         }
         forest_data_range <- max_ci_value - min_ci_value
         forest_width_needed <- max(6, forest_data_range * 1.2 + 3)
@@ -538,11 +604,8 @@ glmforest <- function(model, data = NULL,
                        " inches, height = ", round(rec_height, 1), " inches"))
     }
     
-    ## FIX: Properly calculate the range for the plot
+    ## Calculate the range for the plot
     rangeplot <- rangeb
-    
-    ## Add extra space on the left for the table
-    ## The key is to extend the lower bound significantly to make room for text
     range_width <- diff(rangeb)
     
     ## Calculate how much space we need for the table relative to the forest plot
@@ -562,12 +625,31 @@ glmforest <- function(model, data = NULL,
     ## Calculate positions for text columns within the extended range
     ## Place them in the left portion of the plot
     width <- diff(rangeplot)
+
+    ## Handle show_n_events parameter
+    if (is.null(show_n_events)) {
+        show_n_events <- character(0)
+    } else {
+        show_n_events[show_n_events == "events"] <- "Events"
+    }
     
     ## Start positions from the left edge of the extended range
     y_variable <- rangeplot[1] + col_width_var * width
     y_level <- y_variable + col_width_level * width
-    y_n <- y_level + col_width_n * width
-    y_or <- y_n + col_width_or * width
+
+    if ("n" %in% show_n_events) {
+        y_n <- y_level + col_width_n * width
+        next_pos <- y_n
+    } else {
+        next_pos <- y_level
+    }
+    
+    if ("Events" %in% show_n_events) {
+        y_events <- next_pos + col_width_events * width
+        y_or <- y_events + col_width_or * width
+    } else {
+        y_or <- next_pos + col_width_or * width
+    }
 
     ## Ensure there's a small gap between the effect column and the forest plot
     forest_start <- rangeb[1] - 0.05 * range_width
@@ -587,9 +669,9 @@ glmforest <- function(model, data = NULL,
     )
     
     ## Format deviance values
-    null_dev_formatted <- format(round(gmodel$null.deviance, 2), nsmall = 2)
-    resid_dev_formatted <- format(round(gmodel$residual.deviance, 2), nsmall = 2)
-    pseudo_r2_formatted <- format(round(gmodel$pseudo.r2, 3), nsmall = 3)
+    null_dev_formatted <- format(round(gmodel$null_deviance, 2), nsmall = 2)
+    resid_dev_formatted <- format(round(gmodel$residual_deviance, 2), nsmall = 2)
+    pseudo_r2_formatted <- format(round(gmodel$pseudo_r2, 3), nsmall = 3)
     
     ## Create the plot
     if(exponentiate) {
@@ -605,7 +687,7 @@ glmforest <- function(model, data = NULL,
             
             ## Forest plot elements
             ggplot2::geom_point(ggplot2::aes(size = N), pch = 22, color = "#000000", fill = color) +
-            ggplot2::geom_errorbar(ggplot2::aes(ymin = exp(conf.low), ymax = exp(conf.high)), width = 0.15) +
+            ggplot2::geom_errorbar(ggplot2::aes(ymin = exp(conf_low), ymax = exp(conf_high)), width = 0.15) +
             
             ## Y-axis for forest plot
             ggplot2::annotate(geom = "segment",
@@ -657,54 +739,72 @@ glmforest <- function(model, data = NULL,
                            plot.title = ggplot2::element_text(size = font_size * title_size, face = "bold", hjust = 0.5)) +
             ggplot2::xlab("") +
             
-            ## Column headers
+            ## Variable column
             ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_variable),
                               label = "Variable", fontface = "bold", hjust = 0,
                               size = header_font) +
-            ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_level),
-                              label = "Group", fontface = "bold", hjust = 0,
-                              size = header_font) +
-            ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_n),
-                              label = "n", fontface = "bold.italic", hjust = 0.5,
-                              size = header_font) +
-            ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_or),
-                              label = paste0("bold('", effect_abbrev, " (95% CI); '*bolditalic(p)*'-value')"),
-                              hjust = 0, size = header_font, parse = TRUE) +
             
-            ## Add centered x-axis effect label
-            ggplot2::annotate(geom = "text", x = -1.5, y = reference_value,
-                              label = effect_label, fontface = "bold",
-                              hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
-            
-            ## Variable names
             ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_variable),
                               label = toShowExpClean$var_display, fontface = "bold", hjust = 0,
                               size = annot_font) +
             
-            ## Level names
+            ## Group/level column
+            ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_level),
+                              label = "Group", fontface = "bold", hjust = 0,
+                              size = header_font) +
             ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_level),
                               label = toShowExpClean$level, hjust = 0,
                               size = annot_font) +
             
-            ## N values
-            ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_n),
-                              label = toShowExpClean$n_formatted, hjust = 0.5,
-                              size = annot_font) +
+            ## N column (conditional)
+            {if ("n" %in% show_n_events) {
+                 list(
+                     ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_n),
+                                       label = "n", fontface = "bold.italic", hjust = 0.5,
+                                       size = header_font),
+                     ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_n),
+                                       label = toShowExpClean$n_formatted, hjust = 0.5,
+                                       size = annot_font)
+                 )
+             }} +
             
-            ## Effect values with CI and p-values
+            ## Events column (conditional)
+            {if ("Events" %in% show_n_events) {
+                 list(
+                     ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_events),
+                                       label = "Events", fontface = "bold", hjust = 0.5,
+                                       size = header_font),
+                     ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_events),
+                                       label = toShowExpClean$events_formatted, hjust = 0.5,
+                                       size = annot_font)
+                 )
+             }} +
+            
+            ## Effect column
+            ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.4, y = exp(y_or),
+                              label = paste0("bold('", effect_abbrev, " (95% CI); '*bolditalic(p)*'-value')"),
+                              hjust = 0, size = header_font, parse = TRUE) +
+            
             ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_or),
                               label = toShowExpClean$effect_string_expr, hjust = 0,
                               size = annot_font, parse = TRUE) +
             
-            ## Model statistics at bottom
+            ## X-axis label
+            ggplot2::annotate(geom = "text", x = -1.5, y = reference_value,
+                              label = effect_label, fontface = "bold",
+                              hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
+            
+            ## Model statistics footer
             ggplot2::annotate(geom = "text", x = 0.5, y = exp(y_variable),
-                              label = paste0("Observations: ", gmodel$nobs.formatted,
+                              label = paste0("Observations: ", gmodel$nobs_formatted,
                                              "\nModel: ", gmodel$family,
-                                             "\nNull / Residual Deviance: ", null_dev_formatted, " / ", resid_dev_formatted,
+                                             "\nNull (Residual) Deviance: ", null_dev_formatted, " (", resid_dev_formatted, ")",
                                              "\nPseudo R²: ", pseudo_r2_formatted,
-                                             "\nAIC: ", gmodel$AIC.formatted),
+                                             "\nAIC: ", gmodel$AIC_formatted),
                               size = annot_font * 0.8, hjust = 0, vjust = 1.2, fontface = "italic")
+        
     } else {
+        
         ## Non-exponentiated plot (linear scale)
         p <- ggplot2::ggplot(toShowExpClean, ggplot2::aes(x_pos, estimate)) +
             
@@ -718,7 +818,7 @@ glmforest <- function(model, data = NULL,
             
             ## Forest plot elements
             ggplot2::geom_point(ggplot2::aes(size = N), pch = 22, color = "#000000", fill = color) +
-            ggplot2::geom_errorbar(ggplot2::aes(ymin = conf.low, ymax = conf.high), width = 0.15) +
+            ggplot2::geom_errorbar(ggplot2::aes(ymin = conf_low, ymax = conf_high), width = 0.15) +
             
             ## Y-axis for forest plot
             ggplot2::annotate(geom = "segment",
@@ -770,52 +870,68 @@ glmforest <- function(model, data = NULL,
                            plot.title = ggplot2::element_text(size = font_size * title_size, face = "bold", hjust = 0.5)) +
             ggplot2::xlab("") +
             
-            ## Column headers
+            ## Variable column
             ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = y_variable,
                               label = "Variable", fontface = "bold", hjust = 0,
                               size = header_font) +
-            ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = y_level,
-                              label = "Group", fontface = "bold", hjust = 0,
-                              size = header_font) +
-            ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = y_n,
-                              label = "n", fontface = "bold.italic", hjust = 0.5,
-                              size = header_font) +
-            ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = y_or,
-                              label = paste0("bold('", effect_abbrev, " (95% CI); '*bolditalic(p)*'-value')"),
-                              hjust = 0, size = header_font, parse = TRUE) +
             
-            ## Add centered x-axis effect label
-            ggplot2::annotate(geom = "text", x = -1.5, y = reference_value,
-                              label = effect_label, fontface = "bold",
-                              hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
-            
-            ## Variable names
             ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = y_variable,
                               label = toShowExpClean$var_display, fontface = "bold", hjust = 0,
                               size = annot_font) +
             
-            ## Level names
+            ## Group/level column
+            ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = y_level,
+                              label = "Group", fontface = "bold", hjust = 0,
+                              size = header_font) +
             ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = y_level,
                               label = toShowExpClean$level, hjust = 0,
                               size = annot_font) +
             
-            ## N values
-            ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = y_n,
-                              label = toShowExpClean$n_formatted, hjust = 0.5,
-                              size = annot_font) +
+            ## N column (conditional)
+            {if ("n" %in% show_n_events) {
+                 list(
+                     ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = y_n,
+                                       label = "n", fontface = "bold.italic", hjust = 0.5,
+                                       size = header_font),
+                     ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = y_n,
+                                       label = toShowExpClean$n_formatted, hjust = 0.5,
+                                       size = annot_font)
+                 )
+             }} +
             
-            ## Effect values with CI and p-values
+            ## Events column (conditional)
+            {if ("Events" %in% show_n_events) {
+                 list(
+                     ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = y_events,
+                                       label = "Events", fontface = "bold", hjust = 0.5,
+                                       size = header_font),
+                     ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = y_events,
+                                       label = toShowExpClean$events_formatted, hjust = 0.5,
+                                       size = annot_font)
+                 )
+             }} +
+            
+            ## Effect column
+            ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.4, y = y_or,
+                              label = paste0("bold('", effect_abbrev, " (95% CI); '*bolditalic(p)*'-value')"),
+                              hjust = 0, size = header_font, parse = TRUE) +
+            
             ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = y_or,
                               label = toShowExpClean$effect_string_expr, hjust = 0,
                               size = annot_font, parse = TRUE) +
             
+            ## X-axis label
+            ggplot2::annotate(geom = "text", x = -1.5, y = reference_value,
+                              label = effect_label, fontface = "bold",
+                              hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
+            
             ## Model statistics at bottom
             ggplot2::annotate(geom = "text", x = 0.5, y = y_variable,
-                              label = paste0("Observations: ", gmodel$nobs.formatted,
+                              label = paste0("Observations: ", gmodel$nobs_formatted,
                                              "\nModel: ", gmodel$family,
-                                             "\nNull / Residual Deviance: ", null_dev_formatted, " / ", resid_dev_formatted,
+                                             "\nNull (Residual) Deviance: ", null_dev_formatted, " (", resid_dev_formatted, ")",
                                              "\nPseudo R²: ", pseudo_r2_formatted,
-                                             "\nAIC: ", gmodel$AIC.formatted),
+                                             "\nAIC: ", gmodel$AIC_formatted),
                               size = annot_font * 0.8, hjust = 0, vjust = 1.2, fontface = "italic")
     }
     

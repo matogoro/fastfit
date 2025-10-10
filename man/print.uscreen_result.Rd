@@ -4,7 +4,7 @@
 \alias{print.uscreen_result}
 \title{Print method for uscreen results}
 \usage{
-\method{print}{uscreen_result}(x, n = 20, ...)
+\method{print}{uscreen_result}(x, ...)
 }
 \description{
 Print method for uscreen results

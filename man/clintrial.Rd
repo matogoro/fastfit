@@ -24,6 +24,7 @@ A data frame with 800 observations and 20 variables:
   \item{hemoglobin}{Baseline hemoglobin in g/dL (numeric)}
   \item{creatinine}{Baseline creatinine in mg/dL (numeric)}
   \item{treatment}{Randomized treatment (factor: Control, Drug A, Drug B)}
+  \item{surgery}{Surgical resection (factor: No, Yes)}
   \item{site}{Enrolling site (factor: Site_A through Site_J)}
   \item{os_months}{Overall survival time in months (numeric)}
   \item{os_status}{Death indicator (numeric: 0=censored, 1=death)}

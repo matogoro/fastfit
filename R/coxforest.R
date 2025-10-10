@@ -29,11 +29,13 @@
 #' @param plot_height Numeric value specifying the intended plot height in inches.
 #'   Default is NULL.
 #' @param col_width_var Numeric value specifying the proportion of plot width 
-#'   allocated to the variable column. Default is 0.02.
+#'   allocated to the variable column. Default is 0.01.
 #' @param col_width_level Numeric value specifying the proportion of plot width 
-#'   allocated to the group column. Default is 0.15.
+#'   allocated to the group column. Default is 0.17.
 #' @param col_width_n Numeric value specifying the proportion of plot width 
-#'   allocated to the sample size column. Default is 0.18.
+#'   allocated to the sample size column. Default is 0.17.
+#' @param col_width_events Numeric value specifying the proportion of plot width 
+#'   allocated to the events column. Default is 0.06.
 #' @param col_width_hr Numeric value specifying the proportion of plot width 
 #'   allocated to the hazard ratio column. Default is 0.05.
 #' @param ref_label Character string to display for reference categories. 
@@ -115,9 +117,11 @@ coxforest <- function(model, data = NULL,
                       plot_height = NULL,
                       tbl_width = 0.6,
                       col_width_var = 0.01,
-                      col_width_level = 0.18,
-                      col_width_n = 0.2,
-                      col_width_hr = 0.06,
+                      col_width_level = 0.17,
+                      col_width_n = 0.17,
+                      col_width_events = 0.06,
+                      col_width_hr = 0.05,
+                      show_n_events = c("n", "Events"),
                       ref_label = "reference",
                       var_labels = NULL,
                       color = "#8A61D8") {
@@ -173,27 +177,27 @@ coxforest <- function(model, data = NULL,
     coef <- data.table::data.table(
                             term = rownames(coef_summary),
                             estimate = coef_summary[, "coef"],
-                            std.error = coef_summary[, "se(coef)"],
+                            std_error = coef_summary[, "se(coef)"],
                             statistic = coef_summary[, "z"],
-                            p.value = coef_summary[, "Pr(>|z|)"],
-                            conf.low = conf_int[, 1],
-                            conf.high = conf_int[, 2]
+                            p_value = coef_summary[, "Pr(>|z|)"],
+                            conf_low = conf_int[, 1],
+                            conf_high = conf_int[, 2]
                         )
     
     ## Get model statistics
     conc_values <- summary(model)$concordance
     gmodel <- list(
         nevent = model$nevent,
-        p.value.log = as.numeric(summary(model)$sctest["pvalue"]),
+        p_value_log = as.numeric(summary(model)$sctest["pvalue"]),
         AIC = stats::AIC(model),
         concordance = as.numeric(conc_values["C"]),
         concordance.se = as.numeric(conc_values["se(C)"])
     )
     
     ## Format events and AIC with commas
-    gmodel$nevent.formatted <- format(gmodel$nevent, big.mark = ",", scientific = FALSE)
-    gmodel$AIC.formatted <- format(round(gmodel$AIC, 2), big.mark = ",", scientific = FALSE, nsmall = 2)
-    
+    gmodel$nevent_formatted <- format(gmodel$nevent, big.mark = ",", scientific = FALSE)
+    gmodel$AIC_formatted <- format(round(gmodel$AIC, 2), big.mark = ",", scientific = FALSE, nsmall = 2)
+
     ## Calculate 95% CI for concordance if both concordance and SE are available
     if(!is.null(gmodel$concordance) && !is.na(gmodel$concordance) &&
        !is.null(gmodel$concordance.se) && !is.na(gmodel$concordance.se)) {
@@ -245,23 +249,57 @@ coxforest <- function(model, data = NULL,
             }
         }
         else if (terms[i] == "numeric") {
-            data.table::data.table(var = var, level = "", Freq = nrow(data), pos = 1, var_order = i)
+            data.table::data.table(var = var, level = "-", Freq = nrow(data), pos = 1, var_order = i)
         }
         else {
             vars = grep(paste0("^", var, "*."), coef$term, value=TRUE)
-            data.table::data.table(var = vars, level = "", Freq = nrow(data),
+            data.table::data.table(var = vars, level = "-", Freq = nrow(data),
                                    pos = seq_along(vars), var_order = i)
         }
     })
     
     allTermsDF <- data.table::rbindlist(allTerms)
+
     data.table::setnames(allTermsDF, c("var", "level", "N", "pos", "var_order"))
+
+## Add events
+    formula_terms <- all.vars(model$formula)
+    
+    if (length(formula_terms) >= 2) {
+        ## Assuming standard Surv(time, status) format
+        event_var <- formula_terms[2]
+        
+        ## Calculate events for each term
+        allTermsDF[, Events := {
+            event_data <- data[[event_var]]
+            
+            ## Handle factor event indicators (rare but possible)
+            if (is.factor(event_data)) {
+                ## Convert to binary (assuming second level is the event)
+                event_binary <- as.numeric(event_data) == 2
+            } else {
+                ## Already numeric
+                event_binary <- event_data
+            }
+            
+            if (level == "-") {
+                ## Continuous variable - total events
+                sum(event_binary, na.rm = TRUE)
+            } else {
+                ## Factor level - events in that group
+                sum(event_binary[data[[var]] == level], na.rm = TRUE)
+            }
+        }, by = .(var, level)]
+    } else {
+        ## No events column if can't extract event variable
+        allTermsDF[, Events := NA_integer_]
+    }
     
     ## Create matching index
-    allTermsDF[, inds := ifelse(level == "", var, paste0(var, level))]
+    allTermsDF[, inds := ifelse(level == "-", var, paste0(var, level))]
     
     ## Process coefficients
-    coef[, term := gsub(term, pattern = "`", replacement = "")]
+    coef[, term := gsub(term, pattern = "`", replacement = "-")]
     coef[, inds := term]
     
     ## Merge data
@@ -274,7 +312,7 @@ coxforest <- function(model, data = NULL,
     toShow[, shade_group := var_order %% 2]
     
     ## Select columns
-    toShow <- toShow[, .(var, level, N, p.value, estimate, conf.low, conf.high, pos, var_order, shade_group)]
+    toShow <- toShow[, .(var, level, N, Events, p_value, estimate, conf_low, conf_high, pos, var_order, shade_group)]
     
     ## Format the exponential values
     toShowExpClean <- data.table::copy(toShow)
@@ -283,36 +321,37 @@ coxforest <- function(model, data = NULL,
     toShowExpClean[, hr := ifelse(is.na(estimate), 
                                   NA_real_,
                                   exp(estimate))]
-    toShowExpClean[, hr.formatted := ifelse(is.na(estimate), 
+    toShowExpClean[, hr_formatted := ifelse(is.na(estimate), 
                                             ref_label,
                                             format(round(exp(estimate), digits), nsmall = digits))]
-    toShowExpClean[, conf.low.formatted := ifelse(is.na(conf.low), 
+    toShowExpClean[, conf_low_formatted := ifelse(is.na(conf_low), 
                                                   NA_character_,
-                                                  format(round(exp(conf.low), digits), nsmall = digits))]
-    toShowExpClean[, conf.high.formatted := ifelse(is.na(conf.high), 
+                                                  format(round(exp(conf_low), digits), nsmall = digits))]
+    toShowExpClean[, conf_high_formatted := ifelse(is.na(conf_high), 
                                                    NA_character_,
-                                                   format(round(exp(conf.high), digits), nsmall = digits))]
+                                                   format(round(exp(conf_high), digits), nsmall = digits))]
     
     ## Format p-values
-    toShowExpClean[, p.formatted := ifelse(is.na(p.value), 
+    toShowExpClean[, p_formatted := ifelse(is.na(p_value), 
                                            NA_character_,
-                                    ifelse(p.value < 0.001, 
+                                    ifelse(p_value < 0.001, 
                                            "< 0.001",
-                                           format(round(p.value, 3), nsmall = 3)))]
+                                           format(round(p_value, 3), nsmall = 3)))]
     
     ## Create the combined HR string with expression for italic p
     toShowExpClean[, hr_string_expr := ifelse(
                          is.na(estimate),
                          paste0("'", ref_label, "'"),
-                                       ifelse(p.value < 0.001,
-                                              paste0("'", hr.formatted, " (", conf.low.formatted, "-", 
-                                                     conf.high.formatted, "); '*~italic(p)~'< 0.001'"),
-                                              paste0("'", hr.formatted, " (", conf.low.formatted, "-", 
-                                                     conf.high.formatted, "); '*~italic(p)~'= ", p.formatted, "'"))
+                                       ifelse(p_value < 0.001,
+                                              paste0("'", hr_formatted, " (", conf_low_formatted, "-", 
+                                                     conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
+                                              paste0("'", hr_formatted, " (", conf_low_formatted, "-", 
+                                                     conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'"))
                      )]
     
-    ## Format N with thousands separator
+    ## Format N and events with thousands separator
     toShowExpClean[, n_formatted := format(N, big.mark = ",", scientific = FALSE)]
+    toShowExpClean[, events_formatted := format(Events, big.mark = ",", scientific = FALSE)]
     
     ## Clean up variable names for display
     toShowExpClean[, var_display := as.character(var)]
@@ -320,15 +359,15 @@ coxforest <- function(model, data = NULL,
     ## Apply labels with priority: var_labels > attributes > variable name
     for(v in unique(toShowExpClean$var)) {
         if(v %in% toShowExpClean$var) {
-                                        # Check custom labels first (highest priority)
+            ## Check custom labels first (highest priority)
             if(!is.null(var_labels) && v %in% names(var_labels)) {
                 toShowExpClean[var == v, var_display := var_labels[v]]
             }
-                                        # Then check for attributes
+            ## Then check for attributes
             else if(!is.null(attr(data[[v]], "label"))) {
                 toShowExpClean[var == v, var_display := attr(data[[v]], "label")]
             }
-                                        # Otherwise keep the variable name as-is
+            ## Otherwise keep the variable name as-is
         }
     }
 
@@ -348,12 +387,12 @@ coxforest <- function(model, data = NULL,
     n_rows <- nrow(toShowExpClean)
     
     ## Calculate plot ranges with better handling of extreme cases
-    rangeb <- range(toShow$conf.low, toShow$conf.high, na.rm = TRUE)
+    rangeb <- range(toShow$conf_low, toShow$conf_high, na.rm = TRUE)
     breaks <- grDevices::axisTicks(rangeb/2, log = TRUE, nint = 7)
     
     ## Get min and max CI values
-    min_ci <- min(toShow$conf.low, na.rm = TRUE)
-    max_ci <- max(toShow$conf.high, na.rm = TRUE)
+    min_ci <- min(toShow$conf_low, na.rm = TRUE)
+    max_ci <- max(toShow$conf_high, na.rm = TRUE)
     
     ## Check for one-sided case BEFORE modifying range
     is_one_sided <- (min_ci > 0) || (max_ci < 0)
@@ -381,10 +420,10 @@ coxforest <- function(model, data = NULL,
     ## For HR column, calculate without expressions
     hr_display_len <- ifelse(toShowExpClean$hr_string_expr == paste0("'", ref_label, "'"),
                              nchar(ref_label),
-                             nchar(paste0(toShowExpClean$hr.formatted, " (", 
-                                          toShowExpClean$conf.low.formatted, "-",
-                                          toShowExpClean$conf.high.formatted, "); p = ",
-                                          toShowExpClean$p.formatted)))
+                             nchar(paste0(toShowExpClean$hr_formatted, " (", 
+                                          toShowExpClean$conf_low_formatted, "-",
+                                          toShowExpClean$conf_high_formatted, "); p = ",
+                                          toShowExpClean$p_formatted)))
     max_hr_len <- max(hr_display_len, nchar("HR (95% CI); p-value"), na.rm = TRUE) * 1.1
     
     ## Calculate total character width needed
@@ -398,8 +437,8 @@ coxforest <- function(model, data = NULL,
         text_width_needed <- total_text_chars * char_to_inch
         
         ## Calculate the actual forest plot range based on data
-        min_ci_value <- min(toShow$conf.low, na.rm = TRUE)
-        max_ci_value <- max(toShow$conf.high, na.rm = TRUE)
+        min_ci_value <- min(toShow$conf_low, na.rm = TRUE)
+        max_ci_value <- max(toShow$conf_high, na.rm = TRUE)
         
         ## The actual forest plot width is from min CI to max CI plus some padding
         forest_data_range <- max_ci_value - min_ci_value
@@ -462,8 +501,8 @@ coxforest <- function(model, data = NULL,
         text_width_needed <- total_text_chars * char_to_inch
         
         ## Calculate forest width based on data range with extra safety margin
-        min_ci_value <- min(toShow$conf.low, na.rm = TRUE)
-        max_ci_value <- max(toShow$conf.high, na.rm = TRUE)
+        min_ci_value <- min(toShow$conf_low, na.rm = TRUE)
+        max_ci_value <- max(toShow$conf_high, na.rm = TRUE)
         forest_data_range <- max_ci_value - min_ci_value
         forest_width_needed <- max(6, forest_data_range * 1.2 + 3)
         
@@ -479,11 +518,8 @@ coxforest <- function(model, data = NULL,
                        " inches, height = ", round(rec_height, 1), " inches"))
     }
     
-    ## FIX: Properly calculate the range for the plot
+    ## Calculate the range for the plot
     rangeplot <- rangeb
-    
-    ## Add extra space on the left for the table
-    ## The key is to extend the lower bound significantly to make room for text
     range_width <- diff(rangeb)
     
     ## Calculate how much space we need for the table relative to the forest plot
@@ -503,12 +539,31 @@ coxforest <- function(model, data = NULL,
     ## Calculate positions for text columns within the extended range
     ## Place them in the left portion of the plot
     width <- diff(rangeplot)
+
+    ## Handle show_n_events parameter
+    if (is.null(show_n_events)) {
+        show_n_events <- character(0)
+    } else {
+        show_n_events[show_n_events == "events"] <- "Events"
+    }
     
     ## Start positions from the left edge of the extended range
     y_variable <- rangeplot[1] + col_width_var * width
     y_level <- y_variable + col_width_level * width
-    y_n <- y_level + col_width_n * width
-    y_hr <- y_n + col_width_hr * width
+
+    if ("n" %in% show_n_events) {
+        y_n <- y_level + col_width_n * width
+        next_pos <- y_n
+    } else {
+        next_pos <- y_level
+    }
+    
+    if ("Events" %in% show_n_events) {
+        y_events <- next_pos + col_width_events * width
+        y_hr <- y_events + col_width_hr * width
+    } else {
+        y_hr <- next_pos + col_width_hr * width
+    }
 
     ## Ensure there's a small gap between the HR column and the forest plot
     forest_start <- rangeb[1] - 0.05 * range_width
@@ -528,10 +583,10 @@ coxforest <- function(model, data = NULL,
     )
     
     ## Format the global p-value for display
-    global_p_formatted <- if(as.numeric(gmodel$p.value.log) < 0.001) {
+    global_p_formatted <- if(as.numeric(gmodel$p_value_log) < 0.001) {
                               "< 0.001"
                           } else {
-                              format.pval(gmodel$p.value.log, eps = ".001")
+                              format.pval(gmodel$p_value_log, eps = ".001")
                           }
     
     ## Build concordance string based on whether CI is available
@@ -560,7 +615,7 @@ coxforest <- function(model, data = NULL,
         
         ## Forest plot elements
         ggplot2::geom_point(ggplot2::aes(size = N), pch = 22, color = "#000000", fill = color) +
-        ggplot2::geom_errorbar(ggplot2::aes(ymin = exp(conf.low), ymax = exp(conf.high)), width = 0.15) +
+        ggplot2::geom_errorbar(ggplot2::aes(ymin = exp(conf_low), ymax = exp(conf_high)), width = 0.15) +
         
         ## Y-axis for forest plot
         ggplot2::annotate(geom = "segment",
@@ -612,51 +667,69 @@ coxforest <- function(model, data = NULL,
                        plot.title = ggplot2::element_text(size = font_size * title_size, face = "bold", hjust = 0.5)) +
         ggplot2::xlab("") +
         
-        ## Column headers
+        ## Variable column
         ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_variable),
                           label = "Variable", fontface = "bold", hjust = 0,
                           size = header_font) +
-        ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_level),
-                          label = "Group", fontface = "bold", hjust = 0,
-                          size = header_font) +
-        ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_n),
-                          label = "n", fontface = "bold.italic", hjust = 0.5,
-                          size = header_font) +
-        ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_hr),
-                          label = "bold('aHR (95% CI); '*bolditalic(p)*'-value')",
-                          hjust = 0, size = header_font, parse = TRUE) +
         
-        ## Add centered x-axis "Hazard Ratio" label
-        ggplot2::annotate(geom = "text", x = -1.5, y = 1,
-                          label = "Hazard Ratio", fontface = "bold",
-                          hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
-        
-        ## Variable names
         ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_variable),
                           label = toShowExpClean$var_display, fontface = "bold", hjust = 0,
                           size = annot_font) +
         
-        ## Level names
+        ## Group/level column
+        
+        ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_level),
+                          label = "Group", fontface = "bold", hjust = 0,
+                          size = header_font) +
+        
         ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_level),
                           label = toShowExpClean$level, hjust = 0,
                           size = annot_font) +
+                
+        ## N column (conditional)
+        {if ("n" %in% show_n_events) {
+             list(
+                 ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_n),
+                                   label = "n", fontface = "bold.italic", hjust = 0.5,
+                                   size = header_font),
+                 ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_n),
+                                   label = toShowExpClean$n_formatted, hjust = 0.5,
+                                   size = annot_font)
+             )
+         }} +
         
-        ## N values
-        ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_n),
-                          label = toShowExpClean$n_formatted, hjust = 0.5,
-                          size = annot_font) +
+        ## Events column (conditional)
+        {if ("Events" %in% show_n_events) {
+             list(
+                 ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_events),
+                                   label = "Events", fontface = "bold", hjust = 0.5,
+                                   size = header_font),
+                 ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_events),
+                                   label = toShowExpClean$events_formatted, hjust = 0.5,
+                                   size = annot_font)
+             )
+         }} +
         
-        ## HR values with CI and p-values
+        ## Effect column
+        ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.4, y = exp(y_hr),
+                          label = "bold('aHR (95% CI); '*bolditalic(p)*'-value')",
+                         hjust = 0, size = header_font, parse = TRUE) +
+        
         ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_hr),
                           label = toShowExpClean$hr_string_expr, hjust = 0,
                           size = annot_font, parse = TRUE) +
         
-        ## Model statistics at bottom
+        ## X-axis label
+        ggplot2::annotate(geom = "text", x = -1.5, y = 1,
+                          label = "Hazard Ratio", fontface = "bold",
+                          hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
+        
+        ## Model statistics footer
         ggplot2::annotate(geom = "text", x = 0.5, y = exp(y_variable),
-                          label = paste0("Events: ", gmodel$nevent.formatted,
+                          label = paste0("Total events: ", gmodel$nevent_formatted,
                                          "\nGlobal log-rank p: ", global_p_formatted,
                                          "\n", concordance_string,
-                                         "\nAIC: ", gmodel$AIC.formatted),
+                                         "\nAIC: ", gmodel$AIC_formatted),
                           size = annot_font, hjust = 0, vjust = 1.2, fontface = "italic")
     
     ## Add recommended dimensions as an attribute

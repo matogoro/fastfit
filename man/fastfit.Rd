@@ -23,6 +23,7 @@ fastfit(
   metrics = "both",
   return_type = "table",
   keep_models = FALSE,
+  exponentiate = NULL,
   ...
 )
 }
@@ -81,6 +82,10 @@ Default is "table".}
 
 \item{keep_models}{Logical. If TRUE, stores univariable model objects.
 Default is FALSE.}
+
+\item{exponentiate}{Logical. Whether to exponentiate coefficients. Default is NULL,
+which automatically displays exponentiated coefficients for logistic/Poisson/Cox
+regression models and raw coefficients for log-link or linear regression models.}
 
 \item{...}{Additional arguments passed to model fitting functions.}
 }

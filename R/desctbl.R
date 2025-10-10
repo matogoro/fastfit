@@ -157,7 +157,7 @@ desctbl <- function(data,
         raw_result <- rbind(raw_result, var_data$raw, fill = TRUE)
     }
 
-    ## Standardize column names FIRST (before p-value formatting)
+    ## Standardize column names
     if ("variable" %in% names(result)) {
         data.table::setnames(result, "variable", "Variable")
         data.table::setnames(raw_result, "variable", "Variable")
@@ -179,9 +179,16 @@ desctbl <- function(data,
 
     ## Add N row as first row if grouped (after all other processing)
     if (!is.null(group_var)) {
-        ## Get the actual group values from the data
-        groups <- unique(data[[group_var]])
-        groups <- groups[!is.na(groups)]
+        
+        ## Get the group values in the correct order
+        if (is.factor(data[[group_var]])) {
+            ## Use factor levels for proper ordering
+            groups <- levels(data[[group_var]])
+        } else {
+            ## Fall back to unique values for non-factors
+            groups <- unique(data[[group_var]])
+            groups <- groups[!is.na(groups)]
+        }
         
         ## Create N row
         n_row <- data.table::data.table(
@@ -195,7 +202,7 @@ desctbl <- function(data,
             n_row[[total_label]] <- format(n_total, big.mark = ",")
         }
         
-        ## Calculate for each group
+        ## Calculate for each group IN THE CORRECT ORDER
         for (grp in groups) {
             grp_col <- as.character(grp)
             if (grp_col %in% names(result)) {
@@ -212,7 +219,7 @@ desctbl <- function(data,
         ## Prepend N row
         result <- rbind(n_row, result, fill = TRUE)
     }
-
+    
     ## Attach raw data and metadata as attributes
     data.table::setattr(result, "raw_data", raw_result)
     data.table::setattr(result, "by_variable", group_var)

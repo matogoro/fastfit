@@ -107,24 +107,47 @@ m2dt <- function(model,
                               coefficient = coef_summary[, "Estimate"],
                               se = coef_summary[, "Std. Error"]
                           )
+
+                                        # ALWAYS calculate and store both versions
+        dt[, `:=`(
+                                        # Raw coefficients
+            coef = coefficient,
+            coef_lower = coefficient - z_score * se,
+            coef_upper = coefficient + z_score * se,
+            
+                                        # Exponentiated versions
+            exp_coef = exp(coefficient),
+            exp_lower = exp(coefficient - z_score * se),
+            exp_upper = exp(coefficient + z_score * se)
+        )]
         
-        ## Add effect estimates
-        if (should_exp) {
+        if (is_logistic) {
             dt[, `:=`(
-                effect = exp(coefficient),
-                CI_lower = exp(coefficient - z_score * se),
-                CI_upper = exp(coefficient + z_score * se)
+                OR = exp_coef,
+                CI_lower = exp_lower,
+                CI_upper = exp_upper
+            )]
+        } else if (is_poisson) {
+            dt[, `:=`(
+                RR = exp_coef,
+                CI_lower = exp_lower,
+                CI_upper = exp_upper
+            )]
+        } else if (should_exp) {
+            ## Other log-link models
+            dt[, `:=`(
+                Estimate = exp_coef,
+                CI_lower = exp_lower,
+                CI_upper = exp_upper
             )]
         } else {
+            ## Linear models - use raw coefficients
             dt[, `:=`(
-                effect = coefficient,
-                CI_lower = coefficient - z_score * se,
-                CI_upper = coefficient + z_score * se
+                Estimate = coef,
+                CI_lower = coef_lower,
+                CI_upper = coef_upper
             )]
         }
-        
-        ## Rename effect column
-        data.table::setnames(dt, "effect", effect_name)
         
         ## Add test statistics
         stat_col <- if ("z value" %in% colnames(coef_summary)) "z value" else "t value"
@@ -198,13 +221,21 @@ m2dt <- function(model,
                                        else summ$nevent,
                               coefficient = coef_summary[, "coef"],
                               se = coef_summary[, "se(coef)"],
+                                        # Store both versions
+                              coef = coef_summary[, "coef"],
+                              coef_lower = conf_int[, 1],
+                              coef_upper = conf_int[, 2],
+                              exp_coef = coef_summary[, "exp(coef)"],
+                              exp_lower = exp(conf_int[, 1]),
+                              exp_upper = exp(conf_int[, 2]),
+                                        # Primary display columns
                               HR = coef_summary[, "exp(coef)"],
                               CI_lower = exp(conf_int[, 1]),
                               CI_upper = exp(conf_int[, 2]),
                               statistic = coef_summary[, "z"],
                               p_value = coef_summary[, "Pr(>|z|)"]
                           )
-        
+
         ## Add QC stats
         if (keep_qc_stats) {
             dt[, `:=`(

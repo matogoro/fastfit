@@ -18,9 +18,11 @@ glmforest(
   plot_height = NULL,
   tbl_width = 0.6,
   col_width_var = 0.01,
-  col_width_level = 0.18,
-  col_width_n = 0.2,
-  col_width_or = 0.06,
+  col_width_level = 0.17,
+  col_width_n = 0.17,
+  col_width_events = 0.06,
+  col_width_or = 0.05,
+  show_n_events = c("n", "Events"),
   ref_label = "reference",
   var_labels = NULL,
   color = "#3A7E8A",
@@ -65,13 +67,16 @@ width allocated to the data table. If NULL (default), automatically calculated
 based on content and plot dimensions.}
 
 \item{col_width_var}{Numeric value specifying the proportion of plot width 
-allocated to the variable column. Default is 0.02.}
+allocated to the variable column. Default is 0.01.}
 
 \item{col_width_level}{Numeric value specifying the proportion of plot width 
-allocated to the group column. Default is 0.15.}
+allocated to the group column. Default is 0.17.}
 
 \item{col_width_n}{Numeric value specifying the proportion of plot width 
-allocated to the sample size column. Default is 0.15.}
+allocated to the sample size column. Default is 0.17.}
+
+\item{col_width_events}{Numeric value specifying the proportion of plot width 
+allocated to the sample size column. Default is 0.06.}
 
 \item{col_width_or}{Numeric value specifying the proportion of plot width 
 allocated to the effect estimate column. Default is 0.05.}

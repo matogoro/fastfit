@@ -34,6 +34,9 @@
 #' @param keep_models Logical. If TRUE, stores all fitted model objects in the output.
 #'   This can consume significant memory for large datasets or many predictors.
 #'   Models are accessible via attr(result, "models"). Default is FALSE.
+#' @param exponentiate Logical. Whether to exponentiate coefficients. Default is NULL,
+#'   which automatically displays exponentiated coefficients for logistic/Poisson/Cox
+#'   regression models and raw coefficients for log-link or linear regression models.
 #' @param ... Additional arguments passed to the underlying model fitting functions
 #'   (e.g., weights, subset, na.action).
 #'
@@ -127,6 +130,7 @@ uscreen <- function(data,
                     digits_p = 3,
                     var_labels = NULL,
                     keep_models = FALSE,
+                    exponentiate = NULL,
                     ...) {
     
     if (!data.table::is.data.table(data)) {
@@ -205,7 +209,9 @@ uscreen <- function(data,
                                     show_n_events = show_n_events,
                                     digits = digits,
                                     digits_p = digits_p,
-                                    var_labels = var_labels)
+                                    var_labels = var_labels,
+                                    exponentiate = exponentiate
+                                    )
     
     ## Attach raw data
     setattr(formatted, "raw_data", combined_raw)
@@ -229,7 +235,7 @@ uscreen <- function(data,
 #' Print method for uscreen results
 #' @keywords internal
 #' @export
-print.uscreen_result <- function(x, n = 20, ...) {
+print.uscreen_result <- function(x, ...) {
     cat("\nUnivariable Screening Results\n")
     cat("Outcome: ", attr(x, "outcome"), "\n", sep = "")
     cat("Model Type: ", attr(x, "model_type"), "\n", sep = "")
@@ -253,13 +259,6 @@ print.uscreen_result <- function(x, n = 20, ...) {
     
     cat("\n")
     
-    ## Show results
-    if (nrow(x) > n) {
-        cat("Showing first ", n, " rows (", nrow(x), " total):\n", sep = "")
-        print(head(x, n))
-    } else {
-        NextMethod("print", x)
-    }
-    
+    NextMethod("print", x)
     invisible(x)
 }

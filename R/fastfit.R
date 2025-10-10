@@ -41,6 +41,9 @@
 #'   Default is "table".
 #' @param keep_models Logical. If TRUE, stores univariable model objects.
 #'   Default is FALSE.
+#' @param exponentiate Logical. Whether to exponentiate coefficients. Default is NULL,
+#'   which automatically displays exponentiated coefficients for logistic/Poisson/Cox
+#'   regression models and raw coefficients for log-link or linear regression models.
 #' @param ... Additional arguments passed to model fitting functions.
 #'
 #' @return A data.table with formatted results (when return_type is "table"),
@@ -130,6 +133,7 @@ fastfit <- function(data,
                     metrics = "both",
                     return_type = "table",
                     keep_models = FALSE,
+                    exponentiate = NULL,
                     ...) {
     
     ## Input validation
@@ -169,6 +173,7 @@ fastfit <- function(data,
             digits_p = digits_p,
             var_labels = var_labels,
             keep_models = keep_models,
+            exponentiate = exponentiate,
             ...
         )
         ## Extract raw data for variable selection
@@ -225,8 +230,9 @@ fastfit <- function(data,
                 digits = digits,
                 digits_p = digits_p,
                 var_labels = var_labels,
-                keep_qc_stats = FALSE,  ## Don't need QC stats for display
+                keep_qc_stats = FALSE,  # Don't need QC stats for display
                 add_reference_rows = add_reference_rows,
+                exponentiate = exponentiate,
                 ...
             )
             
@@ -251,7 +257,8 @@ fastfit <- function(data,
         columns = columns,
         metrics = metrics,
         show_n_events = show_n_events,
-        var_labels = var_labels
+        var_labels = var_labels,
+        exponentiate = exponentiate
     )
 
     ## Add attributes
@@ -284,7 +291,8 @@ fastfit <- function(data,
 format_fastfit_combined <- function(uni_formatted, multi_formatted, 
                                     uni_raw, multi_raw,
                                     predictors, columns, metrics, 
-                                    show_n_events, var_labels) {
+                                    show_n_events, var_labels,
+                                    exponentiate = NULL) {
     
     ## Determine effect column name from the formatted tables
     effect_cols <- grep("\\(95% CI\\)$", names(uni_formatted %||% multi_formatted), value = TRUE)
@@ -402,45 +410,128 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
     ## Clean up column names for display
     if (columns == "both") {
         if ("uni_effect" %in% names(result)) {
-            ## Determine the effect type from raw data
-            effect_type <- if (!is.null(uni_raw) && "OR" %in% names(uni_raw)) "OR"
-                           else if (!is.null(uni_raw) && "HR" %in% names(uni_raw)) "HR"
-                           else if (!is.null(uni_raw) && "RR" %in% names(uni_raw)) "RR"
-                           else "Estimate"
+            ## Determine the effect type from raw data and exponentiate parameter
+            if (!is.null(exponentiate)) {
+                if (exponentiate) {
+                                        # User explicitly wants exponentiated values
+                    if (!is.null(uni_raw)) {
+                        if ("OR" %in% names(uni_raw) || "exp_coef" %in% names(uni_raw)) {
+                            effect_type <- "OR"
+                        } else if ("HR" %in% names(uni_raw) || "exp_coef" %in% names(uni_raw)) {
+                            effect_type <- "HR"
+                        } else if ("RR" %in% names(uni_raw) || "exp_coef" %in% names(uni_raw)) {
+                            effect_type <- "RR"
+                        } else {
+                            effect_type <- "Exp(Coef)"
+                        }
+                    }
+                } else {
+                                        # User explicitly wants coefficients
+                    effect_type <- "Coefficient"
+                }
+            } else {
+                                        # Use existing auto-detection
+                effect_type <- if (!is.null(uni_raw) && "OR" %in% names(uni_raw)) "OR"
+                               else if (!is.null(uni_raw) && "HR" %in% names(uni_raw)) "HR"
+                               else if (!is.null(uni_raw) && "RR" %in% names(uni_raw)) "RR"
+                               else "Estimate"
+            }
             
             setnames(result, "uni_effect", paste0("Univariable ", effect_type, " (95% CI)"))
         }
+        
         if ("uni_p" %in% names(result)) {
             setnames(result, "uni_p", "Uni p")
         }
+        
         if ("multi_effect" %in% names(result)) {
             ## Determine the adjusted effect type
-            effect_type <- if (!is.null(multi_raw) && "OR" %in% names(multi_raw)) "aOR"
-                           else if (!is.null(multi_raw) && "HR" %in% names(multi_raw)) "aHR"
-                           else if (!is.null(multi_raw) && "RR" %in% names(multi_raw)) "aRR"
-                           else "Estimate"
+            if (!is.null(exponentiate)) {
+                if (exponentiate) {
+                                        # User explicitly wants exponentiated values - use adjusted notation
+                    if (!is.null(multi_raw)) {
+                        if ("OR" %in% names(multi_raw) || "exp_coef" %in% names(multi_raw)) {
+                            effect_type <- "aOR"  # Preserve adjusted notation
+                        } else if ("HR" %in% names(multi_raw) || "exp_coef" %in% names(multi_raw)) {
+                            effect_type <- "aHR"  # Preserve adjusted notation
+                        } else if ("RR" %in% names(multi_raw) || "exp_coef" %in% names(multi_raw)) {
+                            effect_type <- "aRR"  # Preserve adjusted notation
+                        } else {
+                            effect_type <- "Adj. Exp(Coef)"
+                        }
+                    }
+                } else {
+                                        # User explicitly wants coefficients
+                    effect_type <- "Adj. Coefficient"
+                }
+            } else {
+                                        # Use existing auto-detection with adjusted notation
+                effect_type <- if (!is.null(multi_raw) && "OR" %in% names(multi_raw)) "aOR"
+                               else if (!is.null(multi_raw) && "HR" %in% names(multi_raw)) "aHR"
+                               else if (!is.null(multi_raw) && "RR" %in% names(multi_raw)) "aRR"
+                               else "Estimate"
+            }
             
             setnames(result, "multi_effect", paste0("Multivariable ", effect_type, " (95% CI)"))
         }
+        
         if ("multi_p" %in% names(result)) {
             setnames(result, "multi_p", "Multi p")
         }
+        
     } else if (columns == "uni") {
-        ## Keep as univariable
+        ## Keep as univariable (same logic as above for univariable)
         if ("uni_effect" %in% names(result)) {
-            effect_type <- if (!is.null(uni_raw) && "OR" %in% names(uni_raw)) "OR"
-                           else if (!is.null(uni_raw) && "HR" %in% names(uni_raw)) "HR"
-                           else if (!is.null(uni_raw) && "RR" %in% names(uni_raw)) "RR"
-                           else "Estimate"
+            if (!is.null(exponentiate)) {
+                if (exponentiate) {
+                    if (!is.null(uni_raw)) {
+                        if ("OR" %in% names(uni_raw) || "exp_coef" %in% names(uni_raw)) {
+                            effect_type <- "OR"
+                        } else if ("HR" %in% names(uni_raw) || "exp_coef" %in% names(uni_raw)) {
+                            effect_type <- "HR"
+                        } else if ("RR" %in% names(uni_raw) || "exp_coef" %in% names(uni_raw)) {
+                            effect_type <- "RR"
+                        } else {
+                            effect_type <- "Exp(Coef)"
+                        }
+                    }
+                } else {
+                    effect_type <- "Coefficient"
+                }
+            } else {
+                effect_type <- if (!is.null(uni_raw) && "OR" %in% names(uni_raw)) "OR"
+                               else if (!is.null(uni_raw) && "HR" %in% names(uni_raw)) "HR"
+                               else if (!is.null(uni_raw) && "RR" %in% names(uni_raw)) "RR"
+                               else "Estimate"
+            }
             setnames(result, "uni_effect", paste0("Univariable ", effect_type, " (95% CI)"))
         }
+        
     } else if (columns == "multi") {
-        ## Use adjusted notation
+        ## Use adjusted notation (same logic as multivariable above)
         if ("multi_effect" %in% names(result)) {
-            effect_type <- if (!is.null(multi_raw) && "OR" %in% names(multi_raw)) "aOR"
-                           else if (!is.null(multi_raw) && "HR" %in% names(multi_raw)) "aHR"
-                           else if (!is.null(multi_raw) && "RR" %in% names(multi_raw)) "aRR"
-                           else "Estimate"
+            if (!is.null(exponentiate)) {
+                if (exponentiate) {
+                    if (!is.null(multi_raw)) {
+                        if ("OR" %in% names(multi_raw) || "exp_coef" %in% names(multi_raw)) {
+                            effect_type <- "aOR"
+                        } else if ("HR" %in% names(multi_raw) || "exp_coef" %in% names(multi_raw)) {
+                            effect_type <- "aHR"
+                        } else if ("RR" %in% names(multi_raw) || "exp_coef" %in% names(multi_raw)) {
+                            effect_type <- "aRR"
+                        } else {
+                            effect_type <- "Adj. Exp(Coef)"
+                        }
+                    }
+                } else {
+                    effect_type <- "Adj. Coefficient"
+                }
+            } else {
+                effect_type <- if (!is.null(multi_raw) && "OR" %in% names(multi_raw)) "aOR"
+                               else if (!is.null(multi_raw) && "HR" %in% names(multi_raw)) "aHR"
+                               else if (!is.null(multi_raw) && "RR" %in% names(multi_raw)) "aRR"
+                               else "Estimate"
+            }
             setnames(result, "multi_effect", paste0("Multivariable ", effect_type, " (95% CI)"))
         }
     }

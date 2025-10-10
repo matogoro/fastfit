@@ -18,6 +18,7 @@ uscreen(
   digits_p = 3,
   var_labels = NULL,
   keep_models = FALSE,
+  exponentiate = NULL,
   ...
 )
 }
@@ -64,6 +65,10 @@ match predictor names, values are display labels. Default is NULL.}
 \item{keep_models}{Logical. If TRUE, stores all fitted model objects in the output.
 This can consume significant memory for large datasets or many predictors.
 Models are accessible via attr(result, "models"). Default is FALSE.}
+
+\item{exponentiate}{Logical. Whether to exponentiate coefficients. Default is NULL,
+which automatically displays exponentiated coefficients for logistic/Poisson/Cox
+regression models and raw coefficients for log-link or linear regression models.}
 
 \item{...}{Additional arguments passed to the underlying model fitting functions
 (e.g., weights, subset, na.action).}

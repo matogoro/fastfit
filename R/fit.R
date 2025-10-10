@@ -46,6 +46,9 @@
 #'   Default is NULL.
 #' @param keep_qc_stats Logical. If TRUE, includes model quality statistics
 #'   (AIC, BIC, concordance, etc) in the raw data attribute. Default is TRUE.
+#' @param exponentiate Logical. Whether to exponentiate coefficients. Default is NULL,
+#'   which automatically displays exponentiated coefficients for logistic/Poisson/Cox
+#'   regression models and raw coefficients for log-link or linear regression models.
 #' @param ... Additional arguments passed to the underlying model function
 #'   (e.g., subset, na.action, control parameters).
 #'
@@ -146,6 +149,7 @@ fit <- function(data,
                 digits_p = 3,
                 var_labels = NULL,
                 keep_qc_stats = TRUE,
+                exponentiate = NULL,
                 ...) {
     
     ## Don't create internal variables - work with 'data' directly
@@ -250,7 +254,8 @@ fit <- function(data,
                                     show_n_events = show_n_events,
                                     digits = digits,
                                     digits_p = digits_p,
-                                    var_labels = var_labels)
+                                    var_labels = var_labels,
+                                    exponentiate = exponentiate)
 
     ## Attach metadata
     data.table::setattr(formatted, "model", model)

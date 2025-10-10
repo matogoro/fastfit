@@ -6,7 +6,8 @@ format_model_table <- function(data,
                                digits_p = 3, 
                                var_labels = NULL,
                                show_n_events = c("n", "Events"),
-                               reference_label = "reference") {
+                               reference_label = "reference",
+                               exponentiate = NULL) {
     
     result <- data.table::copy(data)
     
@@ -16,6 +17,52 @@ format_model_table <- function(data,
     }
     if ("group" %in% names(result)) {
         setnames(result, "group", "Group")
+    }
+
+    ## Handle the exponentiate parameter to choose which columns to use
+    if (!is.null(exponentiate)) {
+        if (exponentiate && "exp_coef" %in% names(result)) {
+            ## Check model type
+            if ("OR" %in% names(result)) {
+                effect_col <- "OR"
+            } else if ("HR" %in% names(result)) {
+                effect_col <- "HR"
+            } else if ("RR" %in% names(result)) {
+                effect_col <- "RR"
+            } else {
+                ## Generic model - create OR/RR based on model type
+                model_type <- unique(result$model_type)[1]
+                if (grepl("Logistic", model_type)) {
+                    result[, `:=`(
+                        OR = exp_coef,
+                        CI_lower = exp_lower,
+                        CI_upper = exp_upper
+                    )]
+                    effect_col <- "OR"
+                } else if (grepl("Poisson", model_type)) {
+                    result[, `:=`(
+                        RR = exp_coef,
+                        CI_lower = exp_lower,
+                        CI_upper = exp_upper
+                    )]
+                    effect_col <- "RR"
+                } else {
+                    result[, `:=`(
+                        Estimate = exp_coef,
+                        CI_lower = exp_lower,
+                        CI_upper = exp_upper
+                    )]
+                    effect_col <- "Estimate"
+                }
+            }
+        } else if (!exponentiate && "coef" %in% names(result)) {
+            result[, `:=`(
+                Estimate = coef,
+                CI_lower = coef_lower,
+                CI_upper = coef_upper
+            )]
+            effect_col <- "Estimate"
+        }
     }
     
     ## Auto-detect effect column if not specified

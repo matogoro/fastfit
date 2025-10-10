@@ -13,7 +13,8 @@ format_fastfit_combined(
   columns,
   metrics,
   show_n_events,
-  var_labels
+  var_labels,
+  exponentiate = NULL
 )
 }
 \description{

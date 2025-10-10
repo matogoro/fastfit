@@ -73,8 +73,12 @@ process_continuous <- function(data, var, var_label, group_var, stats, digits,
     raw_result <- data.table::data.table()
     
     if (!is.null(group_var)) {
-        groups <- unique(data[[group_var]])
-        groups <- groups[!is.na(groups)]
+        if (is.factor(data[[group_var]])) {
+            groups <- levels(data[[group_var]])
+        } else {
+            groups <- unique(data[[group_var]])
+            groups <- groups[!is.na(groups)]
+        }
         
         first_stat <- TRUE
         p_values <- list()
@@ -333,8 +337,12 @@ process_categorical <- function(data, var, var_label, group_var, stats,
         )
         
         if (!is.null(group_var)) {
-            groups <- unique(data[[group_var]])
-            groups <- groups[!is.na(groups)]
+            if (is.factor(data[[group_var]])) {
+                groups <- levels(data[[group_var]])
+            } else {
+                groups <- unique(data[[group_var]])
+                groups <- groups[!is.na(groups)]
+            }
             
             ## Add total column
             if (!isFALSE(total)) {
