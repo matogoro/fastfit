@@ -10,6 +10,14 @@ format_model_table <- function(data,
                                exponentiate = NULL) {
     
     result <- data.table::copy(data)
+
+    ## Disallow "Events" column if linear model 
+    if ("model_type" %in% names(result)) {
+        model_type <- unique(result$model_type)[1]
+        if (grepl("Linear", model_type, ignore.case = TRUE)) {
+            show_n_events <- setdiff(show_n_events, c("Events", "events"))
+        }
+    }
     
     ## Standardize column names
     if ("variable" %in% names(result)) {
