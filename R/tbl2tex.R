@@ -20,6 +20,9 @@
 #'   "c" (center), "r" (right), or "p{width}" for paragraph columns.
 #' @param indent_groups Logical. If TRUE, uses \\hspace to indent grouped rows
 #'   creating a hierarchical display. Default is FALSE.
+#' @param condense_table Logical. If TRUE, decreases table vertical height by
+#'   reducing continuous, survival, and binary categorical variables to single
+#'   rows. Makes indent_groups = TRUE by default. Default is FALSE.
 #' @param booktabs Logical. If TRUE, uses booktabs package commands for
 #'   professional-quality rules. Default is FALSE.
 #' @param label Character string. LaTeX label for cross-references using \\ref{}.
@@ -104,6 +107,7 @@ tbl2tex <- function (table,
                      sig_threshold = 0.05,
                      align = NULL, 
                      indent_groups = FALSE,
+                     condense_table = FALSE,
                      booktabs = FALSE,
                      caption = NULL,
                      label = NULL, 
@@ -126,11 +130,15 @@ tbl2tex <- function (table,
         n_row_data <- df[1, ]
         df <- df[-1, ]  # Remove N row from data
     }
-    
-    if (indent_groups) {
-        df <- format_indented_groups(df)
+
+    if (condense_table) {
+        indent_groups <- TRUE
+        df <- condense_table_rows(df, indent_groups = indent_groups)
+        df <- format_indented_groups(df, indent_string = "\\hspace{1em}")
+    } else if (indent_groups) {
+        df <- format_indented_groups(df, indent_string = "\\hspace{1em}")
     }
-    
+
     if (bold_significant) {
         df <- format_pvalues_export_tex(df, sig_threshold)
     }

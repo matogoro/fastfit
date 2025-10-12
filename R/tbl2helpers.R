@@ -64,7 +64,7 @@ determine_alignment <- function(df) {
     return(align)
 }
 
-#' Apply formatting to column headers in exported tables
+#' Apply formatting to column headers in exported tables (PDF/LaTeX)
 #' @keywords internal
 format_column_headers <- function (col_names, add_header_space = TRUE) {
     if (!is.character(col_names)) {
@@ -82,7 +82,7 @@ format_column_headers <- function (col_names, add_header_space = TRUE) {
     return(as.character(col_names))
 }
 
-#' Apply formatting to column headers in exported tables (HTML-specific)
+#' Apply formatting to column headers in exported tables (HTML)
 #' @keywords internal
 format_column_headers_html <- function (col_names) {
     col_names <- gsub("^n$", "<i>n</i>", col_names, ignore.case = TRUE)
@@ -91,7 +91,7 @@ format_column_headers_html <- function (col_names) {
     return(col_names)
 }
 
-#' Apply formatting to column headers in exported tables (HTML)
+#' Apply formatting to indented groups
 #' @keywords internal
 format_indented_groups <- function (df, indent_string = "    ") {
     if (!("Variable" %in% names(df) && "Group" %in% names(df))) {
@@ -128,7 +128,7 @@ format_indented_groups <- function (df, indent_string = "    ") {
                 new_df <- rbind(new_df, var_row)
                 for (j in current:(next_var - 1)) {
                     group_row <- df[j, ]
-                    group_row$Variable <- paste0(latex_indent, 
+                    group_row$Variable <- paste0(indent_string, 
                                                  df$Group[j])
                     if (is_fastfit_table) {
                         for (ec in effect_cols) {
@@ -138,11 +138,11 @@ format_indented_groups <- function (df, indent_string = "    ") {
                                                                         val))) {
                                     if (grepl("Univariable", ec) && "Uni p" %in% 
                                         names(group_row)) {
-                                        group_row[["Uni p"]] <- ""
+                                        group_row[["Uni p"]] <- "-"
                                     }
                                     else if (grepl("Multivariable", ec) && 
                                              "Multi p" %in% names(group_row)) {
-                                        group_row[["Multi p"]] <- ""
+                                        group_row[["Multi p"]] <- "-"
                                     }
                                 }
                             }
@@ -182,7 +182,7 @@ format_indented_groups <- function (df, indent_string = "    ") {
                 new_df <- rbind(new_df, var_row)
                 for (j in current:(next_var - 1)) {
                     group_row <- df[j, ]
-                    group_row$Variable <- paste0(latex_indent, 
+                    group_row$Variable <- paste0(indent_string, 
                                                  df$Group[j])
                     for (p_col in p_cols) {
                         if (p_col %in% names(group_row)) {
@@ -382,4 +382,248 @@ format_column_headers_with_n_html <- function(col_names, n_row_data) {
         }
     }
     return(new_names)
+}
+
+#' Condense table rows for more compact display
+#' @keywords internal
+condense_table_rows <- function(df, indent_groups = TRUE) {
+    
+    ## Work with a copy
+    result <- data.table::copy(as.data.table(df))
+    
+    ## Detect table type
+    is_descriptive <- !any(grepl("(OR|HR|RR|Coefficient|Estimate).*\\(95% CI\\)", names(result)))
+    
+    ## Track rows to delete
+    rows_to_delete <- integer()
+    
+    ## Process each variable
+    vars_to_process <- which(result$Variable != "" & !is.na(result$Variable))
+    
+    for (i in seq_along(vars_to_process)) {
+        var_start <- vars_to_process[i]
+        var_end <- if (i < length(vars_to_process)) {
+                       vars_to_process[i + 1] - 1
+                   } else {
+                       nrow(result)
+                   }
+        
+        if (var_start %in% rows_to_delete) next
+        
+        var_name <- result$Variable[var_start]
+        var_rows <- result[var_start:var_end]
+        n_rows <- nrow(var_rows)
+        
+        if ("Group" %in% names(var_rows)) {
+            groups <- var_rows$Group
+            
+            ## Check for continuous variable
+            is_continuous <- any(grepl("^(Mean|Median|Range|SD|IQR)", groups[1], ignore.case = TRUE))
+            
+            ## Check for binary categorical
+            non_empty_groups <- groups[groups != "" & !is.na(groups)]
+            is_binary <- length(non_empty_groups) == 2 && !is_continuous
+            
+            ## Check for survival
+            is_survival <- any(grepl("Median.*\\(.*CI.*\\)", groups, ignore.case = TRUE))
+            
+            if (is_continuous || is_survival) {
+                ## For continuous/survival, keep only first row
+                if (is_descriptive) {
+                    stat_type <- gsub("\\s*\\(.*\\)", "", groups[1])
+                    stat_type <- gsub("\\s*±.*", "", stat_type)
+                    if (stat_type != "" && !is.na(stat_type) && stat_type != "-") {
+                        if (grepl("Mean ± SD", groups[1])) {
+                            result[var_start, Variable := paste0(var_name, ", mean ± SD")]
+                        } else if (grepl("Median", groups[1]) && grepl("IQR", groups[1])) {
+                            result[var_start, Variable := paste0(var_name, ", median [IQR]")]
+                        } else if (grepl("Median", groups[1]) && is_survival) {
+                            result[var_start, Variable := paste0(var_name, ", median (95% CI)")]
+                        } else {
+                            result[var_start, Variable := paste0(var_name, ", ", tolower(stat_type))]
+                        }
+                    }
+                    ## Clear Group column
+                    result[var_start, Group := ""]
+                }
+                
+                ## Mark extra rows for deletion
+                if (n_rows > 1) {
+                    rows_to_delete <- c(rows_to_delete, (var_start + 1):var_end)
+                }
+                
+            } else if (is_binary) {
+                ## For binary categorical
+                data_cols <- setdiff(names(result), c("Variable", "Group", "p-value", "p.value"))
+                
+                if (length(data_cols) > 0) {
+                    first_data_col <- data_cols[1]
+                    non_ref_idx <- which(!var_rows[[first_data_col]] %in% c("-", "reference", "Reference", ""))
+                    
+                    if (length(non_ref_idx) > 1) {
+                        non_ref_idx <- non_ref_idx[2]
+                    } else if (length(non_ref_idx) == 0) {
+                        non_ref_idx <- 2
+                    }
+                    
+                    if (non_ref_idx <= n_rows) {
+                        non_ref_row <- var_start + non_ref_idx - 1
+                        category_name <- result$Group[non_ref_row]
+                        
+                        if (!is.na(category_name) && category_name != "") {
+                            if (category_name %in% c("1", "Yes", "yes")) {
+                                result[var_start, Variable := paste0(var_name)]
+                            } else {
+                                result[var_start, Variable := paste0(var_name, " (", category_name, ")")]                                
+                            }
+                        }
+                        
+                        ## Copy statistics
+                        for (col in data_cols) {
+                            if (col %in% names(result)) {
+                                result[var_start, (col) := result[non_ref_row, get(col)]]
+                            }
+                        }
+                        
+                        ## Copy p-value
+                        if ("p-value" %in% names(result)) {
+                            pval <- result[var_start:var_end, `p-value`]
+                            pval <- pval[!is.na(pval) & pval != ""]
+                            if (length(pval) > 0) {
+                                result[var_start, `p-value` := pval[1]]
+                            }
+                        }
+                        
+                        ## Clear Group column
+                        result[var_start, Group := ""]
+                        
+                        ## Mark other rows for deletion
+                        rows_to_delete <- c(rows_to_delete, (var_start + 1):var_end)
+                    }
+                }
+            } 
+        }
+    }
+    
+    ## Remove marked rows
+    if (length(rows_to_delete) > 0) {
+        rows_to_delete <- sort(unique(rows_to_delete))
+        rows_to_delete <- rows_to_delete[rows_to_delete <= nrow(result)]
+        if (length(rows_to_delete) > 0) {
+            result <- result[-rows_to_delete]
+        }
+    }
+    
+    return(result)
+}
+
+#' Process a block of rows for a single variable
+#' @keywords internal
+process_variable_block <- function(data, start_row, end_row, rows_to_keep, is_descriptive) {
+    
+    n_rows <- end_row - start_row + 1
+    var_name <- data$Variable[start_row]
+    
+                                        # Check if it's a continuous variable (single row or has statistics like mean/SD)
+    is_continuous <- FALSE
+    if (n_rows == 1) {
+        is_continuous <- TRUE
+    } else if ("Group" %in% names(data)) {
+                                        # Check for continuous variable indicators
+        groups <- data$Group[start_row:end_row]
+        is_continuous <- any(grepl("(Mean|Median|Range|SD|IQR)", groups, ignore.case = TRUE))
+    }
+    
+                                        # Check if it's a binary categorical (2 levels including reference)
+    is_binary <- FALSE
+    if (!is_continuous && n_rows == 2) {
+                                        # Check if one is reference
+        if (any(grepl("reference|-|^$", data$Group[start_row:end_row]))) {
+            is_binary <- TRUE
+        }
+    }
+    
+    if (is_continuous) {
+                                        # Condense continuous variable
+        rows_to_keep <- condense_continuous(data, start_row, end_row, rows_to_keep, is_descriptive)
+        
+    } else if (is_binary) {
+                                        # Condense binary categorical
+        rows_to_keep <- condense_binary(data, start_row, end_row, rows_to_keep, is_descriptive)
+        
+    } else {
+                                        # Multi-level categorical - keep as is
+                                        # Just ensure the variable name is on the first row
+        for (i in (start_row+1):end_row) {
+            if (i <= length(rows_to_keep)) {
+                data$Variable[i] <- ""
+            }
+        }
+    }
+    
+    return(rows_to_keep)
+}
+
+#' Condense continuous variable rows
+#' @keywords internal
+condense_continuous <- function(data, start_row, end_row, rows_to_keep, is_descriptive) {
+    
+                                        # For continuous, keep only first row and update its label
+    if (is_descriptive && "Group" %in% names(data)) {
+                                        # Extract the statistic type and append to variable name
+        stat_type <- data$Group[start_row]
+        if (!is.na(stat_type) && stat_type != "" && stat_type != "-") {
+                                        # Clean up the stat type
+            stat_clean <- gsub("\\s*\\(.*\\)", "", stat_type)  # Remove parenthetical info
+            data$Variable[start_row] <- paste0(data$Variable[start_row], ", ", tolower(stat_clean))
+        }
+                                        # Clear the Group column for cleaner look
+        data$Group[start_row] <- "-"
+    }
+    
+                                        # Mark rows to remove
+    if (end_row > start_row) {
+        rows_to_keep[(start_row+1):end_row] <- FALSE
+    }
+    
+    return(rows_to_keep)
+}
+
+#' Condense binary categorical variable rows  
+#' @keywords internal
+condense_binary <- function(data, start_row, end_row, rows_to_keep, is_descriptive) {
+    
+                                        # Find the non-reference row
+    non_ref_row <- start_row
+    for (i in start_row:end_row) {
+        if (!grepl("reference|-|^$", data$Group[i])) {
+            non_ref_row <- i
+            break
+        }
+    }
+    
+                                        # Move non-reference data to first row
+    if (non_ref_row != start_row) {
+                                        # Copy statistics from non-reference row
+        stat_cols <- setdiff(names(data), c("Variable", "Group"))
+        for (col in stat_cols) {
+            if (col %in% names(data)) {
+                data[[col]][start_row] <- data[[col]][non_ref_row]
+            }
+        }
+    }
+    
+                                        # Update the variable label to include the category
+    non_ref_level <- data$Group[non_ref_row]
+    if (!is.na(non_ref_level) && non_ref_level != "") {
+        data$Variable[start_row] <- paste0(data$Variable[start_row], " (", non_ref_level, ")")
+    }
+    
+                                        # Clear the Group column
+    data$Group[start_row] <- "-"
+    
+                                        # Mark second row for removal
+    rows_to_keep[end_row] <- FALSE
+    
+    return(rows_to_keep)
 }

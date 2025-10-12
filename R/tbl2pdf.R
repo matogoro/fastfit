@@ -28,6 +28,9 @@
 #'   or "r" (right).
 #' @param indent_groups Logical. If TRUE, indents grouped rows hierarchically.
 #'   Default is FALSE.
+#' @param condense_table Logical. If TRUE, decreases table vertical height by
+#'   reducing continuous, survival, and binary categorical variables to single
+#'   rows. Makes indent_groups = TRUE by default. Default is FALSE.
 #' @param ... Additional arguments passed to xtable::xtable.
 #'
 #' @return Invisibly returns NULL. Creates a PDF file at the specified location.
@@ -116,7 +119,8 @@ tbl2pdf <- function (table,
                      bold_significant = TRUE, 
                      sig_threshold = 0.05,
                      align = NULL,
-                     indent_groups = FALSE, 
+                     indent_groups = FALSE,
+                     condense_table = FALSE,
                      ...) {
     
     if (!requireNamespace("xtable", quietly = TRUE)) {
@@ -129,8 +133,7 @@ tbl2pdf <- function (table,
     
     if (!check_latex()) {
         if (requireNamespace("tinytex", quietly = TRUE) && tinytex::is_tinytex()) {
-        }
-        else {
+        } else {
             stop("PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()")
         }
     }
@@ -146,11 +149,15 @@ tbl2pdf <- function (table,
         n_row_data <- df[1, ]
         df <- df[-1, ]
     }
-    
-    if (indent_groups) {
-        df <- format_indented_groups(df)
+
+    if (condense_table) {
+        indent_groups <- TRUE
+        df <- condense_table_rows(df, indent_groups = indent_groups)
+        df <- format_indented_groups(df, indent_string = "\\hspace{1em}")
+    } else if (indent_groups) {
+        df <- format_indented_groups(df, indent_string = "\\hspace{1em}")
     }
-    
+
     if (bold_significant) {
         df <- format_pvalues_export_tex(df, sig_threshold)
     }

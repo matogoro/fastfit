@@ -13,6 +13,7 @@ tbl2tex(
   sig_threshold = 0.05,
   align = NULL,
   indent_groups = FALSE,
+  condense_table = FALSE,
   booktabs = FALSE,
   caption = NULL,
   label = NULL,
@@ -43,6 +44,10 @@ automatically determines based on column content. Options: "l" (left),
 
 \item{indent_groups}{Logical. If TRUE, uses \\hspace to indent grouped rows
 creating a hierarchical display. Default is FALSE.}
+
+\item{condense_table}{Logical. If TRUE, decreases table vertical height by
+reducing continuous, survival, and binary categorical variables to single
+rows. Makes indent_groups = TRUE by default. Default is FALSE.}
 
 \item{booktabs}{Logical. If TRUE, uses booktabs package commands for
 professional-quality rules. Default is FALSE.}

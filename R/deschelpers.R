@@ -893,11 +893,11 @@ reorder_total_column <- function(result, total, total_label) {
         cols <- names(result)
         
         ## Get base columns and group columns
-        base_cols <- c("variable", "level")
+        base_cols <- c("Variable", "Group")
         group_cols <- cols[!cols %in% c(base_cols, total_label, "p-value")]
         p_col <- if ("p-value" %in% cols) "p-value" else NULL
         
-        ## Modified logic: total = TRUE puts it first, total = "last" puts it last
+        ## total = TRUE puts it first, total = "last" puts it last
         if (isTRUE(total) || (is.character(total) && total == "first")) {
             new_order <- c(base_cols, total_label, group_cols, p_col)
         } else if (is.character(total) && total == "last") {

@@ -19,6 +19,7 @@ tbl2pdf(
   sig_threshold = 0.05,
   align = NULL,
   indent_groups = FALSE,
+  condense_table = FALSE,
   ...
 )
 }
@@ -60,6 +61,10 @@ or "r" (right).}
 
 \item{indent_groups}{Logical. If TRUE, indents grouped rows hierarchically.
 Default is FALSE.}
+
+\item{condense_table}{Logical. If TRUE, decreases table vertical height by
+reducing continuous, survival, and binary categorical variables to single
+rows. Makes indent_groups = TRUE by default. Default is FALSE.}
 
 \item{...}{Additional arguments passed to xtable::xtable.}
 }

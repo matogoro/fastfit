@@ -11,13 +11,16 @@
 #'   display (converts underscores to spaces, applies proper casing). Default
 #'   is TRUE.
 #' @param add_padding Logical. If TRUE, adds padding around variable groups
-#'   for improved readability. Default is TRUE.
+#'   for improved readability. Default is FALSE.
 #' @param bold_significant Logical. If TRUE, wraps significant p-values in
 #'   HTML bold tags. Default is TRUE.
 #' @param sig_threshold Numeric. P-value threshold for significance highlighting.
 #'   Default is 0.05.
 #' @param indent_groups Logical. If TRUE, indents grouped rows using non-breaking
 #'   spaces for hierarchical display. Default is FALSE.
+#' @param condense_table Logical. If TRUE, decreases table vertical height by
+#'   reducing continuous, survival, and binary categorical variables to single
+#'   rows. Makes indent_groups = TRUE by default. Default is FALSE.
 #' @param include_css Logical. If TRUE, includes basic CSS styling in the output
 #'   file. Set to FALSE if including in existing HTML with its own styles.
 #'   Default is TRUE.
@@ -69,10 +72,11 @@ tbl2html <- function(table,
                      file,
                      caption = NULL,
                      format_headers = TRUE,
-                     add_padding = TRUE, 
+                     add_padding = FALSE, 
                      bold_significant = TRUE,
                      sig_threshold = 0.05,
                      indent_groups = FALSE,
+                     condense_table = FALSE,
                      include_css = TRUE,
                      ...) {
     
@@ -93,17 +97,21 @@ tbl2html <- function(table,
         n_row_data <- df[1, ]
         df <- df[-1, ]
     }
-    
-    if (indent_groups) {
+
+    if (add_padding && !condense_table && ("Variable" %in% names(df) || "variable" %in% names(df))) {
+        df <- add_variable_padding(df)
+    }
+
+    if (condense_table) {
+        indent_groups <- TRUE
+        df <- condense_table_rows(df, indent_groups = indent_groups)
+        df <- format_indented_groups(df, indent_string = "&nbsp;&nbsp;&nbsp;&nbsp;")
+    } else if (indent_groups) {
         df <- format_indented_groups(df, indent_string = "&nbsp;&nbsp;&nbsp;&nbsp;")
     }
-    
+
     if (bold_significant) {
         df <- format_pvalues_export_html(df, sig_threshold)
-    }
-    
-    if (add_padding && ("Variable" %in% names(df) || "variable" %in% names(df))) {
-        df <- add_variable_padding(df)
     }
     
     if (format_headers) {
@@ -116,7 +124,7 @@ tbl2html <- function(table,
     
     xt <- xtable::xtable(df, caption = caption, ...)
     
-    if (include_css) {
+    if (include_css && !indent_groups) {
         css <- "<style>\n
             table { \n
             border-collapse: collapse; \n
@@ -130,6 +138,36 @@ tbl2html <- function(table,
             }\n
             th:not(:nth-child(1)):not(:nth-child(2)), \n
             td:not(:nth-child(1)):not(:nth-child(2)) { \n
+            text-align: center; \n
+            }\n
+            th { \n
+            background-color: #f2f2f2; \n
+            font-weight: bold;\n
+            }\n
+            caption {\n
+            text-align: left;\n
+            margin-top: 10px;\n
+            margin-bottom: 10px;\n
+            font-weight: bold;\n
+            font-size: 1.1em;\n
+            }\n
+            </style>\n"
+        cat(css, file = file)
+        append <- TRUE
+    } else if (include_css && indent_groups) {
+        css <- "<style>\n
+            table { \n
+            border-collapse: collapse; \n
+            font-family: Arial, sans-serif;\n
+            margin: 20px;\n
+            }\n
+            th, td { \n
+            padding: 8px 12px; \n
+            text-align: left; \n
+            border: 1px solid #ddd;\n
+            }\n
+            th:not(:first-child), \n
+            td:not(:first-child) { \n
             text-align: center; \n
             }\n
             th { \n

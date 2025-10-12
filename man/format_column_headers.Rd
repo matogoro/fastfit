@@ -2,11 +2,11 @@
 % Please edit documentation in R/tbl2helpers.R
 \name{format_column_headers}
 \alias{format_column_headers}
-\title{Apply formatting to column headers in exported tables}
+\title{Apply formatting to column headers in exported tables (PDF/LaTeX)}
 \usage{
 format_column_headers(col_names, add_header_space = TRUE)
 }
 \description{
-Apply formatting to column headers in exported tables
+Apply formatting to column headers in exported tables (PDF/LaTeX)
 }
 \keyword{internal}

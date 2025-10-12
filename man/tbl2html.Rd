@@ -9,10 +9,11 @@ tbl2html(
   file,
   caption = NULL,
   format_headers = TRUE,
-  add_padding = TRUE,
+  add_padding = FALSE,
   bold_significant = TRUE,
   sig_threshold = 0.05,
   indent_groups = FALSE,
+  condense_table = FALSE,
   include_css = TRUE,
   ...
 )
@@ -30,7 +31,7 @@ display (converts underscores to spaces, applies proper casing). Default
 is TRUE.}
 
 \item{add_padding}{Logical. If TRUE, adds padding around variable groups
-for improved readability. Default is TRUE.}
+for improved readability. Default is FALSE.}
 
 \item{bold_significant}{Logical. If TRUE, wraps significant p-values in
 HTML bold tags. Default is TRUE.}
@@ -40,6 +41,10 @@ Default is 0.05.}
 
 \item{indent_groups}{Logical. If TRUE, indents grouped rows using non-breaking
 spaces for hierarchical display. Default is FALSE.}
+
+\item{condense_table}{Logical. If TRUE, decreases table vertical height by
+reducing continuous, survival, and binary categorical variables to single
+rows. Makes indent_groups = TRUE by default. Default is FALSE.}
 
 \item{include_css}{Logical. If TRUE, includes basic CSS styling in the output
 file. Set to FALSE if including in existing HTML with its own styles.

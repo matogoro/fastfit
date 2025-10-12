@@ -2,11 +2,11 @@
 % Please edit documentation in R/tbl2helpers.R
 \name{format_indented_groups}
 \alias{format_indented_groups}
-\title{Apply formatting to column headers in exported tables (HTML)}
+\title{Apply formatting to indented groups}
 \usage{
 format_indented_groups(df, indent_string = "    ")
 }
 \description{
-Apply formatting to column headers in exported tables (HTML)
+Apply formatting to indented groups
 }
 \keyword{internal}

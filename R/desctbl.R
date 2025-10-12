@@ -172,11 +172,6 @@ desctbl <- function(data,
         result <- format_pvalues_desctbl(result, digits_p)
     }
 
-    ## Reorder columns if total position specified
-    if (!isFALSE(total) && !is.null(group_var)) {
-        result <- reorder_total_column(result, total, total_label)
-    }
-
     ## Add N row as first row if grouped (after all other processing)
     if (!is.null(group_var)) {
         
@@ -202,7 +197,7 @@ desctbl <- function(data,
             n_row[[total_label]] <- format(n_total, big.mark = ",")
         }
         
-        ## Calculate for each group IN THE CORRECT ORDER
+        ## Calculate for each group in the correct order
         for (grp in groups) {
             grp_col <- as.character(grp)
             if (grp_col %in% names(result)) {
@@ -219,7 +214,12 @@ desctbl <- function(data,
         ## Prepend N row
         result <- rbind(n_row, result, fill = TRUE)
     }
-    
+
+    ## Reorder columns if total position specified
+    if (!isFALSE(total) && !is.null(group_var)) {
+        result <- reorder_total_column(result, total, total_label)
+    }
+
     ## Attach raw data and metadata as attributes
     data.table::setattr(result, "raw_data", raw_result)
     data.table::setattr(result, "by_variable", group_var)
