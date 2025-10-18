@@ -38,6 +38,10 @@
 #'   allocated to the events column. Default is 0.06.
 #' @param col_width_hr Numeric value specifying the proportion of plot width 
 #'   allocated to the hazard ratio column. Default is 0.05.
+#' @param indent_groups Logical. Whether to indent group levels under variables.
+#'   Default is FALSE.
+#' @param condense_table Logical. Whether to condense binary variables into single rows.
+#'   Forces indent_groups = TRUE. Default is FALSE.
 #' @param ref_label Character string to display for reference categories. 
 #'   Default is "reference".
 #' @param var_labels Named character vector for custom variable labels. Names should 
@@ -122,6 +126,8 @@ coxforest <- function(model, data = NULL,
                       col_width_events = 0.06,
                       col_width_hr = 0.05,
                       show_n_events = c("n", "Events"),
+                      indent_groups = FALSE,
+                      condense_table = FALSE,
                       ref_label = "reference",
                       var_labels = NULL,
                       color = "#8A61D8") {
@@ -262,7 +268,7 @@ coxforest <- function(model, data = NULL,
 
     data.table::setnames(allTermsDF, c("var", "level", "N", "pos", "var_order"))
 
-## Add events
+    ## Add events
     formula_terms <- all.vars(model$formula)
     
     if (length(formula_terms) >= 2) {
@@ -294,9 +300,138 @@ coxforest <- function(model, data = NULL,
         ## No events column if can't extract event variable
         allTermsDF[, Events := NA_integer_]
     }
-    
-    ## Create matching index
-    allTermsDF[, inds := ifelse(level == "-", var, paste0(var, level))]
+
+    if (condense_table || indent_groups) {
+                                        # Force indent_groups = TRUE when condense_table = TRUE
+        if (condense_table) {
+            indent_groups <- TRUE
+        }
+        
+                                        # Store the original inds mapping before any modifications
+        allTermsDF[, inds := ifelse(level == "-", var, paste0(var, level))]
+        orig_inds_map <- data.table::copy(allTermsDF[, .(var, level, inds, N, Events)])
+        
+                                        # Process the structure for condensing/indenting
+        processed_rows <- list()
+        row_counter <- 1
+        
+                                        # Group by variable
+        unique_vars <- unique(allTermsDF[, var])
+        
+        for (v in unique_vars) {
+            var_rows <- allTermsDF[var == v]
+            
+            if (nrow(var_rows) == 1) {
+                                        # Continuous variable - keep as is
+                processed_rows[[row_counter]] <- var_rows
+                row_counter <- row_counter + 1
+            } else {
+                                        # Categorical variable
+                                        # Check if it's binary (2 levels)
+                is_binary <- nrow(var_rows) == 2
+                
+                if (condense_table && is_binary) {
+                                        # Find non-reference level (typically the second level)
+                    non_ref_row <- var_rows[2]
+                    
+                                        # Create condensed row
+                    condensed_row <- data.table::copy(non_ref_row)
+                    condensed_row[, var := paste0(v, " (", level, ")")]
+                    condensed_row[, level := "-"]
+                                        # Keep the original inds for coefficient matching
+                    
+                    processed_rows[[row_counter]] <- condensed_row
+                    row_counter <- row_counter + 1
+                } else {
+                                        # Multi-level categorical or non-condensed binary
+                    if (indent_groups) {
+                                        # Add header row (no data, just variable name)
+                        header_row <- data.table::data.table(
+                                                      var = v,
+                                                      level = "-",  # Use "-" instead of empty to merge Variable/Group columns
+                                                      N = NA_integer_,
+                                                      Events = NA_integer_,
+                                                      pos = var_rows$pos[1],
+                                                      var_order = var_rows$var_order[1],
+                                                      inds = NA_character_
+                                                  )
+                        processed_rows[[row_counter]] <- header_row
+                        row_counter <- row_counter + 1
+                        
+                                        # Add indented group rows
+                        for (i in 1:nrow(var_rows)) {
+                            group_row <- data.table::copy(var_rows[i])
+                                        # Merge the level into the variable column with indentation
+                            group_row[, var := paste0("    ", level)]
+                            group_row[, level := "-"]  # Clear the level column
+                            processed_rows[[row_counter]] <- group_row
+                            row_counter <- row_counter + 1
+                        }
+                    } else {
+                                        # Not indenting - keep original structure
+                        for (i in 1:nrow(var_rows)) {
+                            processed_rows[[row_counter]] <- var_rows[i]
+                            row_counter <- row_counter + 1
+                        }
+                    }
+                }
+            }
+        }
+        
+                                        # Combine all processed rows
+        allTermsDF <- data.table::rbindlist(processed_rows, fill = TRUE)
+        
+                                        # Fix the inds column for matching with coefficients
+        for (i in 1:nrow(allTermsDF)) {
+            current_var <- allTermsDF$var[i]
+            
+                                        # Skip header rows (they have NA inds and that's fine)
+            if (is.na(allTermsDF$inds[i]) && !grepl("^    ", current_var) && !grepl("\\(", current_var)) {
+                                        # This is a header row - leave inds as NA
+                next
+            }
+            
+                                        # Handle condensed binary variables
+            if (grepl("\\(", current_var)) {
+                                        # Extract original var and level
+                orig_var <- gsub(" \\(.*\\)", "", current_var)
+                orig_level <- gsub(".*\\((.*)\\)", "\\1", current_var)
+                
+                matching <- orig_inds_map[var == orig_var & level == orig_level]
+                if (nrow(matching) > 0) {
+                    allTermsDF[i, `:=`(inds = matching$inds[1],
+                                       N = matching$N[1],
+                                       Events = matching$Events[1])]
+                }
+            }
+                                        # Handle indented group rows
+            else if (grepl("^    ", current_var)) {
+                                        # This is an indented level
+                clean_level <- gsub("^    ", "", current_var)
+                
+                                        # Find the parent variable by looking up
+                parent_var <- NA_character_
+                for (j in (i-1):1) {
+                    if (!grepl("^    ", allTermsDF$var[j]) && allTermsDF$var[j] != "") {
+                        parent_var <- gsub(" \\(.*\\)", "", allTermsDF$var[j])
+                        break
+                    }
+                }
+                
+                if (!is.na(parent_var)) {
+                    matching <- orig_inds_map[var == parent_var & level == clean_level]
+                    if (nrow(matching) > 0) {
+                        allTermsDF[i, `:=`(inds = matching$inds[1],
+                                           N = matching$N[1],
+                                           Events = matching$Events[1])]
+                    }
+                }
+            }
+        }
+    } else {
+                                        # No condensing or indenting - create inds normally
+        allTermsDF[, inds := ifelse(level == "-", var, paste0(var, level))]
+    }
     
     ## Process coefficients
     coef[, term := gsub(term, pattern = "`", replacement = "-")]
@@ -321,53 +456,106 @@ coxforest <- function(model, data = NULL,
     toShowExpClean[, hr := ifelse(is.na(estimate), 
                                   NA_real_,
                                   exp(estimate))]
-    toShowExpClean[, hr_formatted := ifelse(is.na(estimate), 
+
+                                        # For header rows (with NA N values), show empty strings instead of "reference"
+    toShowExpClean[, hr_formatted := ifelse(is.na(N) & is.na(estimate),
+                                            "",  # Empty for header rows
+                                     ifelse(is.na(estimate), 
                                             ref_label,
-                                            format(round(exp(estimate), digits), nsmall = digits))]
+                                            format(round(exp(estimate), digits), nsmall = digits)))]
+
     toShowExpClean[, conf_low_formatted := ifelse(is.na(conf_low), 
                                                   NA_character_,
                                                   format(round(exp(conf_low), digits), nsmall = digits))]
     toShowExpClean[, conf_high_formatted := ifelse(is.na(conf_high), 
                                                    NA_character_,
                                                    format(round(exp(conf_high), digits), nsmall = digits))]
-    
+
     ## Format p-values
     toShowExpClean[, p_formatted := ifelse(is.na(p_value), 
                                            NA_character_,
                                     ifelse(p_value < 0.001, 
                                            "< 0.001",
                                            format(round(p_value, 3), nsmall = 3)))]
-    
+
     ## Create the combined HR string with expression for italic p
+                                        # Special handling for header rows
     toShowExpClean[, hr_string_expr := ifelse(
-                         is.na(estimate),
-                         paste0("'", ref_label, "'"),
+                         is.na(N) & is.na(estimate),
+                         "''",  # Empty string for header rows
+                                       ifelse(
+                                           is.na(estimate),
+                                           paste0("'", ref_label, "'"),
                                        ifelse(p_value < 0.001,
                                               paste0("'", hr_formatted, " (", conf_low_formatted, "-", 
                                                      conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
                                               paste0("'", hr_formatted, " (", conf_low_formatted, "-", 
                                                      conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'"))
+                                       )
                      )]
-    
+
     ## Format N and events with thousands separator
-    toShowExpClean[, n_formatted := format(N, big.mark = ",", scientific = FALSE)]
-    toShowExpClean[, events_formatted := format(Events, big.mark = ",", scientific = FALSE)]
+                                        # Show empty for header rows
+    toShowExpClean[, n_formatted := ifelse(is.na(N), "", format(N, big.mark = ",", scientific = FALSE))]
+    toShowExpClean[, events_formatted := ifelse(is.na(Events), "", format(Events, big.mark = ",", scientific = FALSE))]
     
     ## Clean up variable names for display
     toShowExpClean[, var_display := as.character(var)]
 
-    ## Apply labels with priority: var_labels > attributes > variable name
-    for(v in unique(toShowExpClean$var)) {
-        if(v %in% toShowExpClean$var) {
-            ## Check custom labels first (highest priority)
-            if(!is.null(var_labels) && v %in% names(var_labels)) {
-                toShowExpClean[var == v, var_display := var_labels[v]]
+                                        # For the Variable column display
+    if (indent_groups || condense_table) {
+                                        # When indented/condensed, the level is already merged into var
+                                        # Just display var as is (it already contains indented levels or condensed names)
+        toShowExpClean[, var_display := var]
+        
+        for (v in unique(toShowExpClean$var)) {
+            if (v != "" && !grepl("^    ", v)) {  # Not an indented level
+                clean_v <- gsub(" \\(.*\\)", "", v)  # Remove condensed category
+
+                                        # Get the label, either from var_labels or the data attribute
+                label <- if (!is.null(var_labels) && clean_v %in% names(var_labels)) {
+                             var_labels[clean_v]
+                         } else if (!is.null(attr(data[[clean_v]], "label"))) {
+                             attr(data[[clean_v]], "label")
+                         } else {
+                             NULL
+                         }
+
+                if (!is.null(label)) {
+                    if (grepl("\\(", v)) {
+                        category <- gsub(".*\\((.*)\\)", "\\1", v)
+                        if (category %in% c("1", "Yes", "yes")) {
+                                        # Exception: don't append category
+                            toShowExpClean[var == v, var_display := label]
+                        } else {
+                                        # Normal: append category
+                            toShowExpClean[var == v, var_display := paste0(label, " (", category, ")")]
+                        }
+                    } else {
+                        toShowExpClean[var == v, var_display := label]
+                    }
+                }
             }
-            ## Then check for attributes
-            else if(!is.null(attr(data[[v]], "label"))) {
-                toShowExpClean[var == v, var_display := attr(data[[v]], "label")]
+        }
+        
+                                        # Hide the Group column by using empty level display
+        toShowExpClean[, level := ""]
+        
+    } else {
+        
+        ## Apply labels with priority: var_labels > attributes > variable name
+        for(v in unique(toShowExpClean$var)) {
+            if(v %in% toShowExpClean$var) {
+                ## Check custom labels first (highest priority)
+                if(!is.null(var_labels) && v %in% names(var_labels)) {
+                    toShowExpClean[var == v, var_display := var_labels[v]]
+                }
+                ## Then check for attributes
+                else if(!is.null(attr(data[[v]], "label"))) {
+                    toShowExpClean[var == v, var_display := attr(data[[v]], "label")]
+                }
+                ## Otherwise keep the variable name as-is
             }
-            ## Otherwise keep the variable name as-is
         }
     }
 
@@ -427,7 +615,11 @@ coxforest <- function(model, data = NULL,
     max_hr_len <- max(hr_display_len, nchar("HR (95% CI); p-value"), na.rm = TRUE) * 1.1
     
     ## Calculate total character width needed
-    total_text_chars <- max_var_len + max_level_len + max_n_len + max_hr_len + 4
+    if (indent_groups || condense_table) {
+        total_text_chars <- max_var_len + max_n_len + max_hr_len + 4
+    } else {
+        total_text_chars <- max_var_len + max_level_len + max_n_len + max_hr_len + 4
+    }
     
     ## Calculate optimal tbl_width if not provided
     if(is.null(tbl_width)) {
@@ -551,6 +743,14 @@ coxforest <- function(model, data = NULL,
     y_variable <- rangeplot[1] + col_width_var * width
     y_level <- y_variable + col_width_level * width
 
+    if (indent_groups || condense_table) {
+        y_level <- y_variable + (col_width_var + 0.05) * width
+        next_base <- y_variable
+    } else {
+        y_level <- y_variable + col_width_level * width
+        next_base <- y_level
+    }
+    
     if ("n" %in% show_n_events) {
         y_n <- y_level + col_width_n * width
         next_pos <- y_n
@@ -671,66 +871,79 @@ coxforest <- function(model, data = NULL,
         ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_variable),
                           label = "Variable", fontface = "bold", hjust = 0,
                           size = header_font) +
-        
-        ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_variable),
-                          label = toShowExpClean$var_display, fontface = "bold", hjust = 0,
-                          size = annot_font) +
-        
-        ## Group/level column
-        
-        ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_level),
-                          label = "Group", fontface = "bold", hjust = 0,
-                          size = header_font) +
-        
-        ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_level),
-                          label = toShowExpClean$level, hjust = 0,
-                          size = annot_font) +
-                
-        ## N column (conditional)
-        {if ("n" %in% show_n_events) {
-             list(
-                 ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_n),
-                                   label = "n", fontface = "bold.italic", hjust = 0.5,
-                                   size = header_font),
-                 ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_n),
-                                   label = toShowExpClean$n_formatted, hjust = 0.5,
-                                   size = annot_font)
-             )
-         }} +
-        
-        ## Events column (conditional)
-        {if ("Events" %in% show_n_events) {
-             list(
-                 ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_events),
-                                   label = "Events", fontface = "bold", hjust = 0.5,
-                                   size = header_font),
-                 ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_events),
-                                   label = toShowExpClean$events_formatted, hjust = 0.5,
-                                   size = annot_font)
-             )
-         }} +
-        
-        ## Effect column
-        ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.4, y = exp(y_hr),
-                          label = "bold('aHR (95% CI); '*bolditalic(p)*'-value')",
-                         hjust = 0, size = header_font, parse = TRUE) +
-        
-        ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_hr),
-                          label = toShowExpClean$hr_string_expr, hjust = 0,
-                          size = annot_font, parse = TRUE) +
-        
-        ## X-axis label
-        ggplot2::annotate(geom = "text", x = -1.5, y = 1,
-                          label = "Hazard Ratio", fontface = "bold",
-                          hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
-        
-        ## Model statistics footer
-        ggplot2::annotate(geom = "text", x = 0.5, y = exp(y_variable),
-                          label = paste0("Total events: ", gmodel$nevent_formatted,
-                                         "\nGlobal log-rank p: ", global_p_formatted,
-                                         "\n", concordance_string,
-                                         "\nAIC: ", gmodel$AIC_formatted),
-                          size = annot_font, hjust = 0, vjust = 1.2, fontface = "italic")
+
+    {if (indent_groups || condense_table) {
+                                        # When indented/condensed, use conditional formatting
+         ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_variable),
+                           label = toShowExpClean$var_display, 
+                           fontface = ifelse(grepl("^    ", toShowExpClean$var_display), "plain", "bold"), 
+                           hjust = 0,
+                           size = annot_font)
+     } else {
+                                        # Original formatting
+         ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_variable),
+                           label = toShowExpClean$var_display, fontface = "bold", hjust = 0,
+                           size = annot_font)
+     }} +
+    
+    ## Group/level column
+
+    {if (!(indent_groups || condense_table)) {
+         list(
+             ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_level),
+                               label = "Group", fontface = "bold", hjust = 0,
+                               size = header_font),
+             ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_level),
+                               label = toShowExpClean$level, hjust = 0,
+                               size = annot_font)
+         )
+     }} +
+    
+    ## N column (conditional)
+    {if ("n" %in% show_n_events) {
+         list(
+             ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_n),
+                               label = "n", fontface = "bold.italic", hjust = 0.5,
+                               size = header_font),
+             ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_n),
+                               label = toShowExpClean$n_formatted, hjust = 0.5,
+                               size = annot_font)
+         )
+     }} +
+    
+    ## Events column (conditional)
+    {if ("Events" %in% show_n_events) {
+         list(
+             ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = exp(y_events),
+                               label = "Events", fontface = "bold", hjust = 0.5,
+                               size = header_font),
+             ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_events),
+                               label = toShowExpClean$events_formatted, hjust = 0.5,
+                               size = annot_font)
+         )
+     }} +
+    
+    ## Effect column
+    ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.4, y = exp(y_hr),
+                      label = "bold('aHR (95% CI); '*bolditalic(p)*'-value')",
+                      hjust = 0, size = header_font, parse = TRUE) +
+    
+    ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = exp(y_hr),
+                      label = toShowExpClean$hr_string_expr, hjust = 0,
+                      size = annot_font, parse = TRUE) +
+    
+    ## X-axis label
+    ggplot2::annotate(geom = "text", x = -1.5, y = 1,
+                      label = "Hazard Ratio", fontface = "bold",
+                      hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
+    
+    ## Model statistics footer
+    ggplot2::annotate(geom = "text", x = 0.5, y = exp(y_variable),
+                      label = paste0("Total events: ", gmodel$nevent_formatted,
+                                     "\nGlobal log-rank p: ", global_p_formatted,
+                                     "\n", concordance_string,
+                                     "\nAIC: ", gmodel$AIC_formatted),
+                      size = annot_font, hjust = 0, vjust = 1.2, fontface = "italic")
     
     ## Add recommended dimensions as an attribute
     attr(p, "recommended_dims") <- list(width = rec_width, height = rec_height)

@@ -23,6 +23,8 @@ glmforest(
   col_width_events = 0.06,
   col_width_or = 0.05,
   show_n_events = c("n", "Events"),
+  indent_groups = FALSE,
+  condense_table = FALSE,
   ref_label = "reference",
   var_labels = NULL,
   color = "#3A7E8A",
@@ -81,6 +83,15 @@ allocated to the sample size column. Default is 0.06.}
 \item{col_width_or}{Numeric value specifying the proportion of plot width 
 allocated to the effect estimate column. Default is 0.05.}
 
+\item{show_n_events}{Character vector specifying which columns to show. 
+Default is c("n", "Events"). Use NULL for neither.}
+
+\item{indent_groups}{Logical. Whether to indent group levels under variables.
+Default is FALSE.}
+
+\item{condense_table}{Logical. Whether to condense binary variables into single rows.
+Forces indent_groups = TRUE. Default is FALSE.}
+
 \item{ref_label}{Character string to display for reference categories. 
 Default is "reference".}
 
@@ -95,59 +106,13 @@ for logit and log links, FALSE otherwise.}
 }
 \value{
 A ggplot object containing the forest plot. The object has an attribute
-  "recommended_dims" with suggested width and height in inches. If \code{ggpubr} 
-  is installed, returns a ggplot object via \code{ggpubr::as_ggplot()}. 
-  Otherwise, draws the plot directly and returns it invisibly.
+  "recommended_dims" with suggested width and height in inches.
 }
 \description{
 Generates a publication-ready forest plot combining a data table and 
 graphical representation of odds ratios (or other effect measures) from a GLM.
 The plot includes variable names, group levels, sample sizes, effect estimates 
 with confidence intervals, and p-values.
-}
-\details{
-The function creates a forest plot with the following features:
-\itemize{
-  \item Alternating row shading by variable groups
-  \item Point sizes scaled by sample size
-  \item Logarithmic scale for odds/risk ratios (when exponentiated)
-  \item Model statistics displayed at the bottom (observations, model family and link,
-    null deviance, residual deviance, pseudo R-squared, AIC)
-  \item Italic formatting for p-values in the display
-  \item Automatic calculation of optimal dimensions
-  \item Customizable column widths for the data table portion
-}
-
-The function will suggest optimal plot dimensions based on the model complexity.
-Access these via \code{attr(plot, "recommended_dims")} or note the message output.
-}
-\examples{
-\dontrun{
-library(ggplot2)
-
-# Fit a logistic regression model
-glm_model <- glm(am ~ mpg + wt + hp, data = mtcars, family = binomial)
-
-# Create forest plot and save with recommended dimensions
-p <- glmforest(glm_model)
-ggsave("forest.pdf", p, 
-       width = attr(p, "recommended_dims")$width,
-       height = attr(p, "recommended_dims")$height,
-       units = "in")
-
-# Create forest plot with specified dimensions and custom column widths
-p <- glmforest(glm_model, 
-               title = "Logistic Regression Results",
-               plot_width = 12,
-               plot_height = 8,
-               col_width_var = 0.03,
-               col_width_level = 0.20,
-               var_labels = c("mpg" = "Miles per Gallon",
-                             "wt" = "Weight (1000 lbs)",
-                             "hp" = "Horsepower"))
-ggsave("forest.pdf", p, width = 12, height = 8, units = "in")
-}
-
 }
 \seealso{
 \code{\link[stats]{glm}} for fitting GLM models,

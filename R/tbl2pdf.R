@@ -31,6 +31,8 @@
 #' @param condense_table Logical. If TRUE, decreases table vertical height by
 #'   reducing continuous, survival, and binary categorical variables to single
 #'   rows. Makes indent_groups = TRUE by default. Default is FALSE.
+#' @param show_logs Logical. If TRUE, keeps log files after PDF creation.
+#'   Default is FALSE.
 #' @param ... Additional arguments passed to xtable::xtable.
 #'
 #' @return Invisibly returns NULL. Creates a PDF file at the specified location.
@@ -121,6 +123,7 @@ tbl2pdf <- function (table,
                      align = NULL,
                      indent_groups = FALSE,
                      condense_table = FALSE,
+                     show_logs = TRUE,
                      ...) {
     
     if (!requireNamespace("xtable", quietly = TRUE)) {
@@ -178,7 +181,7 @@ tbl2pdf <- function (table,
             names(df) <- format_column_headers(names(df))
         }
     }
-    
+
     xt <- xtable::xtable(df, align = align, ...)
     file_base <- tools::file_path_sans_ext(file)
     tex_file <- paste0(file_base, ".tex")
@@ -252,7 +255,7 @@ tbl2pdf <- function (table,
         cat("\n\\noindent\\resizebox{\\textwidth}{!}{%\n", file = tex_file, 
             append = TRUE)
     }
-    
+
     print(xt,
           file = tex_file,
           append = TRUE,
@@ -263,7 +266,7 @@ tbl2pdf <- function (table,
           hline.after = c(-1, 0, nrow(xt)),
           sanitize.text.function = sanitize_for_latex, 
           sanitize.rownames.function = sanitize_for_latex,
-          sanitize.colnames.function = identity)
+          sanitize.colnames.function = function(x) x)
     
     if (fit_to_page && !is.null(paper_settings$width)) {
         cat("}\n", file = tex_file, append = TRUE)
@@ -303,10 +306,12 @@ tbl2pdf <- function (table,
     }
     
     aux_files <- paste0(file_base, c(".aux", ".log"))
-    
-    for (f in aux_files) {
-        if (file.exists(f)) 
-            file.remove(f)
+
+    if (!show_logs) {
+        for (f in aux_files) {
+            if (file.exists(f))
+                file.remove(f)
+        }
     }
     
     message(sprintf("Table exported to %s", file))

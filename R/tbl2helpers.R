@@ -97,16 +97,18 @@ format_indented_groups <- function (df, indent_string = "    ") {
     if (!("Variable" %in% names(df) && "Group" %in% names(df))) {
         return(df)
     }
-    latex_indent <- "\\hspace{1em}"
+    
     var_rows <- which(df$Variable != "")
     p_cols <- grep("p-value|Uni p|Multi p", names(df), value = TRUE)
     effect_cols <- c("OR (95% CI)", "HR (95% CI)", "RR (95% CI)","Estimate (95% CI)",
                      "Univariable OR (95% CI)", "Multivariable aOR (95% CI)", 
                      "Univariable HR (95% CI)", "Multivariable aHR (95% CI)",
-                     "Univariable RR (95% CI)", "Multivariable aRR (95% CI)")
+                     "Univariable RR (95% CI)", "Multivariable aRR (95% CI)",
+                     "Univariable Estimate (95% CI)", "Multivariable Estimate (95% CI)")
     is_regression_table <- any(effect_cols %in% names(df))
     is_fastfit_table <- any(c("Uni p", "Multi p") %in% names(df))
     new_df <- data.frame()
+    
     for (i in seq_along(var_rows)) {
         current <- var_rows[i]
         next_var <- if (i < length(var_rows)) 
@@ -115,6 +117,7 @@ format_indented_groups <- function (df, indent_string = "    ") {
         var_name <- df$Variable[current]
         has_group <- df$Group[current] != "" && !is.na(df$Group[current]) && 
             df$Group[current] != "-"
+        
         if (has_group) {
             if (is_regression_table) {
                 var_row <- df[current, ]
@@ -126,6 +129,7 @@ format_indented_groups <- function (df, indent_string = "    ") {
                     var_row[[col]] <- ""
                 }
                 new_df <- rbind(new_df, var_row)
+                
                 for (j in current:(next_var - 1)) {
                     group_row <- df[j, ]
                     group_row$Variable <- paste0(indent_string, 
@@ -180,6 +184,7 @@ format_indented_groups <- function (df, indent_string = "    ") {
                     var_row[[col]] <- ""
                 }
                 new_df <- rbind(new_df, var_row)
+                
                 for (j in current:(next_var - 1)) {
                     group_row <- df[j, ]
                     group_row$Variable <- paste0(indent_string, 
@@ -301,18 +306,32 @@ get_paper_settings <- function (paper, margins = NULL) {
 
 #' Sanitize certain symbols for LaTeX
 #' @keywords internal
-sanitize_for_latex <- function (x) {
+sanitize_for_latex <- function(x) {
     if (is.null(x) || length(x) == 0) 
         return(x)
-    has_latex <- grepl("\\\\text(bf|it)\\{", x)
-    needs_sanitizing <- !has_latex & !is.na(x)
+    
+                                        # Check for already-formatted LaTeX more comprehensively
+    has_latex <- grepl("\\\\(text(bf|it|tt|sc|sl|rm)|hspace|vspace|rule|begin|end|[a-zA-Z]+\\{)", x)
+    
+                                        # Also check if already escaped (has \% or \& etc)
+    already_escaped <- grepl("\\\\[%&#_$]", x)
+    
+    needs_sanitizing <- !has_latex & !already_escaped & !is.na(x)
+    
     if (any(needs_sanitizing)) {
+                                        # Order matters! Do backslash first, then other special chars
+        x[needs_sanitizing] <- gsub("\\\\", "\\\\textbackslash{}", x[needs_sanitizing])
         x[needs_sanitizing] <- gsub("%", "\\\\%", x[needs_sanitizing])
         x[needs_sanitizing] <- gsub("&", "\\\\&", x[needs_sanitizing])
         x[needs_sanitizing] <- gsub("#", "\\\\#", x[needs_sanitizing])
         x[needs_sanitizing] <- gsub("_", "\\\\_", x[needs_sanitizing])
         x[needs_sanitizing] <- gsub("\\$", "\\\\$", x[needs_sanitizing])
+        x[needs_sanitizing] <- gsub("\\^", "\\\\textasciicircum{}", x[needs_sanitizing])
+        x[needs_sanitizing] <- gsub("~", "\\\\textasciitilde{}", x[needs_sanitizing])
+        x[needs_sanitizing] <- gsub("\\{", "\\\\{", x[needs_sanitizing])
+        x[needs_sanitizing] <- gsub("\\}", "\\\\}", x[needs_sanitizing])
     }
+    
     return(x)
 }
 
@@ -324,30 +343,28 @@ format_column_headers_with_n_tex <- function(col_names, n_row_data) {
     for (i in seq_along(col_names)) {
         col <- col_names[i]
         
-        ## Check if this column should have n count
+                                        # Sanitize the column name FIRST
+        col_sanitized <- sanitize_for_latex(col)
+        
         has_n <- col %in% names(n_row_data) && 
             !is.na(n_row_data[[col]]) && 
             n_row_data[[col]] != "" && 
             n_row_data[[col]] != "0"
         
         if (col %in% c("Variable", "Group")) {
-            ## Standard formatting for these columns
-            new_names[i] <- format_column_headers(col)
+            new_names[i] <- format_column_headers(col_sanitized)
         } else if (col %in% c("p-value", "p value")) {
-            ## Format p-value with italics
-            new_names[i] <- format_column_headers(col)
+            new_names[i] <- format_column_headers(col_sanitized)
         } else if (has_n) {
-            ## Column with n count - use tabular for text mode
             n_value <- n_row_data[[col]]
-            ## Add vertical padding with struts
+                                        # Build the complex structure with already-sanitized name
             new_names[i] <- paste0("\\begin{tabular}{@{}c@{}}\\rule{0pt}{2.5ex}", 
-                                   col, 
+                                   col_sanitized,  # Use sanitized version
                                    "\\\\[-0ex] (\\textit{n} = ", 
                                    format(as.numeric(gsub(",", "", n_value)), big.mark = ","), 
                                    ")\\rule[-1ex]{0pt}{0pt}\\end{tabular}")
         } else {
-            ## Regular column without n count
-            new_names[i] <- format_column_headers(col)
+            new_names[i] <- format_column_headers(col_sanitized)
         }
     }
     
@@ -626,4 +643,326 @@ condense_binary <- function(data, start_row, end_row, rows_to_keep, is_descripti
     rows_to_keep[end_row] <- FALSE
     
     return(rows_to_keep)
+}
+
+#' Core flextable processing function
+#' @keywords internal
+process_table_for_flextable <- function(table,
+                                        caption = NULL,
+                                        font_size = 10,
+                                        font_family = "Arial",
+                                        format_headers = TRUE,
+                                        bold_significant = TRUE,
+                                        sig_threshold = 0.05,
+                                        indent_groups = FALSE,
+                                        condense_table = FALSE,
+                                        zebra_stripes = FALSE,
+                                        paper = "letter",
+                                        orientation = "portrait",
+                                        width = NULL,
+                                        align = NULL) {
+    
+                                        # Convert to data frame
+    df <- as.data.frame(table)
+    
+                                        # Handle N row if present
+    has_n_row <- FALSE
+    n_row_data <- NULL
+    if (nrow(df) > 0 && "Variable" %in% names(df) && 
+        !is.na(df$Variable[1]) && df$Variable[1] == "N") {
+        has_n_row <- TRUE
+        n_row_data <- df[1, ]
+        df <- df[-1, ]
+    }
+    
+                                        # Track variable groups BEFORE any transformation
+    var_groups <- NULL
+    if (zebra_stripes && "Variable" %in% names(df)) {
+        var_groups <- identify_variable_groups(df)
+    }
+    
+                                        # Apply condensing if requested
+    if (condense_table) {
+        indent_groups <- TRUE
+        df <- condense_table_rows(df, indent_groups = indent_groups)
+        
+                                        # Update variable groups after condensing
+        if (zebra_stripes) {
+            var_groups <- identify_variable_groups(df)
+        }
+        
+        df <- format_indented_groups(df, indent_string = "    ")
+    } else if (indent_groups) {
+        df <- format_indented_groups(df, indent_string = "    ")
+    }
+    
+                                        # Replace empty cells with "-" for consistency
+    df <- replace_empty_cells(df)
+    
+                                        # Create flextable
+    ft <- flextable::flextable(df)
+    
+                                        # Set font
+    ft <- flextable::font(ft, fontname = font_family, part = "all")
+    ft <- flextable::fontsize(ft, size = font_size, part = "all")
+    
+                                        # Format headers
+    if (format_headers) {
+        ft <- format_headers_ft(ft, has_n_row, n_row_data)
+    }
+    
+                                        # Bold significant p-values
+    if (bold_significant) {
+        ft <- bold_pvalues_ft(ft, df, sig_threshold)
+    }
+    
+                                        # Set alignment
+    if (is.null(align)) {
+        for (col in names(df)) {
+            if (col %in% c("Variable", "Group")) {
+                ft <- flextable::align(ft, j = col, align = "left", part = "all")
+            } else {
+                ft <- flextable::align(ft, j = col, align = "center", part = "all")
+            }
+        }
+    } else {
+        if (length(align) == 1) {
+            ft <- flextable::align(ft, align = align, part = "all")
+        } else if (length(align) == ncol(df)) {
+            for (i in seq_along(align)) {
+                ft <- flextable::align(ft, j = i, align = align[i], part = "all")
+            }
+        }
+    }
+    
+                                        # Add borders
+    ft <- flextable::border_remove(ft)
+    ft <- flextable::hline_top(ft, border = officer::fp_border(width = 2), part = "header")
+    ft <- flextable::hline_bottom(ft, border = officer::fp_border(width = 1), part = "header")
+    ft <- flextable::hline_bottom(ft, border = officer::fp_border(width = 2), part = "body")
+    
+                                        # Reduce line spacing and padding
+    ft <- flextable::line_spacing(ft, space = 1)
+    ft <- flextable::padding(ft, i = NULL, j = NULL,
+                             padding.top = 1, padding.bottom = 1,
+                             padding.left = 1, padding.right = 1)
+    
+                                        # Add zebra stripes by variable group if requested
+    if (zebra_stripes && !is.null(var_groups)) {
+        ft <- apply_variable_zebra_stripes_enhanced(ft, df, var_groups)
+    }
+    
+                                        # Calculate width based on paper and orientation if not specified
+    if (is.null(width)) {
+        width <- calculate_table_width(paper, orientation)
+    }
+    
+                                        # Set width
+    ft <- flextable::width(ft, width = width / ncol(df))
+    
+    return(list(ft = ft, caption = caption))
+}
+
+#' Identify variable groups before indentation
+#' @keywords internal
+identify_variable_groups <- function(df) {
+    if (!"Variable" %in% names(df)) return(NULL)
+    
+    var_starts <- which(df$Variable != "" & !is.na(df$Variable))
+    groups <- list()
+    
+    for (i in seq_along(var_starts)) {
+        start_row <- var_starts[i]
+        end_row <- if (i < length(var_starts)) {
+                       var_starts[i + 1] - 1
+                   } else {
+                       nrow(df)
+                   }
+        groups[[i]] <- start_row:end_row
+    }
+    
+    return(groups)
+}
+
+#' Replace empty cells with "-"
+#' @keywords internal
+replace_empty_cells <- function(df) {
+    for (col in names(df)) {
+        if (col != "Variable") {  # Don't replace in Variable column
+            df[[col]][df[[col]] == "" | is.na(df[[col]])] <- "-"
+        }
+    }
+    return(df)
+}
+
+#' Apply zebra stripes with proper variable group detection for indented tables
+#' @keywords internal
+apply_variable_zebra_stripes_enhanced <- function(ft, df, var_groups) {
+                                        # Check if table has been indented (look for leading spaces in Variable column)
+    is_indented <- any(grepl("^\\s{2,}", df$Variable))
+    
+    if (is_indented) {
+                                        # For indented tables, identify variable groups by non-indented rows
+        var_starts <- which(!grepl("^\\s", df$Variable) & df$Variable != "")
+        
+        for (i in seq_along(var_starts)) {
+            if (i %% 2 == 1) {  # Odd variable groups get shading
+                start_row <- var_starts[i]
+                end_row <- if (i < length(var_starts)) {
+                               var_starts[i + 1] - 1
+                           } else {
+                               nrow(df)
+                           }
+                
+                ft <- flextable::bg(ft, i = start_row:end_row, 
+                                    bg = "#F0F0F0", part = "body")
+            }
+        }
+    } else if (!is.null(var_groups)) {
+                                        # Use pre-identified groups for non-indented tables
+        for (i in seq_along(var_groups)) {
+            if (i %% 2 == 1) {
+                rows <- var_groups[[i]]
+                rows <- rows[rows <= nrow(df)]
+                if (length(rows) > 0) {
+                    ft <- flextable::bg(ft, i = rows, bg = "#F0F0F0", part = "body")
+                }
+            }
+        }
+    } else {
+                                        # Fallback to row-based striping
+        ft <- flextable::bg(ft, i = seq(1, nrow(df), 2), 
+                            bg = "#F0F0F0", part = "body")
+    }
+    
+    return(ft)
+}
+
+#' Calculate table width based on paper size and orientation
+#' @keywords internal
+calculate_table_width <- function(paper, orientation) {
+                                        # Define paper sizes (in inches) with margins
+    paper_sizes <- list(
+        letter = c(width = 8.5, height = 11),
+        a4 = c(width = 8.27, height = 11.69),
+        legal = c(width = 8.5, height = 14)
+    )
+    
+    if (!paper %in% names(paper_sizes)) {
+        paper <- "letter"
+    }
+    
+    dims <- paper_sizes[[paper]]
+    
+                                        # Swap for landscape
+    if (orientation == "landscape") {
+        dims <- c(width = dims["height"], height = dims["width"])
+    }
+    
+                                        # Subtract margins (1 inch on each side)
+    usable_width <- dims["width"] - 2
+    
+    return(as.numeric(usable_width))
+}
+
+#' Apply zebra stripes by variable group
+#' @keywords internal
+apply_variable_zebra_stripes <- function(ft, df) {
+    if (!"Variable" %in% names(df)) {
+                                        # If no Variable column, fall back to alternating rows
+        ft <- flextable::bg(ft, i = seq(1, nrow(df), 2), 
+                            bg = "#F0F0F0", part = "body")
+        return(ft)
+    }
+    
+                                        # Find variable groups
+    var_starts <- which(df$Variable != "" & !is.na(df$Variable))
+    
+                                        # Apply shading to alternating variable groups
+    for (i in seq_along(var_starts)) {
+        if (i %% 2 == 1) {  # Odd variable groups get shading
+            start_row <- var_starts[i]
+            end_row <- if (i < length(var_starts)) {
+                           var_starts[i + 1] - 1
+                       } else {
+                           nrow(df)
+                       }
+            
+            ft <- flextable::bg(ft, i = start_row:end_row, 
+                                bg = "#F0F0F0", part = "body")
+        }
+    }
+    
+    return(ft)
+}
+
+#' Format headers for flextable
+#' @keywords internal
+format_headers_ft <- function(ft, has_n_row, n_row_data) {
+    col_names <- names(ft$body$dataset)
+    
+    for (i in seq_along(col_names)) {
+        col <- col_names[i]
+        
+                                        # Skip Variable column for n count addition
+        if (col == "Variable") {
+                                        # Just keep the original label without adding (n = N)
+            next
+        }
+        
+                                        # Italicize 'n' in headers
+        if (col == "n") {
+            ft <- flextable::italic(ft, j = i, part = "header")
+        }
+        
+                                        # Add n counts for data columns only (not Variable)
+        if (has_n_row && col %in% names(n_row_data) && col != "Variable") {
+            n_val <- n_row_data[[col]]
+            if (!is.na(n_val) && n_val != "" && n_val != "0") {
+                new_label <- paste0(col, "\n(n = ", n_val, ")")
+                ft <- flextable::set_header_labels(ft, 
+                                                   values = setNames(list(new_label), col))
+            }
+        }
+    }
+    
+                                        # Bold all headers
+    ft <- flextable::bold(ft, part = "header")
+    
+    return(ft)
+}
+
+#' Bold significant p-values in DOCX
+#' @keywords internal
+bold_pvalues_ft <- function(ft, df, sig_threshold = 0.05) {
+    p_cols <- grep("p-value|p value|Uni p|Multi p|pvalue", names(df), 
+                   ignore.case = TRUE, value = TRUE)
+    
+    for (p_col in p_cols) {
+        if (p_col %in% names(df)) {
+            for (i in seq_len(nrow(df))) {
+                val <- df[[p_col]][i]
+                if (!is.na(val) && val != "") {
+                                        # Check if significant
+                    is_sig <- FALSE
+                    
+                    if (grepl("^<\\s*0\\.001", val)) {
+                        is_sig <- TRUE
+                    } else {
+                        p_numeric <- suppressWarnings(as.numeric(
+                            gsub("[^0-9.]", "", val)))
+                        if (!is.na(p_numeric) && p_numeric < sig_threshold) {
+                            is_sig <- TRUE
+                        }
+                    }
+                    
+                    if (is_sig) {
+                        ft <- flextable::bold(ft, i = i, j = p_col, part = "body")
+                    }
+                }
+            }
+        }
+    }
+    
+    return(ft)
 }

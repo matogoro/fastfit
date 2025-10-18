@@ -20,6 +20,7 @@ tbl2pdf(
   align = NULL,
   indent_groups = FALSE,
   condense_table = FALSE,
+  show_logs = TRUE,
   ...
 )
 }
@@ -65,6 +66,9 @@ Default is FALSE.}
 \item{condense_table}{Logical. If TRUE, decreases table vertical height by
 reducing continuous, survival, and binary categorical variables to single
 rows. Makes indent_groups = TRUE by default. Default is FALSE.}
+
+\item{show_logs}{Logical. If TRUE, keeps log files after PDF creation.
+Default is FALSE.}
 
 \item{...}{Additional arguments passed to xtable::xtable.}
 }

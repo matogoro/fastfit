@@ -162,7 +162,7 @@ format_model_table <- function(data,
         if (effect_col %in% c("OR", "HR", "RR")) {
             result[, (effect_label) := ifelse(
                          is_reference,
-                         "-",
+                         paste0(reference_label),
                                        ifelse(!is.na(get(effect_col)),
                                               sprintf("%.*f (%.*f-%.*f)",
                                                       digits, get(effect_col),
@@ -173,7 +173,7 @@ format_model_table <- function(data,
         } else {
             result[, (effect_label) := ifelse(
                          is_reference,
-                         "-",
+                         paste0(reference_label),
                                        ifelse(!is.na(get(effect_col)),
                                               sprintf("%.*f (%.*f, %.*f)",
                                                       digits, get(effect_col),

@@ -22,6 +22,8 @@ coxforest(
   col_width_events = 0.06,
   col_width_hr = 0.05,
   show_n_events = c("n", "Events"),
+  indent_groups = FALSE,
+  condense_table = FALSE,
   ref_label = "reference",
   var_labels = NULL,
   color = "#8A61D8"
@@ -76,6 +78,12 @@ allocated to the events column. Default is 0.06.}
 
 \item{col_width_hr}{Numeric value specifying the proportion of plot width 
 allocated to the hazard ratio column. Default is 0.05.}
+
+\item{indent_groups}{Logical. Whether to indent group levels under variables.
+Default is FALSE.}
+
+\item{condense_table}{Logical. Whether to condense binary variables into single rows.
+Forces indent_groups = TRUE. Default is FALSE.}
 
 \item{ref_label}{Character string to display for reference categories. 
 Default is "reference".}

@@ -26,6 +26,29 @@ lmforest(
   var_labels = NULL,
   color = "#5A8F5A"
 )
+
+lmforest(
+  model,
+  data = NULL,
+  title = "Linear Model",
+  effect_label = "Coefficient",
+  digits = 2,
+  font_size = 1,
+  annot_size = 3.88,
+  header_size = 5.82,
+  title_size = 23.28,
+  plot_width = NULL,
+  plot_height = NULL,
+  tbl_width = 0.6,
+  col_width_var = 0.01,
+  col_width_level = 0.17,
+  col_width_n = 0.17,
+  col_width_coef = 0.05,
+  show_n = TRUE,
+  ref_label = "reference",
+  var_labels = NULL,
+  color = "#5A8F5A"
+)
 }
 \arguments{
 \item{model}{A linear model object of class \code{lm}.}
@@ -85,8 +108,17 @@ match variable names in the model, values are the display labels.}
 
 \item{color}{Character string specifying the color for coefficient point estimates. 
 Default is "#5A8F5A" (green).}
+
+\item{indent_groups}{Logical. Whether to indent group levels under variables.
+Default is FALSE.}
+
+\item{condense_table}{Logical. Whether to condense binary variables into single rows.
+Forces indent_groups = TRUE. Default is FALSE.}
 }
 \value{
+A ggplot object containing the forest plot. The object has an attribute
+  "recommended_dims" with suggested width and height in inches.
+
 A ggplot object containing the forest plot. The object has an attribute
   "recommended_dims" with suggested width and height in inches.
 }
@@ -95,8 +127,16 @@ Generates a publication-ready forest plot combining a data table and
 graphical representation of coefficients from a linear model.
 The plot includes variable names, group levels, sample sizes, coefficients
 with confidence intervals, and p-values.
+
+Generates a publication-ready forest plot combining a data table and 
+graphical representation of coefficients from a linear model.
+The plot includes variable names, group levels, sample sizes, coefficients
+with confidence intervals, and p-values.
 }
 \seealso{
+\code{\link[stats]{lm}} for fitting linear models,
+\code{\link[ggplot2]{ggplot}} for the underlying plotting system
+
 \code{\link[stats]{lm}} for fitting linear models,
 \code{\link[ggplot2]{ggplot}} for the underlying plotting system
 }

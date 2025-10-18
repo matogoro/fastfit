@@ -836,7 +836,8 @@ perform_categorical_test <- function(data, var, group_var, test_type, ...) {
     
     ## Auto-select test
     if (test_type == "auto") {
-        expected <- stats::chisq.test(tab, simulate.p.value = FALSE)$expected
+        ## Suppress warning only for the expected value calculation
+        expected <- suppressWarnings(stats::chisq.test(tab, simulate.p.value = FALSE)$expected)
         if (any(expected < 5)) {
             test_type <- "fisher.test"
         } else {
