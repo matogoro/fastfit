@@ -17,18 +17,17 @@ glmforest(
   plot_width = NULL,
   plot_height = NULL,
   tbl_width = 0.6,
-  col_width_var = 0.01,
-  col_width_level = 0.17,
-  col_width_n = 0.17,
-  col_width_events = 0.06,
-  col_width_or = 0.05,
-  show_n_events = c("n", "Events"),
+  show_n = TRUE,
+  show_events = TRUE,
   indent_groups = FALSE,
   condense_table = FALSE,
+  center_padding = 4,
+  zebra_stripes = TRUE,
   ref_label = "reference",
   var_labels = NULL,
   color = "#3A7E8A",
-  exponentiate = NULL
+  exponentiate = NULL,
+  units = "in"
 )
 }
 \arguments{
@@ -68,29 +67,21 @@ Default is NULL.}
 width allocated to the data table. If NULL (default), automatically calculated
 based on content and plot dimensions.}
 
-\item{col_width_var}{Numeric value specifying the proportion of plot width 
-allocated to the variable column. Default is 0.01.}
+\item{show_n}{Logical. Whether to show the sample size column. Default is TRUE.}
 
-\item{col_width_level}{Numeric value specifying the proportion of plot width 
-allocated to the group column. Default is 0.17.}
-
-\item{col_width_n}{Numeric value specifying the proportion of plot width 
-allocated to the sample size column. Default is 0.17.}
-
-\item{col_width_events}{Numeric value specifying the proportion of plot width 
-allocated to the sample size column. Default is 0.06.}
-
-\item{col_width_or}{Numeric value specifying the proportion of plot width 
-allocated to the effect estimate column. Default is 0.05.}
-
-\item{show_n_events}{Character vector specifying which columns to show. 
-Default is c("n", "Events"). Use NULL for neither.}
+\item{show_events}{Logical. Whether to show the events column. Default is TRUE.}
 
 \item{indent_groups}{Logical. Whether to indent group levels under variables.
 Default is FALSE.}
 
 \item{condense_table}{Logical. Whether to condense binary variables into single rows.
 Forces indent_groups = TRUE. Default is FALSE.}
+
+\item{center_padding}{Numeric value specifying the padding width between the table
+and the forest plot. Default is 4.}
+
+\item{zebra_stripes}{Logical. Whether to use alternating background shading 
+for different variables to improve readability. Default is TRUE.}
 
 \item{ref_label}{Character string to display for reference categories. 
 Default is "reference".}
@@ -103,6 +94,8 @@ Default is "#3A7E8A" (teal).}
 
 \item{exponentiate}{Logical. Whether to exponentiate coefficients. Default is TRUE 
 for logit and log links, FALSE otherwise.}
+
+\item{units}{Units used for measurement. Default is inches ("in").}
 }
 \value{
 A ggplot object containing the forest plot. The object has an attribute

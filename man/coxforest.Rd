@@ -8,6 +8,7 @@ coxforest(
   model,
   data = NULL,
   title = "Cox Proportional Hazards Model",
+  effect_label = "Hazard Ratio",
   digits = 2,
   font_size = 1,
   annot_size = 3.88,
@@ -16,17 +17,16 @@ coxforest(
   plot_width = NULL,
   plot_height = NULL,
   tbl_width = 0.6,
-  col_width_var = 0.01,
-  col_width_level = 0.17,
-  col_width_n = 0.17,
-  col_width_events = 0.06,
-  col_width_hr = 0.05,
-  show_n_events = c("n", "Events"),
+  show_n = TRUE,
+  show_events = TRUE,
   indent_groups = FALSE,
   condense_table = FALSE,
+  center_padding = 4,
+  zebra_stripes = TRUE,
   ref_label = "reference",
   var_labels = NULL,
-  color = "#8A61D8"
+  color = "#8A61D8",
+  units = "in"
 )
 }
 \arguments{
@@ -38,6 +38,8 @@ fit the model. If NULL (default), the function attempts to extract data
 from the model object.}
 
 \item{title}{Character string specifying the plot title. Default is "Cox Proportional Hazards Model".}
+
+\item{effect_label}{Character string for the effect measure label. Default is "Hazard Ratio".}
 
 \item{digits}{Integer specifying the number of decimal places for hazard ratios 
 and confidence intervals. Default is 2.}
@@ -64,26 +66,21 @@ Default is NULL.}
 width allocated to the data table. If NULL (default), automatically calculated
 based on content and plot dimensions.}
 
-\item{col_width_var}{Numeric value specifying the proportion of plot width 
-allocated to the variable column. Default is 0.01.}
+\item{show_n}{Logical. Whether to show the sample size column. Default is TRUE.}
 
-\item{col_width_level}{Numeric value specifying the proportion of plot width 
-allocated to the group column. Default is 0.17.}
-
-\item{col_width_n}{Numeric value specifying the proportion of plot width 
-allocated to the sample size column. Default is 0.17.}
-
-\item{col_width_events}{Numeric value specifying the proportion of plot width 
-allocated to the events column. Default is 0.06.}
-
-\item{col_width_hr}{Numeric value specifying the proportion of plot width 
-allocated to the hazard ratio column. Default is 0.05.}
+\item{show_events}{Logical. Whether to show the events column. Default is TRUE.}
 
 \item{indent_groups}{Logical. Whether to indent group levels under variables.
 Default is FALSE.}
 
 \item{condense_table}{Logical. Whether to condense binary variables into single rows.
 Forces indent_groups = TRUE. Default is FALSE.}
+
+\item{center_padding}{Numeric value specifying the padding width between the table
+and the forest plot. Default is 4.}
+
+\item{zebra_stripes}{Logical. Whether to use alternating background shading 
+for different variables to improve readability. Default is TRUE.}
 
 \item{ref_label}{Character string to display for reference categories. 
 Default is "reference".}
@@ -93,10 +90,12 @@ match variable names in the model, values are the display labels.}
 
 \item{color}{Character string specifying the color for hazard ratio point estimates. 
 Default is "#8A61D8" (purple).}
+
+\item{units}{Units used for measurement. Default is inches ("in").}
 }
 \value{
 A ggplot object containing the forest plot. The object has an attribute
-  "recommended_dims" with suggested width and height in inches. If \code{ggpubr} 
+  "recommended_dims" with suggested width and height. If \code{ggpubr} 
   is installed, returns a ggplot object via \code{ggpubr::as_ggplot()}. 
   Otherwise, draws the plot directly and returns it invisibly.
 }
@@ -106,55 +105,7 @@ graphical representation of hazard ratios from a Cox proportional hazards model.
 The plot includes variable names, group levels, sample sizes, hazard ratios 
 with confidence intervals, and p-values.
 }
-\details{
-The function creates a forest plot with the following features:
-\itemize{
-  \item Alternating row shading by variable groups
-  \item Point sizes scaled by sample size
-  \item Logarithmic scale for hazard ratios
-  \item Model statistics displayed at the bottom (events, global p-value, 
-    concordance index with 95% CI, AIC)
-  \item Italic formatting for p-values in the display
-  \item Automatic calculation of optimal dimensions
-  \item Customizable column widths for the data table portion
-}
-
-The function will suggest optimal plot dimensions based on the model complexity.
-Access these via \code{attr(plot, "recommended_dims")} or note the message output.
-}
-\examples{
-\dontrun{
-library(survival)
-library(ggplot2)
-
-# Fit a Cox model
-cox_model <- coxph(Surv(time, status) ~ age + sex + ph.ecog, data = lung)
-
-# Create forest plot and save with recommended dimensions
-p <- coxforest(cox_model)
-ggsave("forest.pdf", p, 
-       width = attr(p, "recommended_dims")$width,
-       height = attr(p, "recommended_dims")$height,
-       units = "in")
-
-# Create forest plot with specified dimensions and custom column widths
-p <- coxforest(cox_model, 
-               title = "Survival Analysis Results",
-               plot_width = 12,
-               plot_height = 8,
-               col_width_var = 0.03,
-               col_width_level = 0.20,
-               var_labels = c("age" = "Age (years)",
-                             "sex" = "Sex",
-                             "ph.ecog" = "ECOG Performance Status"))
-ggsave("forest.pdf", p, width = 12, height = 8, units = "in")
-}
-
-}
 \seealso{
 \code{\link[survival]{coxph}} for fitting Cox models,
 \code{\link[ggplot2]{ggplot}} for the underlying plotting system
-}
-\author{
-Paul H. McClelland <PaulHMcClelland@protonmail.com>
 }

@@ -28,23 +28,20 @@
 #'   Used to optimize tbl_width calculation. Default is NULL.
 #' @param plot_height Numeric value specifying the intended plot height in inches.
 #'   Default is NULL.
-#' @param col_width_var Numeric value specifying the proportion of plot width 
-#'   allocated to the variable column. Default is 0.01.
-#' @param col_width_level Numeric value specifying the proportion of plot width 
-#'   allocated to the group column. Default is 0.17.
-#' @param col_width_n Numeric value specifying the proportion of plot width 
-#'   allocated to the sample size column. Default is 0.17.
-#' @param col_width_coef Numeric value specifying the proportion of plot width 
-#'   allocated to the coefficient column. Default is 0.05.
 #' @param show_n Logical. Whether to show the sample size column. Default is TRUE.
 #' @param indent_groups Logical. Whether to indent group levels under variables.
 #'   Default is FALSE.
 #' @param condense_table Logical. Whether to condense binary variables into single rows.
 #'   Forces indent_groups = TRUE. Default is FALSE.
+#' @param center_padding Numeric value specifying the padding width between the table
+#' and the forest plot. Default is 4.
+#' @param zebra_stripes Logical. Whether to use alternating background shading 
+#'   for different variables to improve readability. Default is TRUE.
 #' @param ref_label Character string to display for reference categories. 
 #'   Default is "reference".
 #' @param var_labels Named character vector for custom variable labels. Names should 
 #'   match variable names in the model, values are the display labels.
+#' @param units Units used for measurement. Default is inches ("in").
 #' @param color Character string specifying the color for coefficient point estimates. 
 #'   Default is "#5A8F5A" (green).
 #'
@@ -72,15 +69,14 @@ lmforest <- function(model, data = NULL,
                      plot_width = NULL,
                      plot_height = NULL,
                      tbl_width = 0.6,
-                     col_width_var = 0.01,
-                     col_width_level = 0.17,
-                     col_width_n = 0.17,
-                     col_width_coef = 0.05,
                      show_n = TRUE,
                      indent_groups = FALSE,
                      condense_table = FALSE,
+                     center_padding = 4,
+                     zebra_stripes = TRUE,
                      ref_label = "reference",
                      var_labels = NULL,
+                     units = "in",
                      color = "#5A8F5A") {
     
     ## Check for required packages
@@ -96,6 +92,12 @@ lmforest <- function(model, data = NULL,
     
     ## Check model class
     stopifnot(inherits(model, "lm") && !inherits(model, "glm"))
+
+    ## Internally work in inches
+    if (!is.null(plot_width) && units != "in") {
+        plot_width <- convert_units(plot_width, from = units, to = "inches")
+    }
+    
     
     ## Get data
     if(is.null(data)){
@@ -155,7 +157,7 @@ lmforest <- function(model, data = NULL,
     gmodel$AIC_formatted <- format(round(gmodel$AIC, 2), big.mark = ",", scientific = FALSE, nsmall = 2)
     
     ## Extract statistics for every variable - preserving order
-    allTerms <- lapply(seq_along(terms), function(i){
+    all_terms <- lapply(seq_along(terms), function(i){
         var <- names(terms)[i]
         
         if (terms[i] %in% c("factor", "character")) {
@@ -205,8 +207,8 @@ lmforest <- function(model, data = NULL,
         }
     })
     
-    allTermsDF <- data.table::rbindlist(allTerms)
-    data.table::setnames(allTermsDF, c("var", "level", "N", "pos", "var_order"))
+    all_terms_df <- data.table::rbindlist(all_terms)
+    data.table::setnames(all_terms_df, c("var", "level", "N", "pos", "var_order"))
 
     ## Apply condensing and indenting if requested
     if (condense_table || indent_groups) {
@@ -214,65 +216,69 @@ lmforest <- function(model, data = NULL,
             indent_groups <- TRUE
         }
         
-        allTermsDF[, inds := ifelse(level == "-", var, paste0(var, level))]
-        orig_inds_map <- data.table::copy(allTermsDF[, .(var, level, inds, N)])
+        all_terms_df[, inds := ifelse(level == "-", var, paste0(var, level))]
+        orig_inds_map <- data.table::copy(all_terms_df[, .(var, level, inds, N)])
         
         processed_rows <- list()
         row_counter <- 1
-        unique_vars <- unique(allTermsDF[, var])
+        unique_vars <- unique(all_terms_df[, var])
         
         for (v in unique_vars) {
-            var_rows <- allTermsDF[var == v]
+            var_rows <- all_terms_df[var == v]
             
             if (nrow(var_rows) == 1) {
+                                        # Single-level variable (continuous)
                 processed_rows[[row_counter]] <- var_rows
                 row_counter <- row_counter + 1
             } else {
+                                        # Multi-level variable (categorical)
                 is_binary <- nrow(var_rows) == 2
                 
                 if (condense_table && is_binary) {
+                                        # Only condense if BOTH flags are set
                     non_ref_row <- var_rows[2]
                     condensed_row <- data.table::copy(non_ref_row)
                     condensed_row[, var := paste0(v, " (", level, ")")]
                     condensed_row[, level := "-"]
                     processed_rows[[row_counter]] <- condensed_row
                     row_counter <- row_counter + 1
-                } else {
-                    if (indent_groups) {
-                        header_row <- data.table::data.table(
-                                                      var = v,
-                                                      level = "-",
-                                                      N = NA_integer_,
-                                                      pos = var_rows$pos[1],
-                                                      var_order = var_rows$var_order[1],
-                                                      inds = NA_character_
-                                                  )
-                        processed_rows[[row_counter]] <- header_row
+                } else if (indent_groups) {
+                                        # Add header for ANY multi-level variable when indenting
+                    header_row <- data.table::data.table(
+                                                  var = v,
+                                                  level = "-",
+                                                  N = NA_integer_,
+                                                  pos = var_rows$pos[1],
+                                                  var_order = var_rows$var_order[1],
+                                                  inds = NA_character_
+                                              )
+                    processed_rows[[row_counter]] <- header_row
+                    row_counter <- row_counter + 1
+                    
+                                        # Add indented levels
+                    for (i in 1:nrow(var_rows)) {
+                        group_row <- data.table::copy(var_rows[i])
+                        group_row[, var := paste0("    ", level)]
+                        group_row[, level := "-"]
+                        processed_rows[[row_counter]] <- group_row
                         row_counter <- row_counter + 1
-                        
-                        for (i in 1:nrow(var_rows)) {
-                            group_row <- data.table::copy(var_rows[i])
-                            group_row[, var := paste0("    ", level)]
-                            group_row[, level := "-"]
-                            processed_rows[[row_counter]] <- group_row
-                            row_counter <- row_counter + 1
-                        }
-                    } else {
-                        for (i in 1:nrow(var_rows)) {
-                            processed_rows[[row_counter]] <- var_rows[i]
-                            row_counter <- row_counter + 1
-                        }
+                    }
+                } else {
+                                        # Standard layout
+                    for (i in 1:nrow(var_rows)) {
+                        processed_rows[[row_counter]] <- var_rows[i]
+                        row_counter <- row_counter + 1
                     }
                 }
             }
         }
         
-        allTermsDF <- data.table::rbindlist(processed_rows, fill = TRUE)
+        all_terms_df <- data.table::rbindlist(processed_rows, fill = TRUE)
         
-        for (i in 1:nrow(allTermsDF)) {
-            current_var <- allTermsDF$var[i]
+        for (i in 1:nrow(all_terms_df)) {
+            current_var <- all_terms_df$var[i]
             
-            if (is.na(allTermsDF$inds[i]) && !grepl("^    ", current_var) && !grepl("\\(", current_var)) {
+            if (is.na(all_terms_df$inds[i]) && !grepl("^    ", current_var) && !grepl("\\(", current_var)) {
                 next
             }
             
@@ -282,8 +288,8 @@ lmforest <- function(model, data = NULL,
                 
                 matching <- orig_inds_map[var == orig_var & level == orig_level]
                 if (nrow(matching) > 0) {
-                    allTermsDF[i, `:=`(inds = matching$inds[1],
-                                       N = matching$N[1])]
+                    all_terms_df[i, `:=`(inds = matching$inds[1],
+                                         N = matching$N[1])]
                 }
             }
             else if (grepl("^    ", current_var)) {
@@ -291,8 +297,8 @@ lmforest <- function(model, data = NULL,
                 
                 parent_var <- NA_character_
                 for (j in (i-1):1) {
-                    if (!grepl("^    ", allTermsDF$var[j]) && allTermsDF$var[j] != "") {
-                        parent_var <- gsub(" \\(.*\\)", "", allTermsDF$var[j])
+                    if (!grepl("^    ", all_terms_df$var[j]) && all_terms_df$var[j] != "") {
+                        parent_var <- gsub(" \\(.*\\)", "", all_terms_df$var[j])
                         break
                     }
                 }
@@ -300,14 +306,14 @@ lmforest <- function(model, data = NULL,
                 if (!is.na(parent_var)) {
                     matching <- orig_inds_map[var == parent_var & level == clean_level]
                     if (nrow(matching) > 0) {
-                        allTermsDF[i, `:=`(inds = matching$inds[1],
-                                           N = matching$N[1])]
+                        all_terms_df[i, `:=`(inds = matching$inds[1],
+                                             N = matching$N[1])]
                     }
                 }
             }
-        }
+    }
     } else {
-        allTermsDF[, inds := ifelse(level == "-", var, paste0(var, level))]
+        all_terms_df[, inds := ifelse(level == "-", var, paste0(var, level))]
     }
     
     ## Process coefficients
@@ -315,43 +321,49 @@ lmforest <- function(model, data = NULL,
     coef[, inds := term]
     
     ## Merge data
-    toShow <- merge(allTermsDF, coef, by.x = "inds", by.y = "inds", all.x = TRUE, sort = FALSE)
+    to_show <- merge(all_terms_df, coef, by.x = "inds", by.y = "inds", all.x = TRUE, sort = FALSE)
     
     ## Sort by variable order first, then position within variable
-    data.table::setorder(toShow, var_order, pos)
+    data.table::setorder(to_show, var_order, pos)
     
-    ## Add variable-based shading indicator
-    toShow[, shade_group := var_order %% 2]
+    ## Add variable-based shading indicator (zebra stripes)
+    if (zebra_stripes) {
+        to_show[, shade_group := var_order %% 2]
+        shade_colors <- c("#FFFFFF", "#EEEEEE")
+    } else {
+        to_show[, shade_group := 0]
+        shade_colors <- c("#FFFFFF", "#FFFFFF")
+    }
     
     ## Select columns
-    toShow <- toShow[, .(var, level, N, p_value, estimate, conf_low, conf_high, pos, var_order, shade_group)]
+    to_show <- to_show[, .(var, level, N, p_value, estimate, conf_low, conf_high, pos, var_order, shade_group)]
     
     ## Format the values
-    toShowExpClean <- data.table::copy(toShow)
+    to_show_exp_clean <- data.table::copy(to_show)
     
     ## Create formatted columns for display
-    toShowExpClean[, effect := estimate]
-    toShowExpClean[, effect_formatted := ifelse(is.na(N) & is.na(estimate),
-                                                "",
+    to_show_exp_clean[, effect := estimate]
+    to_show_exp_clean[, effect_formatted := ifelse(is.na(N) & is.na(estimate),
+                                                   "",
                                          ifelse(is.na(estimate), 
                                                 ref_label,
                                                 format(round(estimate, digits), nsmall = digits)))]
-    toShowExpClean[, conf_low_formatted := ifelse(is.na(conf_low), 
-                                                  NA_character_,
-                                                  format(round(conf_low, digits), nsmall = digits))]
-    toShowExpClean[, conf_high_formatted := ifelse(is.na(conf_high), 
-                                                   NA_character_,
+    to_show_exp_clean[, conf_low_formatted := ifelse(is.na(conf_low), 
+                                                     NA_character_,
+                                                     format(round(conf_low, digits), nsmall = digits))]
+    to_show_exp_clean[, conf_high_formatted := ifelse(is.na(conf_high), 
+                                                      NA_character_,
                                                    format(round(conf_high, digits), nsmall = digits))]
     
     ## Format p-values
-    toShowExpClean[, p_formatted := ifelse(is.na(p_value), 
+    to_show_exp_clean[, p_formatted := ifelse(is.na(p_value), 
                                            NA_character_,
                                     ifelse(p_value < 0.001, 
                                            "< 0.001",
                                            format(round(p_value, 3), nsmall = 3)))]
     
     ## Create the combined effect string with expression for italic p
-    toShowExpClean[, effect_string_expr := ifelse(
+    to_show_exp_clean[, effect_string_expr := ifelse(
                          is.na(N) & is.na(estimate),
                          "''",
                          fcase(
@@ -375,18 +387,18 @@ lmforest <- function(model, data = NULL,
                      )]
     
     ## Format N with thousands separator
-    toShowExpClean[, n_formatted := ifelse(is.na(N), "", format(N, big.mark = ",", scientific = FALSE))]
+    to_show_exp_clean[, n_formatted := ifelse(is.na(N), "", format(N, big.mark = ",", scientific = FALSE))]
     
     ## Clean up variable names for display
-    toShowExpClean[, var_display := as.character(var)]
+    to_show_exp_clean[, var_display := as.character(var)]
     
     if (indent_groups || condense_table) {
-        toShowExpClean[, var_display := var]
+        to_show_exp_clean[, var_display := var]
         
-        for (v in unique(toShowExpClean$var)) {
+        for (v in unique(to_show_exp_clean$var)) {
             if (v != "" && !grepl("^    ", v)) {
                 clean_v <- gsub(" \\(.*\\)", "", v)
-                
+
                 label <- if (!is.null(var_labels) && clean_v %in% names(var_labels)) {
                              var_labels[clean_v]
                          } else if (!is.null(attr(data[[clean_v]], "label"))) {
@@ -399,48 +411,50 @@ lmforest <- function(model, data = NULL,
                     if (grepl("\\(", v)) {
                         category <- gsub(".*\\((.*)\\)", "\\1", v)
                         if (category %in% c("1", "Yes", "yes")) {
-                            toShowExpClean[var == v, var_display := label]
+                            to_show_exp_clean[var == v, var_display := label]
                         } else {
-                            toShowExpClean[var == v, var_display := paste0(label, " (", category, ")")]
+                            to_show_exp_clean[var == v, var_display := paste0(label, " (", category, ")")]
                         }
                     } else {
-                        toShowExpClean[var == v, var_display := label]
+                        to_show_exp_clean[var == v, var_display := label]
                     }
                 }
             }
         }
         
-        toShowExpClean[, level := ""]
+        to_show_exp_clean[, level := ""]
     } else {
-        for(v in unique(toShowExpClean$var)) {
-            if(v %in% toShowExpClean$var) {
+        for(v in unique(to_show_exp_clean$var)) {
+            if(v %in% to_show_exp_clean$var) {
                 if(!is.null(var_labels) && v %in% names(var_labels)) {
-                    toShowExpClean[var == v, var_display := var_labels[v]]
+                    to_show_exp_clean[var == v, var_display := var_labels[v]]
                 }
                 else if(!is.null(attr(data[[v]], "label"))) {
-                    toShowExpClean[var == v, var_display := attr(data[[v]], "label")]
+                    to_show_exp_clean[var == v, var_display := attr(data[[v]], "label")]
                 }
             }
         }
     }
-    
-    toShowExpClean[duplicated(var), var_display := ""]
+
+    if (!indent_groups) {
+        to_show_exp_clean[duplicated(var), var_display := ""]
+    }
     
     ## Handle missing estimates for plotting
-    toShowExpClean[is.na(estimate), estimate := 0]
+    to_show_exp_clean[is.na(estimate), estimate := 0]
     
     ## Reorder (flip) - but maintain the variable grouping
-    toShowExpClean <- toShowExpClean[order(nrow(toShowExpClean):1)]
-    toShowExpClean[, x_pos := .I]
+    to_show_exp_clean <- to_show_exp_clean[order(nrow(to_show_exp_clean):1)]
+    to_show_exp_clean[, x_pos := .I]
     
     ## Add shade_group based on var_order for alternating by variable
-    toShowExpClean[, shade_group := var_order %% 2]
+    to_show_exp_clean[, shade_group := var_order %% 2]
     
     ## Number of rows for later adjustments
-    n_rows <- nrow(toShowExpClean)
+    n_rows <- nrow(to_show_exp_clean)
     
     ## Calculate plot ranges
-    rangeb <- range(toShow$conf_low, toShow$conf_high, na.rm = TRUE)
+    rangeb <- range(to_show$conf_low, to_show$conf_high, na.rm = TRUE)
     breaks <- pretty(rangeb, n = 7)
     breaks <- breaks[breaks >= rangeb[1] & breaks <= rangeb[2]]
     
@@ -460,155 +474,89 @@ lmforest <- function(model, data = NULL,
     }
     
     reference_value <- 0
-    
-    ## Calculate dynamic column widths based on content
-    max_var_len <- max(nchar(toShowExpClean$var_display) * 0.75, nchar("Variable"), na.rm = TRUE)
-    max_n_len <- max(nchar(toShowExpClean$n_formatted), nchar("n"), na.rm = TRUE)
-    
-    ## For effect column
-    effect_display_len <- ifelse(toShowExpClean$effect_string_expr == paste0("'", ref_label, "'"),
-                                 nchar(ref_label),
-                                 nchar(paste0(toShowExpClean$effect_formatted, " (", 
-                                              toShowExpClean$conf_low_formatted, ", ",
-                                              toShowExpClean$conf_high_formatted, "); p = ",
-                                              toShowExpClean$p_formatted)))
-    max_effect_len <- max(effect_display_len, nchar("Coefficient (95% CI); p-value"), na.rm = TRUE) * 1.1
-    
-    ## Calculate total character width needed
-    if (indent_groups || condense_table) {
-        total_text_chars <- max_var_len + (if(show_n) max_n_len else 0) + max_effect_len + 3
-    } else {
-        max_level_len <- max(nchar(toShowExpClean$level) * 0.75, nchar("Group"), na.rm = TRUE)
-        total_text_chars <- max_var_len + max_level_len + (if(show_n) max_n_len else 0) + max_effect_len + 4
+
+    ## Calculate plot ranges
+    rangeb <- range(to_show$conf_low, to_show$conf_high, na.rm = TRUE)
+    breaks <- pretty(rangeb, n = 7)
+    breaks <- breaks[breaks >= rangeb[1] & breaks <= rangeb[2]]
+
+    ## Check for one-sided case
+    is_one_sided <- (min(rangeb) > 0) || (max(rangeb) < 0)
+
+    ## Ensure 0 is included for coefficients
+    if(!0 %in% breaks) {
+        breaks <- sort(unique(c(breaks, 0)))
     }
 
-    ## Calculate total character width based on what's actually shown
-    if (condense_table) {
-                                        # When condensed: Only Variable and Effect columns
-        total_text_chars <- max_var_len + max_effect_len + 2  # Less padding needed
-    } else if (indent_groups) {
-                                        # When indented but not condensed: Variable, n (optional), and Effect
-        if (show_n) {
-            max_n_len <- max(nchar(toShowExpClean$n_formatted), nchar("n"), na.rm = TRUE)
-            total_text_chars <- max_var_len + max_n_len + max_effect_len + 3
-        } else {
-            total_text_chars <- max_var_len + max_effect_len + 2
-        }
-    } else {
-                                        # Standard layout: Variable, Group, n (optional), and Effect
-        max_level_len <- max(nchar(toShowExpClean$level) * 0.75, nchar("Group"), na.rm = TRUE)
-        if (show_n) {
-            max_n_len <- max(nchar(toShowExpClean$n_formatted), nchar("n"), na.rm = TRUE)
-            total_text_chars <- max_var_len + max_level_len + max_n_len + max_effect_len + 4
-        } else {
-            total_text_chars <- max_var_len + max_level_len + max_effect_len + 3
-        }
+    ## Extend range if needed
+    if(min(rangeb) > 0) {
+        rangeb[1] <- -0.1 * abs(max(rangeb))
+    } else if(max(rangeb) < 0) {
+        rangeb[2] <- 0.1 * abs(min(rangeb))
     }
-    
-    ## Calculate optimal tbl_width if not provided
-    if(is.null(tbl_width)) {
-        char_to_inch <- 0.08 * font_size
-        text_width_needed <- total_text_chars * char_to_inch
-        
-        min_ci_value <- min(toShow$conf_low, na.rm = TRUE)
-        max_ci_value <- max(toShow$conf_high, na.rm = TRUE)
-        forest_data_range <- max_ci_value - min_ci_value
-        forest_width_min <- max(5, forest_data_range * 1.2 + 2)
-        
-        if(!is.null(plot_width)) {
-            available_for_text <- plot_width - forest_width_min
-            if(available_for_text > text_width_needed) {
-                tbl_width <- text_width_needed / plot_width
-            } else {
-                tbl_width <- min(0.5, available_for_text / plot_width)
-                warning(paste0("Specified plot width (", plot_width, 
-                               ") may be too narrow. Consider width of at least ", 
-                               round(text_width_needed + forest_width_min, 1), " inches."))
-            }
-        } else {
-            text_proportion_needed <- text_width_needed / (text_width_needed + forest_width_min * 1.2)
-            
-            if(n_rows < 10) {
-                tbl_width <- text_proportion_needed * 0.95
-            } else if(n_rows > 30) {
-                tbl_width <- text_proportion_needed * 0.85
-            } else {
-                tbl_width <- text_proportion_needed * 0.9
-            }
-        }
-        
-        tbl_width <- max(0.25, min(0.55, tbl_width))
-        
-        if(is_one_sided) {
-            tbl_width <- tbl_width * 0.85
-        }
+
+    reference_value <- 0
+
+    ## Calculate layout using helper function
+    layout <- calculate_forest_layout(
+        to_show_exp_clean = to_show_exp_clean,
+        show_n = show_n,
+        show_events = FALSE,  # lmforest doesn't have events
+        indent_groups = indent_groups,
+        condense_table = condense_table,
+        effect_label = effect_label,
+        ref_label = ref_label,
+        font_size = font_size,
+        tbl_width = ifelse(is.null(tbl_width), 0.6, tbl_width),
+        rangeb = rangeb,
+        center_padding = center_padding
+    )
+
+    ## Set up the extended range for plotting
+    rangeplot <- c(layout$rangeplot_start, rangeb[2] + diff(rangeb) * 0.05)
+
+    ## Extract positions
+    y_variable <- layout$positions$var
+    if (!(indent_groups || condense_table)) {
+        y_level <- layout$positions$level
     }
-    
-    ## Calculate recommended plot dimensions
-    rec_height <- max(5, min(20, 3 + n_rows * 0.25))
-    
+    if (show_n) {
+        y_n <- layout$positions$n
+    }
+    y_coef <- layout$positions$effect  # Note: called y_coef in lmforest, not y_or
+
+    ## Calculate recommended dimensions
+    rec_height <- max(5, min(20, 3 + nrow(to_show_exp_clean) * 0.25))
+
     if(!is.null(plot_width)) {
         rec_width <- plot_width
         if(!is.null(plot_height)) {
             rec_height <- plot_height
         }
     } else {
-        char_to_inch <- 0.08 * font_size
-        text_width_needed <- total_text_chars * char_to_inch
+        ## Use the calculated total width
+        rec_width <- layout$total_width + 1.0  # Add margins
         
-        min_ci_value <- min(toShow$conf_low, na.rm = TRUE) 
-        max_ci_value <- max(toShow$conf_high, na.rm = TRUE)
-        forest_data_range <- max_ci_value - min_ci_value
-        forest_width_needed <- max(6, forest_data_range * 1.2 + 3)
-        
-        rec_width <- max((text_width_needed / tbl_width) * 1.5,  
-                         text_width_needed + forest_width_needed)
-        rec_width <- max(12, min(30, rec_width))
+        ## Apply reasonable bounds based on layout
+        if (condense_table || indent_groups) {
+            if (!show_n) {
+                rec_width <- max(7.5, min(11, rec_width))
+            } else {
+                rec_width <- max(9, min(14, rec_width))
+            }
+        } else {
+            if (!show_n) {
+                rec_width <- max(12, min(15, rec_width))
+            } else {
+                rec_width <- max(13, min(16, rec_width))
+            }
+        }
     }
-    
-    ## Provide dimension recommendations
-    if(is.null(plot_width) || is.null(plot_height)) {
-        message(paste0("Recommended plot dimensions: width = ", round(rec_width, 1), 
-                       " inches, height = ", round(rec_height, 1), " inches"))
-    }
-    
-    ## Calculate the range for the plot
-    rangeplot <- rangeb
-    range_width <- diff(rangeb)
-    
-    if(is.null(tbl_width)) {
-        table_space_factor <- 1.5
-    } else {
-        table_space_factor <- tbl_width / (1 - tbl_width)
-    }
-    
-    rangeplot[1] <- rangeb[1] - (range_width * table_space_factor * 1.3)
-    rangeplot[2] <- rangeb[2] + (range_width * 0.05)
-    
-    width <- diff(rangeplot)
-    
-    ## Start positions from the left edge
-    y_variable <- rangeplot[1] + col_width_var * width
-    
-    if (indent_groups || condense_table) {
-        y_level <- y_variable + (col_width_var + 0.05) * width
-        next_base <- y_variable
-    } else {
-        y_level <- y_variable + col_width_level * width
-        next_base <- y_level
-    }
-    
-    if (show_n) {
-        y_n <- next_base + col_width_n * width
-        y_coef <- y_n + col_width_coef * width
-    } else {
-        y_coef <- next_base + col_width_coef * width
-    }
-    
+
     ## Font sizes
     annot_font <- font_size * annot_size
     header_font <- font_size * header_size
-    
+
     ## Custom ticks data
     ticks_df <- data.frame(
         x = -0.5,
@@ -618,18 +566,18 @@ lmforest <- function(model, data = NULL,
     )
     
     ## Create the plot
-    p <- ggplot2::ggplot(toShowExpClean, ggplot2::aes(x_pos, estimate)) +
+    p <- ggplot2::ggplot(to_show_exp_clean, ggplot2::aes(x_pos, estimate)) +
         
         ## Shading rectangles
         ggplot2::geom_rect(ggplot2::aes(xmin = x_pos - .5, xmax = x_pos + .5,
                                         ymin = rangeplot[1], ymax = rangeplot[2],
-                                        fill = ordered(shade_group + 1))) +
+                                        fill = ordered(shade_group))) +
         ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.10, 0.05))) +
         ggplot2::scale_size_continuous(range = c(1, 6), guide = "none") +
-        ggplot2::scale_fill_manual(values = c("#FFFFFF", "#EEEEEE"), guide = "none") +
+        ggplot2::scale_fill_manual(values = shade_colors, guide = "none") +
         
         ## Forest plot elements
-        ggplot2::geom_point(ggplot2::aes(size = N), pch = 22, color = "#000000", fill = color) +
+        ggplot2::geom_point(ggplot2::aes(size = N), pch = 22, color = "#000000", fill = color, na.rm = TRUE) +
         ggplot2::geom_errorbar(ggplot2::aes(ymin = conf_low, ymax = conf_high), width = 0.15) +
         
         ## Y-axis for forest plot
@@ -641,7 +589,7 @@ lmforest <- function(model, data = NULL,
         
         ## Reference line at 0
         ggplot2::annotate(geom = "segment", 
-                          x = -0.5, xend = max(toShowExpClean$x_pos) + 0.5, 
+                          x = -0.5, xend = max(to_show_exp_clean$x_pos) + 0.5, 
                           y = reference_value, yend = reference_value, 
                           linetype = "longdash") +
         
@@ -682,30 +630,30 @@ lmforest <- function(model, data = NULL,
         ggplot2::xlab("") +
         
         ## Variable column
-        ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = y_variable,
+        ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = y_variable,
                           label = "Variable", fontface = "bold", hjust = 0,
                           size = header_font) +
         
         {if (indent_groups || condense_table) {
-             ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = y_variable,
-                               label = toShowExpClean$var_display, 
-                               fontface = ifelse(grepl("^    ", toShowExpClean$var_display), "plain", "bold"), 
+             ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_variable,
+                               label = to_show_exp_clean$var_display, 
+                               fontface = ifelse(grepl("^    ", to_show_exp_clean$var_display), "plain", "bold"), 
                                hjust = 0,
                                size = annot_font)
          } else {
-             ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = y_variable,
-                               label = toShowExpClean$var_display, fontface = "bold", hjust = 0,
+             ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_variable,
+                               label = to_show_exp_clean$var_display, fontface = "bold", hjust = 0,
                                size = annot_font)
          }} +
         
         ## Group/level column
         {if (!(indent_groups || condense_table)) {
              list(
-                 ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = y_level,
+                 ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = y_level,
                                    label = "Group", fontface = "bold", hjust = 0,
                                    size = header_font),
-                 ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = y_level,
-                                   label = toShowExpClean$level, hjust = 0,
+                 ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_level,
+                                   label = to_show_exp_clean$level, hjust = 0,
                                    size = annot_font)
              )
          }} +
@@ -713,22 +661,22 @@ lmforest <- function(model, data = NULL,
         ## N column (conditional)
         {if (show_n) {
              list(
-                 ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.5, y = y_n,
+                 ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = y_n,
                                    label = "n", fontface = "bold.italic", hjust = 0.5,
                                    size = header_font),
-                 ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = y_n,
-                                   label = toShowExpClean$n_formatted, hjust = 0.5,
+                 ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_n,
+                                   label = to_show_exp_clean$n_formatted, hjust = 0.5,
                                    size = annot_font)
              )
          }} +
         
         ## Coefficient column
-        ggplot2::annotate(geom = "text", x = max(toShowExpClean$x_pos) + 1.4, y = y_coef,
+        ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.4, y = y_coef,
                           label = paste0("bold('Coefficient (95% CI); '*bolditalic(p)*'-value')"),
                           hjust = 0, size = header_font, parse = TRUE) +
         
-        ggplot2::annotate(geom = "text", x = toShowExpClean$x_pos, y = y_coef,
-                          label = toShowExpClean$effect_string_expr, hjust = 0,
+        ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_coef,
+                          label = to_show_exp_clean$effect_string_expr, hjust = 0,
                           size = annot_font, parse = TRUE) +
         
         ## X-axis label
@@ -747,10 +695,22 @@ lmforest <- function(model, data = NULL,
                                                          paste0("= ", round(gmodel$f_pvalue, 3))),
                                          "\nAIC: ", gmodel$AIC_formatted),
                           size = annot_font * 0.8, hjust = 0, vjust = 1.2, fontface = "italic")
+
+    ## Convert units back for output if needed
+    if (units != "in") {
+        rec_width <- convert_units(rec_width, from = "inches", to = units)
+        rec_height <- convert_units(rec_height, from = "inches", to = units)
+    }
+
+    ## Provide dimension recommendations
+    if(is.null(plot_width) || is.null(plot_height)) {
+        message(sprintf("Recommended plot dimensions: width = %.1f %s, height = %.1f %s",
+                        rec_width, units, rec_height, units))
+    }
     
     ## Add recommended dimensions as an attribute
-    attr(p, "recommended_dims") <- list(width = rec_width, height = rec_height)
-    
+    attr(p, "recommended_dims") <- list(width = rec_width, height = rec_height, units = units)
+
     ## Return the plot
     return(p)
 }

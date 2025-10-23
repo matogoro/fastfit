@@ -17,36 +17,14 @@ lmforest(
   plot_width = NULL,
   plot_height = NULL,
   tbl_width = 0.6,
-  col_width_var = 0.01,
-  col_width_level = 0.17,
-  col_width_n = 0.17,
-  col_width_coef = 0.05,
   show_n = TRUE,
+  indent_groups = FALSE,
+  condense_table = FALSE,
+  center_padding = 4,
+  zebra_stripes = TRUE,
   ref_label = "reference",
   var_labels = NULL,
-  color = "#5A8F5A"
-)
-
-lmforest(
-  model,
-  data = NULL,
-  title = "Linear Model",
-  effect_label = "Coefficient",
-  digits = 2,
-  font_size = 1,
-  annot_size = 3.88,
-  header_size = 5.82,
-  title_size = 23.28,
-  plot_width = NULL,
-  plot_height = NULL,
-  tbl_width = 0.6,
-  col_width_var = 0.01,
-  col_width_level = 0.17,
-  col_width_n = 0.17,
-  col_width_coef = 0.05,
-  show_n = TRUE,
-  ref_label = "reference",
-  var_labels = NULL,
+  units = "in",
   color = "#5A8F5A"
 )
 }
@@ -86,19 +64,19 @@ Default is NULL.}
 width allocated to the data table. If NULL (default), automatically calculated
 based on content and plot dimensions.}
 
-\item{col_width_var}{Numeric value specifying the proportion of plot width 
-allocated to the variable column. Default is 0.01.}
-
-\item{col_width_level}{Numeric value specifying the proportion of plot width 
-allocated to the group column. Default is 0.17.}
-
-\item{col_width_n}{Numeric value specifying the proportion of plot width 
-allocated to the sample size column. Default is 0.17.}
-
-\item{col_width_coef}{Numeric value specifying the proportion of plot width 
-allocated to the coefficient column. Default is 0.05.}
-
 \item{show_n}{Logical. Whether to show the sample size column. Default is TRUE.}
+
+\item{indent_groups}{Logical. Whether to indent group levels under variables.
+Default is FALSE.}
+
+\item{condense_table}{Logical. Whether to condense binary variables into single rows.
+Forces indent_groups = TRUE. Default is FALSE.}
+
+\item{center_padding}{Numeric value specifying the padding width between the table
+and the forest plot. Default is 4.}
+
+\item{zebra_stripes}{Logical. Whether to use alternating background shading 
+for different variables to improve readability. Default is TRUE.}
 
 \item{ref_label}{Character string to display for reference categories. 
 Default is "reference".}
@@ -106,19 +84,12 @@ Default is "reference".}
 \item{var_labels}{Named character vector for custom variable labels. Names should 
 match variable names in the model, values are the display labels.}
 
+\item{units}{Units used for measurement. Default is inches ("in").}
+
 \item{color}{Character string specifying the color for coefficient point estimates. 
 Default is "#5A8F5A" (green).}
-
-\item{indent_groups}{Logical. Whether to indent group levels under variables.
-Default is FALSE.}
-
-\item{condense_table}{Logical. Whether to condense binary variables into single rows.
-Forces indent_groups = TRUE. Default is FALSE.}
 }
 \value{
-A ggplot object containing the forest plot. The object has an attribute
-  "recommended_dims" with suggested width and height in inches.
-
 A ggplot object containing the forest plot. The object has an attribute
   "recommended_dims" with suggested width and height in inches.
 }
@@ -127,16 +98,8 @@ Generates a publication-ready forest plot combining a data table and
 graphical representation of coefficients from a linear model.
 The plot includes variable names, group levels, sample sizes, coefficients
 with confidence intervals, and p-values.
-
-Generates a publication-ready forest plot combining a data table and 
-graphical representation of coefficients from a linear model.
-The plot includes variable names, group levels, sample sizes, coefficients
-with confidence intervals, and p-values.
 }
 \seealso{
-\code{\link[stats]{lm}} for fitting linear models,
-\code{\link[ggplot2]{ggplot}} for the underlying plotting system
-
 \code{\link[stats]{lm}} for fitting linear models,
 \code{\link[ggplot2]{ggplot}} for the underlying plotting system
 }
