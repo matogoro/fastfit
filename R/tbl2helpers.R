@@ -541,36 +541,35 @@ process_variable_block <- function(data, start_row, end_row, rows_to_keep, is_de
     n_rows <- end_row - start_row + 1
     var_name <- data$Variable[start_row]
     
-                                        # Check if it's a continuous variable (single row or has statistics like mean/SD)
+    ## Check if continuous variable (single row or has statistics like mean/SD)
     is_continuous <- FALSE
     if (n_rows == 1) {
         is_continuous <- TRUE
     } else if ("Group" %in% names(data)) {
-                                        # Check for continuous variable indicators
+        ## Check for continuous variable indicators
         groups <- data$Group[start_row:end_row]
         is_continuous <- any(grepl("(Mean|Median|Range|SD|IQR)", groups, ignore.case = TRUE))
     }
     
-                                        # Check if it's a binary categorical (2 levels including reference)
+    ## Check if it's a binary categorical (2 levels including reference)
     is_binary <- FALSE
     if (!is_continuous && n_rows == 2) {
-                                        # Check if one is reference
+        ## Check if one is reference
         if (any(grepl("reference|-|^$", data$Group[start_row:end_row]))) {
             is_binary <- TRUE
         }
     }
     
     if (is_continuous) {
-                                        # Condense continuous variable
+        ## Condense continuous variable
         rows_to_keep <- condense_continuous(data, start_row, end_row, rows_to_keep, is_descriptive)
         
     } else if (is_binary) {
-                                        # Condense binary categorical
+        ## Condense binary categorical
         rows_to_keep <- condense_binary(data, start_row, end_row, rows_to_keep, is_descriptive)
         
     } else {
-                                        # Multi-level categorical - keep as is
-                                        # Just ensure the variable name is on the first row
+        ## Multi-level categorical - keep as is
         for (i in (start_row+1):end_row) {
             if (i <= length(rows_to_keep)) {
                 data$Variable[i] <- ""
@@ -585,20 +584,20 @@ process_variable_block <- function(data, start_row, end_row, rows_to_keep, is_de
 #' @keywords internal
 condense_continuous <- function(data, start_row, end_row, rows_to_keep, is_descriptive) {
     
-                                        # For continuous, keep only first row and update its label
+    ## For continuous, keep only first row and update its label
     if (is_descriptive && "Group" %in% names(data)) {
-                                        # Extract the statistic type and append to variable name
+        ## Extract the statistic type and append to variable name
         stat_type <- data$Group[start_row]
         if (!is.na(stat_type) && stat_type != "" && stat_type != "-") {
-                                        # Clean up the stat type
-            stat_clean <- gsub("\\s*\\(.*\\)", "", stat_type)  # Remove parenthetical info
+            ## Clean up the stat type
+            stat_clean <- gsub("\\s*\\(.*\\)", "", stat_type)
             data$Variable[start_row] <- paste0(data$Variable[start_row], ", ", tolower(stat_clean))
         }
-                                        # Clear the Group column for cleaner look
+        ## Clear the Group column for cleaner look
         data$Group[start_row] <- "-"
     }
     
-                                        # Mark rows to remove
+    ## Mark rows to remove
     if (end_row > start_row) {
         rows_to_keep[(start_row+1):end_row] <- FALSE
     }
@@ -610,7 +609,7 @@ condense_continuous <- function(data, start_row, end_row, rows_to_keep, is_descr
 #' @keywords internal
 condense_binary <- function(data, start_row, end_row, rows_to_keep, is_descriptive) {
     
-                                        # Find the non-reference row
+    ## Find the non-reference row
     non_ref_row <- start_row
     for (i in start_row:end_row) {
         if (!grepl("reference|-|^$", data$Group[i])) {
@@ -619,9 +618,9 @@ condense_binary <- function(data, start_row, end_row, rows_to_keep, is_descripti
         }
     }
     
-                                        # Move non-reference data to first row
+    ## Move non-reference data to first row
     if (non_ref_row != start_row) {
-                                        # Copy statistics from non-reference row
+        ## Copy statistics from non-reference row
         stat_cols <- setdiff(names(data), c("Variable", "Group"))
         for (col in stat_cols) {
             if (col %in% names(data)) {
@@ -630,16 +629,16 @@ condense_binary <- function(data, start_row, end_row, rows_to_keep, is_descripti
         }
     }
     
-                                        # Update the variable label to include the category
+    ## Update the variable label to include the category
     non_ref_level <- data$Group[non_ref_row]
     if (!is.na(non_ref_level) && non_ref_level != "") {
         data$Variable[start_row] <- paste0(data$Variable[start_row], " (", non_ref_level, ")")
     }
     
-                                        # Clear the Group column
+    ## Clear the Group column
     data$Group[start_row] <- "-"
     
-                                        # Mark second row for removal
+    ## Mark second row for removal
     rows_to_keep[end_row] <- FALSE
     
     return(rows_to_keep)
@@ -657,15 +656,16 @@ process_table_for_flextable <- function(table,
                                         indent_groups = FALSE,
                                         condense_table = FALSE,
                                         zebra_stripes = FALSE,
+                                        dark_header = FALSE,
                                         paper = "letter",
                                         orientation = "portrait",
                                         width = NULL,
                                         align = NULL) {
     
-                                        # Convert to data frame
+    ## Convert to data frame
     df <- as.data.frame(table)
     
-                                        # Handle N row if present
+    ## Handle N row if present
     has_n_row <- FALSE
     n_row_data <- NULL
     if (nrow(df) > 0 && "Variable" %in% names(df) && 
@@ -675,18 +675,18 @@ process_table_for_flextable <- function(table,
         df <- df[-1, ]
     }
     
-                                        # Track variable groups BEFORE any transformation
+    ## Track variable groups BEFORE any transformation
     var_groups <- NULL
     if (zebra_stripes && "Variable" %in% names(df)) {
         var_groups <- identify_variable_groups(df)
     }
     
-                                        # Apply condensing if requested
+    ## Apply condensing if requested
     if (condense_table) {
         indent_groups <- TRUE
         df <- condense_table_rows(df, indent_groups = indent_groups)
         
-                                        # Update variable groups after condensing
+        ## Update variable groups after condensing
         if (zebra_stripes) {
             var_groups <- identify_variable_groups(df)
         }
@@ -696,27 +696,34 @@ process_table_for_flextable <- function(table,
         df <- format_indented_groups(df, indent_string = "    ")
     }
     
-                                        # Replace empty cells with "-" for consistency
+    ## Replace empty cells with "-" for consistency
     df <- replace_empty_cells(df)
     
-                                        # Create flextable
+    ## Create flextable
     ft <- flextable::flextable(df)
     
-                                        # Set font
+    ## Set font
     ft <- flextable::font(ft, fontname = font_family, part = "all")
     ft <- flextable::fontsize(ft, size = font_size, part = "all")
     
-                                        # Format headers
+    ## Format headers
     if (format_headers) {
         ft <- format_headers_ft(ft, has_n_row, n_row_data)
     }
+
+    ## Apply dark header if requested
+    if (dark_header) {
+        ft <- flextable::bg(ft, bg = "#000000", part = "header")
+        ft <- flextable::color(ft, color = "#FFFFFF", part = "header")
+        ft <- flextable::bold(ft, bold = TRUE, part = "header")
+    }
     
-                                        # Bold significant p-values
+    ## Bold significant p-values
     if (bold_significant) {
         ft <- bold_pvalues_ft(ft, df, sig_threshold)
     }
     
-                                        # Set alignment
+    ## Set alignment
     if (is.null(align)) {
         for (col in names(df)) {
             if (col %in% c("Variable", "Group")) {
@@ -735,29 +742,29 @@ process_table_for_flextable <- function(table,
         }
     }
     
-                                        # Add borders
+    ## Add borders
     ft <- flextable::border_remove(ft)
     ft <- flextable::hline_top(ft, border = officer::fp_border(width = 2), part = "header")
     ft <- flextable::hline_bottom(ft, border = officer::fp_border(width = 1), part = "header")
     ft <- flextable::hline_bottom(ft, border = officer::fp_border(width = 2), part = "body")
     
-                                        # Reduce line spacing and padding
+    ## Reduce line spacing and padding
     ft <- flextable::line_spacing(ft, space = 1)
     ft <- flextable::padding(ft, i = NULL, j = NULL,
                              padding.top = 1, padding.bottom = 1,
                              padding.left = 1, padding.right = 1)
     
-                                        # Add zebra stripes by variable group if requested
+    ## Add zebra stripes by variable group if requested
     if (zebra_stripes && !is.null(var_groups)) {
         ft <- apply_variable_zebra_stripes_enhanced(ft, df, var_groups)
     }
     
-                                        # Calculate width based on paper and orientation if not specified
+    ## Calculate width based on paper and orientation if not specified
     if (is.null(width)) {
         width <- calculate_table_width(paper, orientation)
     }
     
-                                        # Set width
+    ## Set width
     ft <- flextable::width(ft, width = width / ncol(df))
     
     return(list(ft = ft, caption = caption))
@@ -788,7 +795,7 @@ identify_variable_groups <- function(df) {
 #' @keywords internal
 replace_empty_cells <- function(df) {
     for (col in names(df)) {
-        if (col != "Variable") {  # Don't replace in Variable column
+        if (col != "Variable") {
             df[[col]][df[[col]] == "" | is.na(df[[col]])] <- "-"
         }
     }
@@ -798,15 +805,15 @@ replace_empty_cells <- function(df) {
 #' Apply zebra stripes with proper variable group detection for indented tables
 #' @keywords internal
 apply_variable_zebra_stripes_enhanced <- function(ft, df, var_groups) {
-                                        # Check if table has been indented (look for leading spaces in Variable column)
+    ## Check if table has been indented (look for leading spaces in Variable column)
     is_indented <- any(grepl("^\\s{2,}", df$Variable))
     
     if (is_indented) {
-                                        # For indented tables, identify variable groups by non-indented rows
+        ## For indented tables, identify variable groups by non-indented rows
         var_starts <- which(!grepl("^\\s", df$Variable) & df$Variable != "")
         
         for (i in seq_along(var_starts)) {
-            if (i %% 2 == 1) {  # Odd variable groups get shading
+            if (i %% 2 == 1) {  ## Odd variable groups get shading
                 start_row <- var_starts[i]
                 end_row <- if (i < length(var_starts)) {
                                var_starts[i + 1] - 1
@@ -815,24 +822,24 @@ apply_variable_zebra_stripes_enhanced <- function(ft, df, var_groups) {
                            }
                 
                 ft <- flextable::bg(ft, i = start_row:end_row, 
-                                    bg = "#F0F0F0", part = "body")
+                                    bg = "#EEEEEE", part = "body")
             }
         }
     } else if (!is.null(var_groups)) {
-                                        # Use pre-identified groups for non-indented tables
+        ## Use pre-identified groups for non-indented tables
         for (i in seq_along(var_groups)) {
             if (i %% 2 == 1) {
                 rows <- var_groups[[i]]
                 rows <- rows[rows <= nrow(df)]
                 if (length(rows) > 0) {
-                    ft <- flextable::bg(ft, i = rows, bg = "#F0F0F0", part = "body")
+                    ft <- flextable::bg(ft, i = rows, bg = "#EEEEEE", part = "body")
                 }
             }
         }
     } else {
-                                        # Fallback to row-based striping
+        ## Fallback to row-based striping
         ft <- flextable::bg(ft, i = seq(1, nrow(df), 2), 
-                            bg = "#F0F0F0", part = "body")
+                            bg = "#EEEEEE", part = "body")
     }
     
     return(ft)
@@ -841,7 +848,7 @@ apply_variable_zebra_stripes_enhanced <- function(ft, df, var_groups) {
 #' Calculate table width based on paper size and orientation
 #' @keywords internal
 calculate_table_width <- function(paper, orientation) {
-                                        # Define paper sizes (in inches) with margins
+    ## Define paper sizes (in inches) with margins
     paper_sizes <- list(
         letter = c(width = 8.5, height = 11),
         a4 = c(width = 8.27, height = 11.69),
@@ -854,46 +861,15 @@ calculate_table_width <- function(paper, orientation) {
     
     dims <- paper_sizes[[paper]]
     
-                                        # Swap for landscape
+    ## Swap for landscape
     if (orientation == "landscape") {
         dims <- c(width = dims["height"], height = dims["width"])
     }
     
-                                        # Subtract margins (1 inch on each side)
+    ## Subtract margins (1 inch on each side)
     usable_width <- dims["width"] - 2
     
     return(as.numeric(usable_width))
-}
-
-#' Apply zebra stripes by variable group
-#' @keywords internal
-apply_variable_zebra_stripes <- function(ft, df) {
-    if (!"Variable" %in% names(df)) {
-                                        # If no Variable column, fall back to alternating rows
-        ft <- flextable::bg(ft, i = seq(1, nrow(df), 2), 
-                            bg = "#F0F0F0", part = "body")
-        return(ft)
-    }
-    
-                                        # Find variable groups
-    var_starts <- which(df$Variable != "" & !is.na(df$Variable))
-    
-                                        # Apply shading to alternating variable groups
-    for (i in seq_along(var_starts)) {
-        if (i %% 2 == 1) {  # Odd variable groups get shading
-            start_row <- var_starts[i]
-            end_row <- if (i < length(var_starts)) {
-                           var_starts[i + 1] - 1
-                       } else {
-                           nrow(df)
-                       }
-            
-            ft <- flextable::bg(ft, i = start_row:end_row, 
-                                bg = "#F0F0F0", part = "body")
-        }
-    }
-    
-    return(ft)
 }
 
 #' Format headers for flextable
@@ -904,18 +880,18 @@ format_headers_ft <- function(ft, has_n_row, n_row_data) {
     for (i in seq_along(col_names)) {
         col <- col_names[i]
         
-                                        # Skip Variable column for n count addition
+        ## Skip Variable column for n count addition
         if (col == "Variable") {
-                                        # Just keep the original label without adding (n = N)
+            ## Just keep the original label without adding (n = N)
             next
         }
         
-                                        # Italicize 'n' in headers
+        ## Italicize 'n' in headers
         if (col == "n") {
             ft <- flextable::italic(ft, j = i, part = "header")
         }
         
-                                        # Add n counts for data columns only (not Variable)
+        ## Add n counts for data columns only (not Variable)
         if (has_n_row && col %in% names(n_row_data) && col != "Variable") {
             n_val <- n_row_data[[col]]
             if (!is.na(n_val) && n_val != "" && n_val != "0") {
@@ -926,7 +902,7 @@ format_headers_ft <- function(ft, has_n_row, n_row_data) {
         }
     }
     
-                                        # Bold all headers
+    ## Bold all headers
     ft <- flextable::bold(ft, part = "header")
     
     return(ft)
@@ -943,7 +919,6 @@ bold_pvalues_ft <- function(ft, df, sig_threshold = 0.05) {
             for (i in seq_len(nrow(df))) {
                 val <- df[[p_col]][i]
                 if (!is.na(val) && val != "") {
-                                        # Check if significant
                     is_sig <- FALSE
                     
                     if (grepl("^<\\s*0\\.001", val)) {
@@ -965,4 +940,111 @@ bold_pvalues_ft <- function(ft, df, sig_threshold = 0.05) {
     }
     
     return(ft)
+}
+
+#' Apply zebra striping to alternating variables
+#' @keywords internal
+apply_zebra_stripes <- function(x, stripe_color = "gray!10") {
+    
+    if (!is.data.frame(x) && !is.data.table(x)) {
+        return(list())
+    }
+    
+                                        # Convert to data frame if needed
+    if (is.data.table(x)) {
+        x <- as.data.frame(x)
+    }
+    
+                                        # Detect table type and extract variable groups
+    var_groups <- NULL
+    
+                                        # Check for model output table (has "Variable" column)
+    if ("Variable" %in% names(x)) {
+                                        # Model output table - use Variable column pattern
+        var_col <- as.character(x$Variable)
+        var_starts <- which(var_col != "" & !is.na(var_col))
+        
+        if (length(var_starts) > 0) {
+            var_groups <- integer(nrow(x))
+            for (i in seq_along(var_starts)) {
+                start_idx <- var_starts[i]
+                end_idx <- if (i < length(var_starts)) {
+                               var_starts[i + 1] - 1
+                           } else {
+                               nrow(x)
+                           }
+                var_groups[start_idx:end_idx] <- i
+            }
+        }
+        
+    } else if (ncol(x) > 0) {
+                                        # Descriptive table - use first column indentation pattern
+        first_col <- as.character(x[[1]])
+        
+                                        # Skip if first column is all NA or empty
+        if (all(is.na(first_col) | first_col == "")) {
+            return(list())
+        }
+        
+                                        # Detect indentation levels
+        indent_levels <- nchar(first_col) - nchar(trimws(first_col, "left"))
+        
+                                        # Find main variable rows (minimum indentation, excluding special rows)
+        min_indent <- min(indent_levels, na.rm = TRUE)
+        main_var_rows <- which(indent_levels == min_indent)
+        
+                                        # Exclude total/summary rows
+        exclude_patterns <- c("^[[:space:]]*Total", "^[[:space:]]*Overall", 
+                              "^[[:space:]]*Missing", "^[[:space:]]*N[[:space:]]*=",
+                              "^[[:space:]]*N[[:space:]]*\\(", "^[[:space:]]*Mean")
+        
+        for (pattern in exclude_patterns) {
+            exclude_rows <- grep(pattern, first_col[main_var_rows], ignore.case = TRUE)
+            if (length(exclude_rows) > 0) {
+                main_var_rows <- main_var_rows[-exclude_rows]
+            }
+        }
+        
+                                        # Build groups if we have valid main variables
+        if (length(main_var_rows) > 0) {
+            var_groups <- integer(nrow(x))
+            for (i in seq_along(main_var_rows)) {
+                start_idx <- main_var_rows[i]
+                end_idx <- if (i < length(main_var_rows)) {
+                               main_var_rows[i + 1] - 1
+                           } else {
+                               nrow(x)
+                           }
+                var_groups[start_idx:end_idx] <- i
+            }
+        }
+    }
+    
+                                        # If no groups detected, return empty
+    if (is.null(var_groups) || all(var_groups == 0)) {
+        return(list())
+    }
+    
+                                        # Build LaTeX commands for alternating stripes
+    commands <- character()
+    positions <- numeric()
+    
+    unique_groups <- unique(var_groups[var_groups > 0])
+    for (group_id in unique_groups) {
+                                        # Apply stripes to even-numbered groups
+        if (group_id %% 2 == 0) {
+            group_rows <- which(var_groups == group_id)
+            for (row in group_rows) {
+                commands <- c(commands, paste0("\\rowcolor{", stripe_color, "}"))
+                positions <- c(positions, row - 1)  # xtable uses 0-based indexing
+            }
+        }
+    }
+    
+                                        # Return formatted for xtable's add.to.row
+    if (length(commands) > 0) {
+        return(list(pos = as.list(positions), command = commands))
+    } else {
+        return(list())
+    }
 }

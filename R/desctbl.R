@@ -172,9 +172,8 @@ desctbl <- function(data,
         result <- format_pvalues_desctbl(result, digits_p)
     }
 
-    ## Add N row as first row if grouped (after all other processing)
+    ## Add N row as first row (for both grouped and ungrouped tables)
     if (!is.null(group_var)) {
-        
         ## Get the group values in the correct order
         if (is.factor(data[[group_var]])) {
             ## Use factor levels for proper ordering
@@ -210,6 +209,18 @@ desctbl <- function(data,
         if ("p-value" %in% names(result)) {
             n_row[["p-value"]] <- ""
         }
+        
+        ## Prepend N row
+        result <- rbind(n_row, result, fill = TRUE)
+        
+    } else if (total && total_label %in% names(result)) {
+        ## Add N row for ungrouped tables with Total column
+        n_total <- nrow(data)
+        n_row <- data.table::data.table(
+                                 Variable = "N",
+                                 Group = ""
+                             )
+        n_row[[total_label]] <- format(n_total, big.mark = ",")
         
         ## Prepend N row
         result <- rbind(n_row, result, fill = TRUE)

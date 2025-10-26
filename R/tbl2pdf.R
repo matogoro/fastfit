@@ -18,8 +18,11 @@
 #' @param caption Character string. Optional caption to display below table.
 #' @param format_headers Logical. If TRUE, formats column headers (e.g., converts
 #'   underscores to spaces). Default is TRUE.
-#' @param add_padding Logical. If TRUE, adds spacing around variable groups.
+#' @param variable_padding Logical. If TRUE, adds spacing around variable groups.
 #'   Default is TRUE.
+#' @param cell_padding Character string or numeric. Add vertical padding to text
+#'   within cells. Choices are "none", "normal" (default), "relaxed", "loose", or
+#'   a number representing a custom multiplier.
 #' @param bold_significant Logical. If TRUE, bolds p-values below significance
 #'   threshold. Default is TRUE.
 #' @param sig_threshold Numeric. P-value threshold for boldface. Default is 0.05.
@@ -31,6 +34,8 @@
 #' @param condense_table Logical. If TRUE, decreases table vertical height by
 #'   reducing continuous, survival, and binary categorical variables to single
 #'   rows. Makes indent_groups = TRUE by default. Default is FALSE.
+#' @param zebra_stripes Logical. If TRUE, adds alternating row shading. Default is FALSE.
+#' @param stripe_color Character string. Uses LaTeX color names. Default is "gray!20".
 #' @param show_logs Logical. If TRUE, keeps log files after PDF creation.
 #'   Default is FALSE.
 #' @param ... Additional arguments passed to xtable::xtable.
@@ -117,12 +122,16 @@ tbl2pdf <- function (table,
                      font_size = 8,
                      caption = NULL, 
                      format_headers = TRUE,
-                     add_padding = TRUE,
+                     variable_padding = TRUE,
+                     cell_padding = "normal",
                      bold_significant = TRUE, 
                      sig_threshold = 0.05,
                      align = NULL,
                      indent_groups = FALSE,
                      condense_table = FALSE,
+                     zebra_stripes = FALSE,
+                     stripe_color = "gray!20",
+                     dark_header = FALSE,
                      show_logs = TRUE,
                      ...) {
     
@@ -145,34 +154,177 @@ tbl2pdf <- function (table,
     paper_settings <- get_paper_settings(paper, margins)
     df <- as.data.frame(table)
 
+                                        # Detect variable groups BEFORE any processing
+    var_groups <- NULL
+    if (zebra_stripes) {
+        if ("Variable" %in% names(df)) {
+            var_starts <- which(df$Variable != "" & !is.na(df$Variable))
+            if (length(var_starts) > 0) {
+                var_groups <- integer(nrow(df))
+                for (i in seq_along(var_starts)) {
+                    start_idx <- var_starts[i]
+                    end_idx <- if (i < length(var_starts)) {
+                                   var_starts[i + 1] - 1
+                               } else {
+                                   nrow(df)
+                               }
+                    var_groups[start_idx:end_idx] <- i
+                }
+            }
+        }
+    }
+    
     has_n_row <- FALSE
     n_row_data <- NULL
     if (nrow(df) > 0 && "Variable" %in% names(df) && df$Variable[1] == "N") {
         has_n_row <- TRUE
         n_row_data <- df[1, ]
         df <- df[-1, ]
-    }
-
-    if (condense_table) {
-        indent_groups <- TRUE
-        df <- condense_table_rows(df, indent_groups = indent_groups)
-        df <- format_indented_groups(df, indent_string = "\\hspace{1em}")
-    } else if (indent_groups) {
-        df <- format_indented_groups(df, indent_string = "\\hspace{1em}")
+        if (!is.null(var_groups) && length(var_groups) > 1) {
+            var_groups <- var_groups[-1]
+        }
     }
 
     if (bold_significant) {
         df <- format_pvalues_export_tex(df, sig_threshold)
     }
     
-    if (add_padding && ("Variable" %in% names(df) || "variable" %in% 
-                        names(df))) {
+    original_nrow <- nrow(df)
+
+    if (condense_table) {
+        indent_groups <- TRUE
+        df <- condense_table_rows(df, indent_groups = indent_groups)
+        if (zebra_stripes && "Variable" %in% names(df)) {
+            var_starts <- which(df$Variable != "" & !is.na(df$Variable))
+            if (length(var_starts) > 0) {
+                var_groups <- integer(nrow(df))
+                for (i in seq_along(var_starts)) {
+                    start_idx <- var_starts[i]
+                    end_idx <- if (i < length(var_starts)) {
+                                   var_starts[i + 1] - 1
+                               } else {
+                                   nrow(df)
+                               }
+                    var_groups[start_idx:end_idx] <- i
+                }
+            }
+        }
+        df <- format_indented_groups(df, indent_string = "\\hspace{1em}")
+    } else if (indent_groups) {
+        df <- format_indented_groups(df, indent_string = "\\hspace{1em}")
+    }
+    
+    padding_rows <- NULL
+    if (variable_padding && ("Variable" %in% names(df) || "variable" %in% names(df))) {
+        if (!is.null(var_groups)) {
+            padding_positions <- which(diff(var_groups) != 0)
+            new_var_groups <- integer(nrow(df) + length(padding_positions))
+            current_pos <- 1
+            for (i in 1:nrow(df)) {
+                new_var_groups[current_pos] <- var_groups[i]
+                current_pos <- current_pos + 1
+                if (i %in% padding_positions) {
+                    new_var_groups[current_pos] <- 0
+                    current_pos <- current_pos + 1
+                }
+            }
+            var_groups <- new_var_groups
+        }
         df <- add_variable_padding(df)
     }
     
+    add.to.row <- NULL
+    if (zebra_stripes && "Variable" %in% names(df)) {
+        is_indented <- indent_groups || condense_table
+        
+        if (is_indented) {
+            var_starts <- which(!grepl("\\\\hspace", df$Variable) & 
+                                df$Variable != "" & 
+                                !is.na(df$Variable))
+            
+            commands <- character()
+            positions <- numeric()
+            
+            for (i in seq_along(var_starts)) {
+                if (i %% 2 != 0) {
+                    start_idx <- var_starts[i]
+                    end_idx <- if (i < length(var_starts)) {
+                                   if (variable_padding) {
+                                       var_starts[i + 1] - 2
+                                   } else {
+                                       var_starts[i + 1] - 1
+                                   }
+                               } else {
+                                   nrow(df)
+                               }
+                    
+                    for (row in start_idx:end_idx) {
+                        if (!is.na(df$Variable[row])) {
+                            commands <- c(commands, paste0("\\rowcolor{", stripe_color, "}"))
+                            positions <- c(positions, row - 1)
+                        }
+                    }
+                }
+            }
+            
+            if (length(commands) > 0) {
+                add.to.row <- list(pos = as.list(positions), command = commands)
+            }
+        } else {
+            if ("Group" %in% names(df)) {
+                var_starts <- which(df$Variable != "" & !is.na(df$Variable))
+                
+                commands <- character()
+                positions <- numeric()
+                
+                for (i in seq_along(var_starts)) {
+                    if (i %% 2 != 0) {
+                        start_idx <- var_starts[i]
+                        end_idx <- if (i < length(var_starts)) {
+                                       if (variable_padding) {
+                                           var_starts[i + 1] - 2
+                                       } else {
+                                           var_starts[i + 1] - 1
+                                       }
+                                   } else {
+                                       nrow(df)
+                                   }
+                        
+                        for (row in start_idx:end_idx) {
+                            if (!is.na(df$Variable[row])) {
+                                commands <- c(commands, paste0("\\rowcolor{", stripe_color, "}"))
+                                positions <- c(positions, row - 1)
+                            }
+                        }
+                    }
+                }
+                
+                if (length(commands) > 0) {
+                    add.to.row <- list(pos = as.list(positions), command = commands)
+                }
+            } else if (!is.null(var_groups)) {
+                commands <- character()
+                positions <- numeric()
+                
+                for (i in 1:nrow(df)) {
+                    if (var_groups[i] %% 2 != 0 && var_groups[i] > 0) {
+                        commands <- c(commands, paste0("\\rowcolor{", stripe_color, "}"))
+                        positions <- c(positions, i - 1)
+                    }
+                }
+                
+                if (length(commands) > 0) {
+                    add.to.row <- list(pos = as.list(positions), command = commands)
+                }
+            }
+        }
+    }
+
     if (is.null(align)) {
         align <- determine_alignment(df)
     }
+    
+    original_col_names <- names(df)
     
     if (format_headers) {
         if (has_n_row) {
@@ -182,10 +334,47 @@ tbl2pdf <- function (table,
         }
     }
 
+    if (dark_header) {
+        col_names <- names(df)
+        for (i in seq_along(col_names)) {
+            col_names[i] <- paste0("\\color{white}", col_names[i])
+        }
+        names(df) <- col_names
+        
+        header_command <- "\\rowcolor{black}"
+        
+        if (!is.null(add.to.row) && length(add.to.row$pos) > 0) {
+            add.to.row$pos <- c(list(-1), add.to.row$pos)
+            add.to.row$command <- c(header_command, add.to.row$command)
+        } else {
+            add.to.row <- list(
+                pos = list(-1),
+                command = header_command
+            )
+        }
+    }
+    
+                                        # Create xtable object
     xt <- xtable::xtable(df, align = align, ...)
+    
     file_base <- tools::file_path_sans_ext(file)
     tex_file <- paste0(file_base, ".tex")
     use_standalone <- FALSE
+    
+                                        # Determine array stretch value for cell padding
+    array_stretch <- switch(as.character(cell_padding),
+                            "none" = NULL,
+                            "normal" = "1.3",
+                            "relaxed" = "1.5",
+                            "loose" = "1.8",
+                            {
+                                        # If numeric value provided
+                                if (is.numeric(cell_padding)) {
+                                    as.character(cell_padding)
+                                } else {
+                                    "1.3"  # Default to normal
+                                }
+                            })
     
     if (is.null(paper_settings$width)) {
         standalone_check <- system2("kpsewhich", args = "standalone.cls", 
@@ -194,17 +383,22 @@ tbl2pdf <- function (table,
         
         if (use_standalone) {
             message("Using standalone class for auto-sized output")
+            xcolor_line <- if (zebra_stripes || dark_header) "\\usepackage[table]{xcolor}\n" else ""
+                                        # Add arraystretch command if padding requested
+            array_stretch_line <- if (!is.null(array_stretch)) 
+                                      sprintf("\\renewcommand{\\arraystretch}{%s}\n", array_stretch) else ""
+            
             cat(sprintf("\\documentclass[%dpt,border=10pt,varwidth=\\maxdimen]{standalone}\n
                          \\usepackage[T1]{fontenc}\n
                          \\usepackage[utf8]{inputenc}\n
-                         \\usepackage{helvet}\n
+                         %s\\usepackage{helvet}\n
                          \\renewcommand{\\familydefault}{\\sfdefault}\n
                          \\usepackage{array}\n
                          \\usepackage{graphicx}\n
                          \\usepackage{varwidth}\n
-                         \\begin{document}\n
+                         %s\\begin{document}\n
                          \\begin{varwidth}{\\linewidth}\n", 
-                        font_size), file = tex_file)
+                        font_size, xcolor_line, array_stretch_line), file = tex_file)
             
         } else {
             
@@ -218,18 +412,22 @@ tbl2pdf <- function (table,
                         "Using minimal margins instead.")
             }
             
+            xcolor_line <- if (zebra_stripes || dark_header) "\\usepackage[table]{xcolor}\n" else ""
+            array_stretch_line <- if (!is.null(array_stretch)) 
+                                      sprintf("\\renewcommand{\\arraystretch}{%s}\n", array_stretch) else ""
+            
             cat(sprintf("\\documentclass[%dpt]{article}\n
                          \\usepackage[T1]{fontenc}\n
                          \\usepackage[utf8]{inputenc}\n
                          \\usepackage[paperwidth=15in,paperheight=15in,margin=0.5in]{geometry}\n
-                         \\usepackage{helvet}\n
+                         %s\\usepackage{helvet}\n
                          \\renewcommand{\\familydefault}{\\sfdefault}\n
                          \\usepackage{array}\n
                          \\usepackage{graphicx}\n
                          \\pagestyle{empty}\n
-                         \\begin{document}\n
+                         %s\\begin{document}\n
                          \\noindent\n", 
-                        font_size), file = tex_file)
+                        font_size, xcolor_line, array_stretch_line), file = tex_file)
         }
         
     } else {
@@ -237,18 +435,22 @@ tbl2pdf <- function (table,
         margin_str <- sprintf("top=%.1fin,right=%.1fin,bottom=%.1fin,left=%.1fin", 
                               paper_settings$margins[1], paper_settings$margins[2], 
                               paper_settings$margins[3], paper_settings$margins[4])
+        xcolor_line <- if (zebra_stripes || dark_header) "\\usepackage[table]{xcolor}\n" else ""
+        array_stretch_line <- if (!is.null(array_stretch)) 
+                                  sprintf("\\renewcommand{\\arraystretch}{%s}\n", array_stretch) else ""
+        
         cat(sprintf("\\documentclass[%dpt]{article}\n
                      \\usepackage[T1]{fontenc}\n
                      \\usepackage[utf8]{inputenc}\n
                      \\usepackage[%s,%s,%s]{geometry}\n
-                     \\usepackage{helvet}\n
+                     %s\\usepackage{helvet}\n
                      \\renewcommand{\\familydefault}{\\sfdefault}\n
                      \\usepackage{array}\n
                      \\usepackage{graphicx}\n
                      \\pagestyle{empty}\n
-                     \\begin{document}\n", 
+                     %s\\begin{document}\n", 
                     font_size, paper_settings$latex_paper, orientation, 
-                    margin_str), file = tex_file)
+                    margin_str, xcolor_line, array_stretch_line), file = tex_file)
     }
     
     if (fit_to_page && !is.null(paper_settings$width)) {
@@ -256,17 +458,32 @@ tbl2pdf <- function (table,
             append = TRUE)
     }
 
-    print(xt,
-          file = tex_file,
-          append = TRUE,
-          include.rownames = FALSE, 
-          booktabs = FALSE,
-          floating = FALSE,
-          tabular.environment = "tabular", 
-          hline.after = c(-1, 0, nrow(xt)),
-          sanitize.text.function = sanitize_for_latex, 
-          sanitize.rownames.function = sanitize_for_latex,
-          sanitize.colnames.function = function(x) x)
+    if ((zebra_stripes || dark_header) && length(add.to.row$pos) > 0) {
+        print(xt,
+              file = tex_file,
+              append = TRUE,
+              include.rownames = FALSE, 
+              booktabs = FALSE,
+              floating = FALSE,
+              tabular.environment = "tabular", 
+              hline.after = c(-1, 0, nrow(xt)),
+              add.to.row = add.to.row,
+              sanitize.text.function = sanitize_for_latex, 
+              sanitize.rownames.function = sanitize_for_latex,
+              sanitize.colnames.function = function(x) x)
+    } else {
+        print(xt,
+              file = tex_file,
+              append = TRUE,
+              include.rownames = FALSE, 
+              booktabs = FALSE,
+              floating = FALSE,
+              tabular.environment = "tabular", 
+              hline.after = c(-1, 0, nrow(xt)),
+              sanitize.text.function = sanitize_for_latex, 
+              sanitize.rownames.function = sanitize_for_latex,
+              sanitize.colnames.function = function(x) x)
+    }
     
     if (fit_to_page && !is.null(paper_settings$width)) {
         cat("}\n", file = tex_file, append = TRUE)
@@ -282,7 +499,7 @@ tbl2pdf <- function (table,
     }
     
     cat("\n\\end{document}", file = tex_file, append = TRUE)
-    
+
     message("Compiling PDF...")
     
     result <- system2("pdflatex",
@@ -301,7 +518,7 @@ tbl2pdf <- function (table,
     }
     
     if (!file.exists(pdf_file)) {
-        warning("PDF compilation failed. Check ", file_base, 
+        warning("PDF compilation failed. Ensure show_logs = TRUE and check ", file_base, 
                 ".log for errors")
     }
     

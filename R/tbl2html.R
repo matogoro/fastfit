@@ -10,7 +10,7 @@
 #' @param format_headers Logical. If TRUE, formats column headers for better
 #'   display (converts underscores to spaces, applies proper casing). Default
 #'   is TRUE.
-#' @param add_padding Logical. If TRUE, adds padding around variable groups
+#' @param variable_padding Logical. If TRUE, adds padding around variable groups
 #'   for improved readability. Default is FALSE.
 #' @param bold_significant Logical. If TRUE, wraps significant p-values in
 #'   HTML bold tags. Default is TRUE.
@@ -72,11 +72,14 @@ tbl2html <- function(table,
                      file,
                      caption = NULL,
                      format_headers = TRUE,
-                     add_padding = FALSE, 
+                     variable_padding = FALSE, 
                      bold_significant = TRUE,
                      sig_threshold = 0.05,
                      indent_groups = FALSE,
                      condense_table = FALSE,
+                     zebra_stripes = FALSE,
+                     stripe_color = "#EEEEEE",
+                     dark_header = FALSE,
                      include_css = TRUE,
                      ...) {
     
@@ -98,7 +101,8 @@ tbl2html <- function(table,
         df <- df[-1, ]
     }
 
-    if (add_padding && !condense_table && ("Variable" %in% names(df) || "variable" %in% names(df))) {
+                                        # Apply transformations first
+    if (variable_padding && !condense_table && ("Variable" %in% names(df) || "variable" %in% names(df))) {
         df <- add_variable_padding(df)
     }
 
@@ -114,6 +118,36 @@ tbl2html <- function(table,
         df <- format_pvalues_export_html(df, sig_threshold)
     }
     
+                                        # NOW calculate var_groups on the FINAL dataframe structure
+    var_groups <- NULL
+    if (zebra_stripes && "Variable" %in% names(df)) {
+                                        # For indented tables, non-indented rows mark variable starts
+        if (indent_groups || condense_table) {
+            var_starts <- which(!grepl("^&nbsp;", df$Variable) & 
+                                df$Variable != "" & 
+                                !is.na(df$Variable))
+        } else {
+                                        # For regular tables, any non-empty Variable marks a start
+            var_starts <- which(df$Variable != "" & !is.na(df$Variable))
+        }
+        
+        if (length(var_starts) > 0) {
+            var_groups <- integer(nrow(df))
+            for (i in seq_along(var_starts)) {
+                start_idx <- var_starts[i]
+                end_idx <- if (i < length(var_starts)) {
+                               var_starts[i + 1] - 1
+                           } else {
+                               nrow(df)
+                           }
+                var_groups[start_idx:end_idx] <- i
+            }
+            
+                                        # Apply zebra stripes by tracking groups
+            df$.zebra_group <- var_groups
+        }
+    }
+    
     if (format_headers) {
         if (has_n_row) {
             names(df) <- format_column_headers_with_n_html(names(df), n_row_data)
@@ -122,81 +156,141 @@ tbl2html <- function(table,
         }
     }
     
-    xt <- xtable::xtable(df, caption = caption, ...)
-    
-    if (include_css && !indent_groups) {
-        css <- "<style>\n
-            table { \n
-            border-collapse: collapse; \n
-            font-family: Arial, sans-serif;\n
-            margin: 20px;\n
-            }\n
-            th, td { \n
-            padding: 8px 12px; \n
-            text-align: left; \n
-            border: 1px solid #ddd;\n
-            }\n
-            th:not(:nth-child(1)):not(:nth-child(2)), \n
-            td:not(:nth-child(1)):not(:nth-child(2)) { \n
-            text-align: center; \n
-            }\n
-            th { \n
-            background-color: #f2f2f2; \n
-            font-weight: bold;\n
-            }\n
-            caption {\n
-            text-align: left;\n
-            margin-top: 10px;\n
-            margin-bottom: 10px;\n
-            font-weight: bold;\n
-            font-size: 1.1em;\n
-            }\n
-            </style>\n"
-        cat(css, file = file)
-        append <- TRUE
-    } else if (include_css && indent_groups) {
-        css <- "<style>\n
-            table { \n
-            border-collapse: collapse; \n
-            font-family: Arial, sans-serif;\n
-            margin: 20px;\n
-            }\n
-            th, td { \n
-            padding: 8px 12px; \n
-            text-align: left; \n
-            border: 1px solid #ddd;\n
-            }\n
-            th:not(:first-child), \n
-            td:not(:first-child) { \n
-            text-align: center; \n
-            }\n
-            th { \n
-            background-color: #f2f2f2; \n
-            font-weight: bold;\n
-            }\n
-            caption {\n
-            text-align: left;\n
-            margin-top: 10px;\n
-            margin-bottom: 10px;\n
-            font-weight: bold;\n
-            font-size: 1.1em;\n
-            }\n
-            </style>\n"
-        cat(css, file = file)
-        append <- TRUE
+                                        # Remove zebra tracking column from display
+    display_df <- df
+    if (zebra_stripes && ".zebra_group" %in% names(display_df)) {
+        zebra_groups <- display_df$.zebra_group
+        display_df$.zebra_group <- NULL
     } else {
-        append <- FALSE
+        zebra_groups <- NULL
     }
     
-    print(xt,
-          type = "html",
-          file = file,
-          append = append,
-          include.rownames = FALSE,
-          sanitize.text.function = identity,
-          sanitize.rownames.function = identity,
-          sanitize.colnames.function = identity,
-          ...)
+                                        # Remove debug print
+                                        # print(zebra_groups)
+    
+    xt <- xtable::xtable(display_df, caption = caption, ...)
+    
+                                        # Build CSS (unchanged)
+    if (include_css) {
+        css <- paste0("<style>\n",
+                      "table { \n",
+                      "border-collapse: collapse; \n",
+                      "font-family: Arial, sans-serif;\n",
+                      "margin: 20px;\n",
+                      "}\n",
+                      "th, td { \n",
+                      "padding: 8px 12px; \n",
+                      "text-align: left; \n",
+                      "border: 1px solid #ddd;\n",
+                      "}\n")
+        
+        if (indent_groups) {
+            css <- paste0(css,
+                          "th:not(:first-child), \n",
+                          "td:not(:first-child) { \n",
+                          "text-align: center; \n",
+                          "}\n")
+        } else {
+            css <- paste0(css,
+                          "th:not(:nth-child(1)):not(:nth-child(2)), \n",
+                          "td:not(:nth-child(1)):not(:nth-child(2)) { \n",
+                          "text-align: center; \n",
+                          "}\n")
+        }
+        
+                                        # Header styling - dark or light
+        if (dark_header) {
+            css <- paste0(css,
+                          "th { \n",
+                          "background-color: #000000; \n",
+                          "color: #FFFFFF; \n",
+                          "font-weight: bold;\n",
+                          "}\n")
+        } else {
+            css <- paste0(css,
+                          "th { \n",
+                          "background-color: #f2f2f2; \n",
+                          "font-weight: bold;\n",
+                          "}\n")
+        }
+        
+                                        # Zebra stripe styling
+        if (zebra_stripes) {
+            css <- paste0(css,
+                          "tr.zebra-stripe { \n",
+                          "background-color: ", stripe_color, ";\n",
+                          "}\n")
+        }
+        
+        css <- paste0(css,
+                      "caption {\n",
+                      "text-align: left;\n",
+                      "margin-top: 10px;\n",
+                      "margin-bottom: 10px;\n",
+                      "font-weight: bold;\n",
+                      "font-size: 1.1em;\n",
+                      "}\n",
+                      "</style>\n")
+    }
+    
+                                        # Generate HTML table
+    if (zebra_stripes && !is.null(zebra_groups)) {
+                                        # Capture the HTML output
+        html_output <- capture.output(
+            print(xt,
+                  type = "html",
+                  include.rownames = FALSE,
+                  sanitize.text.function = identity,
+                  sanitize.rownames.function = identity,
+                  sanitize.colnames.function = identity,
+                  ...)
+        )
+        
+                                        # Add classes to TR elements based on zebra groups
+        tr_count <- 0
+        for (i in seq_along(html_output)) {
+            if (grepl("^  <tr>", html_output[i])) {
+                tr_count <- tr_count + 1
+                if (tr_count <= length(zebra_groups)) {
+                    group_num <- zebra_groups[tr_count]
+                    if (!is.na(group_num) && group_num %% 2 == 1) {
+                        html_output[i] <- gsub("  <tr>", '  <tr class="zebra-stripe">', html_output[i])
+                    }
+                }
+            }
+        }
+        
+                                        # Write everything to file
+        if (include_css) {
+            writeLines(c(css, html_output), file)
+        } else {
+            writeLines(html_output, file)
+        }
+    } else {
+                                        # Standard output without zebra stripes
+        if (include_css) {
+            cat(css, file = file)
+            print(xt,
+                  type = "html",
+                  file = file,
+                  append = TRUE,
+                  include.rownames = FALSE,
+                  sanitize.text.function = identity,
+                  sanitize.rownames.function = identity,
+                  sanitize.colnames.function = identity,
+                  ...)
+        } else {
+            print(xt,
+                  type = "html",
+                  file = file,
+                  append = FALSE,
+                  include.rownames = FALSE,
+                  sanitize.text.function = identity,
+                  sanitize.rownames.function = identity,
+                  sanitize.colnames.function = identity,
+                  ...)
+        }
+    }
     
     message(sprintf("Table exported to %s", file))
     
