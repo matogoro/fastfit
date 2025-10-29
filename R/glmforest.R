@@ -169,8 +169,14 @@ glmforest <- function(model, data = NULL,
         family = paste0(model$family$family, " (", model$family$link, " link)")
     )
     
+    ## Calculate total observations and percentage analyzed
+    total_obs <- nrow(data)
+    gmodel$pct_analyzed <- (gmodel$nobs / total_obs) * 100
+    
     ## Format observations and AIC with commas
     gmodel$nobs_formatted <- format(gmodel$nobs, big.mark = ",", scientific = FALSE)
+    gmodel$nobs_with_pct <- paste0(gmodel$nobs_formatted, " (", 
+                                   sprintf("%.1f%%", gmodel$pct_analyzed), ")")
     gmodel$AIC_formatted <- format(round(gmodel$AIC, 2), big.mark = ",", scientific = FALSE, nsmall = 2)
     
     ## Calculate pseudo R-squared (McFadden's)
@@ -338,8 +344,8 @@ glmforest <- function(model, data = NULL,
                 matching <- orig_inds_map[var == orig_var & level == orig_level]
                 if (nrow(matching) > 0) {
                     all_terms_df[i, `:=`(inds = matching$inds[1],
-                                       N = matching$N[1],
-                                       Events = matching$Events[1])]
+                                         N = matching$N[1],
+                                         Events = matching$Events[1])]
                 }
             }
             else if (grepl("^    ", current_var)) {
@@ -357,8 +363,8 @@ glmforest <- function(model, data = NULL,
                     matching <- orig_inds_map[var == parent_var & level == clean_level]
                     if (nrow(matching) > 0) {
                         all_terms_df[i, `:=`(inds = matching$inds[1],
-                                           N = matching$N[1],
-                                           Events = matching$Events[1])]
+                                             N = matching$N[1],
+                                             Events = matching$Events[1])]
                     }
                 }
             }
@@ -396,65 +402,65 @@ glmforest <- function(model, data = NULL,
     if(exponentiate) {
         to_show_exp_clean[, effect := ifelse(is.na(estimate), 
                                              NA_real_,
-                                          exp(estimate))]
+                                             exp(estimate))]
         to_show_exp_clean[, effect_formatted := ifelse(is.na(N) & is.na(estimate),
                                                        "",
-                                             ifelse(is.na(estimate), 
-                                                    ref_label,
-                                                    format(round(exp(estimate), digits), nsmall = digits)))]
+                                                ifelse(is.na(estimate), 
+                                                       ref_label,
+                                                       format(round(exp(estimate), digits), nsmall = digits)))]
         to_show_exp_clean[, conf_low_formatted := ifelse(is.na(conf_low), 
                                                          NA_character_,
                                                          format(round(exp(conf_low), digits), nsmall = digits))]
         to_show_exp_clean[, conf_high_formatted := ifelse(is.na(conf_high), 
                                                           NA_character_,
-                                                       format(round(exp(conf_high), digits), nsmall = digits))]
+                                                          format(round(exp(conf_high), digits), nsmall = digits))]
     } else {
         to_show_exp_clean[, effect := estimate]
         to_show_exp_clean[, effect_formatted := ifelse(is.na(N) & is.na(estimate),
-                                                    "",
-                                             ifelse(is.na(estimate), 
-                                                    ref_label,
-                                                    format(round(estimate, digits), nsmall = digits)))]
+                                                       "",
+                                                ifelse(is.na(estimate), 
+                                                       ref_label,
+                                                       format(round(estimate, digits), nsmall = digits)))]
         to_show_exp_clean[, conf_low_formatted := ifelse(is.na(conf_low), 
-                                                      NA_character_,
-                                                      format(round(conf_low, digits), nsmall = digits))]
+                                                         NA_character_,
+                                                         format(round(conf_low, digits), nsmall = digits))]
         to_show_exp_clean[, conf_high_formatted := ifelse(is.na(conf_high), 
-                                                       NA_character_,
-                                                       format(round(conf_high, digits), nsmall = digits))]
+                                                          NA_character_,
+                                                          format(round(conf_high, digits), nsmall = digits))]
     }
     
     ## Format p-values
     to_show_exp_clean[, p_formatted := ifelse(is.na(p_value), 
-                                           NA_character_,
-                                    ifelse(p_value < 0.001, 
-                                           "< 0.001",
-                                           format(round(p_value, 3), nsmall = 3)))]
+                                              NA_character_,
+                                       ifelse(p_value < 0.001, 
+                                              "< 0.001",
+                                              format(round(p_value, 3), nsmall = 3)))]
     
     ## Create the combined effect string with expression for italic p
     effect_abbrev <- if(effect_label == "Odds Ratio") "aOR" else if(effect_label == "Risk Ratio") "aRR" else "Coef"
 
     to_show_exp_clean[, effect_string_expr := ifelse(
-                         is.na(N) & is.na(estimate),
-                         "''",
-                         fcase(
-                             is.na(estimate), paste0("'", ref_label, "'"),
-                             
-                             p_value < 0.001 & !exponentiate & (conf_low < 0 | conf_high < 0),
-                             paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
-                                    conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
-                             
-                             p_value < 0.001,
-                             paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
-                                    conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
-                             
-                             !exponentiate & (conf_low < 0 | conf_high < 0),
-                             paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
-                                    conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'"),
-                             
-                             default = paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
-                                              conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'")
-                         )
-                     )]
+                            is.na(N) & is.na(estimate),
+                            "''",
+                            fcase(
+                                is.na(estimate), paste0("'", ref_label, "'"),
+                                
+                                p_value < 0.001 & !exponentiate & (conf_low < 0 | conf_high < 0),
+                                paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
+                                       conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
+                                
+                                p_value < 0.001,
+                                paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
+                                       conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
+                                
+                                !exponentiate & (conf_low < 0 | conf_high < 0),
+                                paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
+                                       conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'"),
+                                
+                                default = paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
+                                                 conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'")
+                            )
+                        )]
     
     ## Format N and events with thousands separator
     to_show_exp_clean[, n_formatted := ifelse(is.na(N), "", format(N, big.mark = ",", scientific = FALSE))]
@@ -790,92 +796,92 @@ glmforest <- function(model, data = NULL,
             
             ## Model statistics footer
             ggplot2::annotate(geom = "text", x = 0.5, y = exp(y_variable),
-                              label = paste0("Observations: ", gmodel$nobs_formatted,
+                              label = paste0("Observations analyzed: ", gmodel$nobs_with_pct,
                                              "\nModel: ", gmodel$family,
                                              "\nNull (Residual) Deviance: ", null_dev_formatted, " (", resid_dev_formatted, ")",
                                              "\nPseudo R²: ", pseudo_r2_formatted,
                                              "\nAIC: ", gmodel$AIC_formatted),
                               size = annot_font * 0.8, hjust = 0, vjust = 1.2, fontface = "italic")
         
-        } else {
-            ## Non-exponentiated plot (linear scale)
-            p <- ggplot2::ggplot(to_show_exp_clean, ggplot2::aes(x_pos, estimate)) +
-                
-                ggplot2::geom_rect(ggplot2::aes(xmin = x_pos - .5, xmax = x_pos + .5,
-                                                ymin = rangeplot[1], ymax = rangeplot[2],
-                                                fill = ordered(shade_group + 1))) +
-                ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.10, 0.05))) +
-                ggplot2::scale_size_continuous(range = c(1, 6), guide = "none") +
-                ggplot2::scale_fill_manual(values = c("#FFFFFF", "#EEEEEE"), guide = "none") +
-                
-                ggplot2::geom_point(ggplot2::aes(size = N), pch = 22, color = "#000000", fill = color, na.rm = TRUE) +
-                ggplot2::geom_errorbar(ggplot2::aes(ymin = conf_low, ymax = conf_high), width = 0.15) +
-                
-                ggplot2::annotate(geom = "segment",
-                                  x = -0.5, xend = -0.5,
-                                  y = rangeb[1],
-                                  yend = rangeb[2],
-                                  color = "#000000", linewidth = 1) +
-                
-                ggplot2::annotate(geom = "segment", 
-                                  x = -0.5, xend = max(to_show_exp_clean$x_pos) + 0.5, 
-                                  y = reference_value, yend = reference_value, 
-                                  linetype = "longdash") +
-                
-                ggplot2::geom_segment(data = ticks_df,
-                                      ggplot2::aes(x = x, xend = xend, y = y, yend = yend),
-                                      inherit.aes = FALSE,
-                                      color = "#000000",
-                                      linewidth = 1) +
-                ggplot2::geom_text(data = ticks_df,
-                                   ggplot2::aes(x = xend - 0.05, y = y, label = sprintf("%g", y)),
-                                   inherit.aes = FALSE,
-                                   hjust = 0.5,
-                                   vjust = 1.3,
-                                   size = annot_font * 1.5) +
-                
-                ggplot2::coord_flip(ylim = rangeplot) +
-                ggplot2::ggtitle(title) +
-                ggplot2::scale_y_continuous(name = effect_label,
-                                            labels = sprintf("%g", breaks),
-                                            expand = c(0.02, 0.02),
-                                            breaks = breaks) +
-                ggplot2::theme_light() +
-                ggplot2::theme(plot.margin = ggplot2::margin(t = 10, r = 0, b = 0, l = 0),
-                               panel.grid.minor.y = ggplot2::element_blank(),
-                               panel.grid.minor.x = ggplot2::element_blank(),
-                               panel.grid.major.y = ggplot2::element_blank(),
-                               panel.grid.major.x = ggplot2::element_blank(),
-                               legend.position = "none",
-                               panel.border = ggplot2::element_blank(),
-                               axis.title.y = ggplot2::element_blank(),
-                               axis.text.y = ggplot2::element_blank(),
-                               axis.ticks.y = ggplot2::element_blank(),
-                               axis.title.x = ggplot2::element_blank(),
-                               axis.ticks.x = ggplot2::element_blank(),
-                               axis.text.x = ggplot2::element_blank(),
-                               plot.title = ggplot2::element_text(size = font_size * title_size, face = "bold", hjust = 0.5)) +
-                ggplot2::xlab("") +
-                
-                ## Variable column
-                ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = y_variable,
-                                  label = "Variable", fontface = "bold", hjust = 0,
-                                  size = header_font) +
-                
-                {if (indent_groups || condense_table) {
-                     ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_variable,
-                                       label = to_show_exp_clean$var_display, 
-                                       fontface = ifelse(grepl("^    ", to_show_exp_clean$var_display), "plain", "bold"), 
-                                       hjust = 0,
-                                       size = annot_font)
-                 } else {
-                     ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_variable,
-                                       label = to_show_exp_clean$var_display, fontface = "bold", hjust = 0,
-                                       size = annot_font)
-                 }} +
-                
-                ## Group/level column
-                {if (!(indent_groups || condense_table)) {
+    } else {
+        ## Non-exponentiated plot (linear scale)
+        p <- ggplot2::ggplot(to_show_exp_clean, ggplot2::aes(x_pos, estimate)) +
+            
+            ggplot2::geom_rect(ggplot2::aes(xmin = x_pos - .5, xmax = x_pos + .5,
+                                            ymin = rangeplot[1], ymax = rangeplot[2],
+                                            fill = ordered(shade_group + 1))) +
+            ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.10, 0.05))) +
+            ggplot2::scale_size_continuous(range = c(1, 6), guide = "none") +
+            ggplot2::scale_fill_manual(values = c("#FFFFFF", "#EEEEEE"), guide = "none") +
+            
+            ggplot2::geom_point(ggplot2::aes(size = N), pch = 22, color = "#000000", fill = color, na.rm = TRUE) +
+            ggplot2::geom_errorbar(ggplot2::aes(ymin = conf_low, ymax = conf_high), width = 0.15) +
+            
+            ggplot2::annotate(geom = "segment",
+                              x = -0.5, xend = -0.5,
+                              y = rangeb[1],
+                              yend = rangeb[2],
+                              color = "#000000", linewidth = 1) +
+            
+            ggplot2::annotate(geom = "segment", 
+                              x = -0.5, xend = max(to_show_exp_clean$x_pos) + 0.5, 
+                              y = reference_value, yend = reference_value, 
+                              linetype = "longdash") +
+            
+            ggplot2::geom_segment(data = ticks_df,
+                                  ggplot2::aes(x = x, xend = xend, y = y, yend = yend),
+                                  inherit.aes = FALSE,
+                                  color = "#000000",
+                                  linewidth = 1) +
+            ggplot2::geom_text(data = ticks_df,
+                               ggplot2::aes(x = xend - 0.05, y = y, label = sprintf("%g", y)),
+                               inherit.aes = FALSE,
+                               hjust = 0.5,
+                               vjust = 1.3,
+                               size = annot_font * 1.5) +
+            
+            ggplot2::coord_flip(ylim = rangeplot) +
+            ggplot2::ggtitle(title) +
+            ggplot2::scale_y_continuous(name = effect_label,
+                                        labels = sprintf("%g", breaks),
+                                        expand = c(0.02, 0.02),
+                                        breaks = breaks) +
+            ggplot2::theme_light() +
+            ggplot2::theme(plot.margin = ggplot2::margin(t = 10, r = 0, b = 0, l = 0),
+                           panel.grid.minor.y = ggplot2::element_blank(),
+                           panel.grid.minor.x = ggplot2::element_blank(),
+                           panel.grid.major.y = ggplot2::element_blank(),
+                           panel.grid.major.x = ggplot2::element_blank(),
+                           legend.position = "none",
+                           panel.border = ggplot2::element_blank(),
+                           axis.title.y = ggplot2::element_blank(),
+                           axis.text.y = ggplot2::element_blank(),
+                           axis.ticks.y = ggplot2::element_blank(),
+                           axis.title.x = ggplot2::element_blank(),
+                           axis.ticks.x = ggplot2::element_blank(),
+                           axis.text.x = ggplot2::element_blank(),
+                           plot.title = ggplot2::element_text(size = font_size * title_size, face = "bold", hjust = 0.5)) +
+            ggplot2::xlab("") +
+            
+            ## Variable column
+            ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = y_variable,
+                              label = "Variable", fontface = "bold", hjust = 0,
+                              size = header_font) +
+            
+            {if (indent_groups || condense_table) {
+                 ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_variable,
+                                   label = to_show_exp_clean$var_display, 
+                                   fontface = ifelse(grepl("^    ", to_show_exp_clean$var_display), "plain", "bold"), 
+                                   hjust = 0,
+                                   size = annot_font)
+             } else {
+                 ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_variable,
+                                   label = to_show_exp_clean$var_display, fontface = "bold", hjust = 0,
+                                   size = annot_font)
+             }} +
+            
+            ## Group/level column
+            {if (!(indent_groups || condense_table)) {
                  list(
                      ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = y_level,
                                        label = "Group", fontface = "bold", hjust = 0,
@@ -926,7 +932,7 @@ glmforest <- function(model, data = NULL,
                         
                         ## Model statistics at bottom
                         ggplot2::annotate(geom = "text", x = 0.5, y = y_variable,
-                                          label = paste0("Observations: ", gmodel$nobs_formatted,
+                                          label = paste0("Observations analyzed: ", gmodel$nobs_with_pct,
                                                          "\nModel: ", gmodel$family,
                                                          "\nNull (Residual) Deviance: ", null_dev_formatted, " (", resid_dev_formatted, ")",
                                                          "\nPseudo R²: ", pseudo_r2_formatted,

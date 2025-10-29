@@ -14,12 +14,16 @@ tbl2pdf(
   font_size = 8,
   caption = NULL,
   format_headers = TRUE,
-  add_padding = TRUE,
+  var_padding = TRUE,
+  cell_padding = "normal",
   bold_significant = TRUE,
   sig_threshold = 0.05,
   align = NULL,
   indent_groups = FALSE,
   condense_table = FALSE,
+  zebra_stripes = FALSE,
+  stripe_color = "gray!20",
+  dark_header = FALSE,
   show_logs = TRUE,
   ...
 )
@@ -48,8 +52,12 @@ is TRUE.}
 \item{format_headers}{Logical. If TRUE, formats column headers (e.g., converts
 underscores to spaces). Default is TRUE.}
 
-\item{add_padding}{Logical. If TRUE, adds spacing around variable groups.
+\item{var_padding}{Logical. If TRUE, adds spacing around variable groups.
 Default is TRUE.}
+
+\item{cell_padding}{Character string or numeric. Add vertical padding to text
+within cells. Choices are "none", "normal" (default), "relaxed", "loose", or
+a number representing a custom multiplier.}
 
 \item{bold_significant}{Logical. If TRUE, bolds p-values below significance
 threshold. Default is TRUE.}
@@ -66,6 +74,10 @@ Default is FALSE.}
 \item{condense_table}{Logical. If TRUE, decreases table vertical height by
 reducing continuous, survival, and binary categorical variables to single
 rows. Makes indent_groups = TRUE by default. Default is FALSE.}
+
+\item{zebra_stripes}{Logical. If TRUE, adds alternating row shading. Default is FALSE.}
+
+\item{stripe_color}{Character string. Uses LaTeX color names. Default is "gray!20".}
 
 \item{show_logs}{Logical. If TRUE, keeps log files after PDF creation.
 Default is FALSE.}

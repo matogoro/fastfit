@@ -16,7 +16,8 @@ fit(
   weights = NULL,
   conf_level = 0.95,
   add_reference_rows = TRUE,
-  show_n_events = c("n", "events"),
+  show_n = TRUE,
+  show_events = TRUE,
   digits = 2,
   digits_p = 3,
   var_labels = NULL,
@@ -67,10 +68,9 @@ between 0 and 1. Default is 0.95 (95 percent CI).}
 \item{add_reference_rows}{Logical. If TRUE, adds rows for reference categories
 of factor variables. Default is TRUE.}
 
-\item{show_n_events}{Character vector specifying which optional columns to display.
-Options: "n", "events" (or "Events"). Default is c("n", "events") for 
-survival/logistic models, "n" only for other models. Set to NULL to hide
-these columns entirely.}
+\item{show_n}{Logical. Whether to show the sample size column. Default is TRUE.}
+
+\item{show_events}{Logical. Whether to show the events column. Default is TRUE.}
 
 \item{digits}{Integer specifying decimal places for effect estimates.
 Default is 2.}

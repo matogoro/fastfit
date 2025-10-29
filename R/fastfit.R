@@ -24,10 +24,8 @@
 #' @param conf_level Numeric confidence level for intervals. Default is 0.95.
 #' @param add_reference_rows Logical. If TRUE, includes reference category rows.
 #'   Default is TRUE.
-#' @param show_n_events Character vector specifying which optional columns to display.
-#'   Options: "n", "events" (or "Events"). Default is c("n", "events") for 
-#'   survival/logistic models, "n" only for other models. Set to NULL to hide
-#'   these columns entirely.
+#' @param show_n Logical. Whether to show the sample size column. Default is TRUE.
+#' @param show_events Logical. Whether to show the events column. Default is TRUE.
 #' @param digits Integer specifying decimal places for effect estimates.
 #'   Default is 2.
 #' @param digits_p Integer specifying decimal places for p-values.
@@ -64,7 +62,7 @@
 #' 3. Multivariable modeling: Selected variables are combined in a single model.
 #' 
 #' 4. Output formatting: Results are formatted for publication with appropriate
-#'    effect measures (OR for logistic, HR for Cox, estimates for linear).
+#'    effect measures (estimates for linear, OR for logistic, HR for Cox).
 #'
 #' The automatic p-value threshold screening (method = "screen") helps identify
 #' potentially important predictors while reducing multicollinearity. The custom
@@ -126,7 +124,8 @@ fastfit <- function(data,
                     family = "binomial",
                     conf_level = 0.95,
                     add_reference_rows = TRUE,
-                    show_n_events = c("n", "events"),
+                    show_n = TRUE,
+                    show_events = TRUE,
                     digits = 2,
                     digits_p = 3,
                     var_labels = NULL,
@@ -168,7 +167,8 @@ fastfit <- function(data,
             family = family,
             conf_level = conf_level,
             add_reference_rows = add_reference_rows,
-            show_n_events = show_n_events,
+            show_n = show_n,
+            show_events = show_events,
             digits = digits,
             digits_p = digits_p,
             var_labels = var_labels,
@@ -226,7 +226,8 @@ fastfit <- function(data,
                 model_type = model_type,
                 family = family,
                 conf_level = conf_level,
-                show_n_events = show_n_events,
+                show_n = show_n,
+                show_events = show_events,
                 digits = digits,
                 digits_p = digits_p,
                 var_labels = var_labels,
@@ -256,7 +257,8 @@ fastfit <- function(data,
         predictors = predictors,
         columns = columns,
         metrics = metrics,
-        show_n_events = show_n_events,
+        show_n = show_n,
+        show_events = show_events,
         var_labels = var_labels,
         exponentiate = exponentiate
     )
@@ -291,7 +293,7 @@ fastfit <- function(data,
 format_fastfit_combined <- function(uni_formatted, multi_formatted, 
                                     uni_raw, multi_raw,
                                     predictors, columns, metrics, 
-                                    show_n_events, var_labels,
+                                    show_n, show_events, var_labels,
                                     exponentiate = NULL) {
     
     ## Determine effect column name from the formatted tables
@@ -357,19 +359,19 @@ format_fastfit_combined <- function(uni_formatted, multi_formatted,
             if (!is.null(uni_var_rows) && i <= nrow(uni_var_rows)) {
                 row[, Variable := uni_var_rows$Variable[i]]
                 row[, Group := uni_var_rows$Group[i]]
-                if ("n" %in% show_n_events && "n" %in% names(uni_var_rows)) {
+                if (show_n && "n" %in% names(uni_var_rows)) {
                     row[, n := uni_var_rows$n[i]]
                 }
-                if (("Events" %in% show_n_events || "events" %in% show_n_events) && "Events" %in% names(uni_var_rows)) {
+                if (show_events && "Events" %in% names(uni_var_rows)) {
                     row[, Events := uni_var_rows$Events[i]]
                 }
             } else if (!is.null(multi_var_rows) && i <= nrow(multi_var_rows)) {
                 row[, Variable := multi_var_rows$Variable[i]]
                 row[, Group := multi_var_rows$Group[i]]
-                if ("n" %in% show_n_events && "n" %in% names(multi_var_rows)) {
+                if (show_n && "n" %in% names(multi_var_rows)) {
                     row[, n := multi_var_rows$n[i]]
                 }
-                if (("Events" %in% show_n_events || "events" %in% show_n_events) && "Events" %in% names(multi_var_rows)) {
+                if (show_events && "Events" %in% names(multi_var_rows)) {
                     row[, Events := multi_var_rows$Events[i]]
                 }
             }

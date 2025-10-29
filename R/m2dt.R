@@ -13,9 +13,12 @@
 #' @param keep_qc_stats Logical. If TRUE, includes model quality statistics such as
 #'   AIC, BIC, R-squared, concordance, and model fit tests. These appear as 
 #'   additional columns in the output. Default is TRUE.
+#' @param include_intercept Logical. If TRUE, includes the model intercept in output.
+#'   If FALSE, removes the intercept row from results. Useful for creating cleaner
+#'   presentation tables. Default is TRUE for backward compatibility.
 #' @param terms_to_exclude Character vector of term names to exclude from output.
-#'   Useful for removing intercepts or other unwanted parameters. Default is
-#'   "(Intercept)".
+#'   Useful for removing specific unwanted parameters. Default is NULL. Note: If
+#'   include_intercept is FALSE, "(Intercept)" is automatically added to this list.
 #' @param add_reference_rows Logical. If TRUE, adds rows for reference categories
 #'   of factor variables with appropriate labels and baseline values (OR/HR = 1,
 #'   Estimate = 0). Default is TRUE.
@@ -49,13 +52,31 @@
 #'   - model_family: The family for GLM models
 #'   - conf_level: The confidence level used
 #'
+#' @keywords internal
 #' @export
 m2dt <- function(model, 
                  conf_level = 0.95,
                  keep_qc_stats = TRUE,
-                 terms_to_exclude = "(Intercept)",
+                 include_intercept = TRUE,
+                 terms_to_exclude = NULL,
                  add_reference_rows = TRUE,
                  reference_label = "reference") {
+    
+                                        # ENHANCED: Handle intercept exclusion
+                                        # If include_intercept is FALSE, add "(Intercept)" to exclusion list
+    if (!include_intercept) {
+        if (is.null(terms_to_exclude)) {
+            terms_to_exclude <- "(Intercept)"
+        } else {
+            terms_to_exclude <- unique(c(terms_to_exclude, "(Intercept)"))
+        }
+    }
+    
+                                        # For backward compatibility: if terms_to_exclude is still NULL at this point,
+                                        # set it to empty character vector (no exclusions)
+    if (is.null(terms_to_exclude)) {
+        terms_to_exclude <- character(0)
+    }
     
     model_class <- class(model)[1]
     
@@ -87,11 +108,11 @@ m2dt <- function(model,
         
         effect_name <- if (is_logistic) "OR" else if (is_poisson) "RR" else "Estimate"
 
-                                        # Events calculation for logistic regression
+        ## Events calculation for logistic regression
         events_value <- NA_integer_
         if (is_logistic && !is.null(model$y)) {
             if (is.factor(model$y)) {
-                                        # Convert factor to numeric (assumes binary factor with levels 0/1 or similar)
+                ## Convert factor to numeric (assumes binary factor with levels 0/1 or similar)
                 events_value <- sum(as.numeric(model$y) == 2)  # Second level is typically "Yes" or "1"
             } else {
                 events_value <- sum(model$y)
@@ -108,14 +129,13 @@ m2dt <- function(model,
                               se = coef_summary[, "Std. Error"]
                           )
 
-                                        # ALWAYS calculate and store both versions
         dt[, `:=`(
-                                        # Raw coefficients
+            ## Raw coefficients
             coef = coefficient,
             coef_lower = coefficient - z_score * se,
             coef_upper = coefficient + z_score * se,
             
-                                        # Exponentiated versions
+            ## Exponentiated versions
             exp_coef = exp(coefficient),
             exp_lower = exp(coefficient - z_score * se),
             exp_upper = exp(coefficient + z_score * se)
@@ -243,107 +263,180 @@ m2dt <- function(model,
                 concordance_se = summ$concordance[2],
                 rsq = summ$rsq[1],
                 rsq_max = summ$rsq[2],
-                logtest_stat = summ$logtest[1],
-                logtest_p = summ$logtest[3],
+                likelihood_ratio_test = summ$logtest[1],
+                likelihood_ratio_df = summ$logtest[2],
+                likelihood_ratio_p = summ$logtest[3],
                 wald_test = summ$waldtest[1],
+                wald_df = summ$waldtest[2],
                 wald_p = summ$waldtest[3],
                 score_test = summ$sctest[1],
+                score_df = summ$sctest[2],
                 score_p = summ$sctest[3]
             )]
+        }
+        
+    } else if (model_class %in% c("coxme", "lme", "lmer", "glmer")) {
+        
+        ## Mixed effects models
+        summ <- summary(model)
+        
+        if (model_class == "coxme") {
+            coef_vec <- stats::fixef(model)
+            vcov_mat <- as.matrix(stats::vcov(model))
+            se_vec <- sqrt(diag(vcov_mat))
+            z_vec <- coef_vec / se_vec
+            p_vec <- 2 * (1 - stats::pnorm(abs(z_vec)))
             
-            ## Add AIC/BIC
+            dt <- data.table::data.table(
+                                  model_scope = model_scope %||% "Multivariable",
+                                  model_type = model_type_name,
+                                  term = names(coef_vec),
+                                  n = model$n[1],
+                                  events = model$n[2],
+                                  coefficient = coef_vec,
+                                  se = se_vec,
+                                  coef = coef_vec,
+                                  coef_lower = coef_vec - stats::qnorm((1 + conf_level) / 2) * se_vec,
+                                  coef_upper = coef_vec + stats::qnorm((1 + conf_level) / 2) * se_vec,
+                                  exp_coef = exp(coef_vec),
+                                  exp_lower = exp(coef_vec - stats::qnorm((1 + conf_level) / 2) * se_vec),
+                                  exp_upper = exp(coef_vec + stats::qnorm((1 + conf_level) / 2) * se_vec),
+                                  HR = exp(coef_vec),
+                                  CI_lower = exp(coef_vec - stats::qnorm((1 + conf_level) / 2) * se_vec),
+                                  CI_upper = exp(coef_vec + stats::qnorm((1 + conf_level) / 2) * se_vec),
+                                  statistic = z_vec,
+                                  p_value = p_vec
+                              )
+            
+        } else {
+            ## lmer/glmer from lme4
+            if (!requireNamespace("lme4", quietly = TRUE))
+                stop("Package 'lme4' required")
+            
+            coef_summary <- stats::coef(summ)
+            
+            ## Determine if should exponentiate
+            should_exp <- model_class == "glmer" && 
+                (summ$family == "binomial" || summ$link == "log")
+            
+            dt <- data.table::data.table(
+                                  model_scope = model_scope %||% "Multivariable",
+                                  model_type = model_type_name,
+                                  term = rownames(coef_summary),
+                                  n = stats::nobs(model),
+                                  events = NA_integer_,
+                                  coefficient = coef_summary[, "Estimate"],
+                                  se = coef_summary[, "Std. Error"]
+                              )
+            
+            z_score <- stats::qnorm((1 + conf_level) / 2)
             dt[, `:=`(
-                AIC = stats::AIC(model),
-                BIC = stats::extractAIC(model, k = log(n))[2]
+                coef = coefficient,
+                coef_lower = coefficient - z_score * se,
+                coef_upper = coefficient + z_score * se,
+                exp_coef = if (should_exp) exp(coefficient) else coefficient,
+                exp_lower = if (should_exp) exp(coefficient - z_score * se) else coefficient - z_score * se,
+                exp_upper = if (should_exp) exp(coefficient + z_score * se) else coefficient + z_score * se
             )]
-        }
-        
-    } else if (model_class == "coxme") {
-        
-        if (!requireNamespace("coxme", quietly = TRUE))
-            stop("Package 'coxme' required")
-        
-        coef_vals <- stats::coef(model)
-        se_vals <- sqrt(diag(stats::vcov(model)))
-        z_vals <- coef_vals / se_vals
-        p_vals <- 2 * stats::pnorm(-abs(z_vals))
-        z_score <- stats::qnorm((1 + conf_level) / 2)
-        
-        dt <- data.table::data.table(
-                              model_scope = model_scope %||% "Multivariable",
-                              model_type = model_type_name,
-                              term = names(coef_vals),
-                              n = model$n[1],
-                              events = model$n[2],
-                              coefficient = coef_vals,
-                              se = se_vals,
-                              HR = exp(coef_vals),
-                              CI_lower = exp(coef_vals - z_score * se_vals),
-                              CI_upper = exp(coef_vals + z_score * se_vals),
-                              statistic = z_vals,
-                              p_value = p_vals
-                          )
-        
-        if (keep_qc_stats) {
-            dt[, `:=`(
-                loglik = stats::logLik(model),
-                df = attr(stats::logLik(model), "df"),
-                AIC = stats::AIC(model)
-            )]
-        }
-        
-    } else {
-        stop("Model class '", model_class, "' not yet supported")
-    }
-    
-    ## Remove excluded terms
-    if (!is.null(terms_to_exclude)) {
-        dt <- dt[!term %in% terms_to_exclude]
-    }
-    
-    ## Parse terms into variable and group BEFORE adding reference rows
-    parsed_terms <- parse_term(dt$term, model$xlevels)
-    dt[, `:=`(
-        variable = parsed_terms$variable,
-        group = parsed_terms$group
-    )]
-    
-    ## IMPORTANT: Calculate group-specific n and events for categorical variables
-    if (!is.null(model$xlevels)) {
-        ## We need the full dataset to get accurate counts
-        ## Try multiple sources to find it
-        data_source <- NULL
-        
-        ## First try: stored data in model
-        if (!is.null(model$data)) {
-            data_source <- model$data
-        }
-        ## Second try: get from model frame's environment
-        else if (!is.null(environment(model$terms))) {
-            ## Try to get the data from the environment where the model was created
-            data_name <- as.character(model$call$data)
-            if (length(data_name) > 0) {
-                data_source <- tryCatch(
-                    get(data_name, envir = environment(model$terms)),
-                    error = function(e) NULL
-                )
+            
+            ## Add appropriate effect column
+            if (model_class == "glmer" && summ$family == "binomial") {
+                dt[, `:=`(
+                    OR = exp_coef,
+                    CI_lower = exp_lower,
+                    CI_upper = exp_upper
+                )]
+            } else if (should_exp) {
+                dt[, `:=`(
+                    RR = exp_coef,
+                    CI_lower = exp_lower,
+                    CI_upper = exp_upper
+                )]
+            } else {
+                dt[, `:=`(
+                    Estimate = coef,
+                    CI_lower = coef_lower,
+                    CI_upper = coef_upper
+                )]
+            }
+            
+            ## Add test statistics
+            if ("t value" %in% colnames(coef_summary)) {
+                dt[, `:=`(
+                    statistic = coef_summary[, "t value"],
+                    p_value = if ("Pr(>|t|)" %in% colnames(coef_summary)) 
+                                  coef_summary[, "Pr(>|t|)"] else NA_real_
+                )]
+            } else if ("z value" %in% colnames(coef_summary)) {
+                dt[, `:=`(
+                    statistic = coef_summary[, "z value"],
+                    p_value = if ("Pr(>|z|)" %in% colnames(coef_summary)) 
+                                  coef_summary[, "Pr(>|z|)"] else NA_real_
+                )]
             }
         }
         
-        if (!is.null(data_source)) {
-                                        # For each factor variable, calculate group counts
+    } else {
+        stop("Unsupported model class: ", model_class)
+    }
+    
+                                        # ENHANCED: Filter out excluded terms before any further processing
+                                        # This ensures intercepts are removed early in the pipeline
+    if (length(terms_to_exclude) > 0) {
+        dt <- dt[!term %in% terms_to_exclude]
+    }
+
+    ## Process terms to extract variable and group information
+    if (!("variable" %in% names(dt))) {
+        dt[, `:=`(variable = "", group = "")]
+        
+        for (i in seq_len(nrow(dt))) {
+            term_str <- dt$term[i]
+            
+                                        # NOTE: We no longer need to check terms_to_exclude here
+                                        # because we've already filtered them out above
+            
+            ## Check against xlevels if available
+            if (!is.null(model$xlevels)) {
+                matched <- FALSE
+                for (var in names(model$xlevels)) {
+                    if (grepl(paste0("^", var), term_str)) {
+                        level <- gsub(paste0("^", var), "", term_str)
+                        dt[i, `:=`(variable = var, group = level)]
+                        matched <- TRUE
+                        break
+                    }
+                }
+                if (!matched) {
+                    dt[i, `:=`(variable = term_str, group = "")]
+                }
+            } else {
+                dt[i, `:=`(variable = term_str, group = "")]
+            }
+        }
+        
+        ## Add n_group and events_group for categorical variables
+        if (!is.null(model$xlevels)) {
+            
+            ## Try to get the source data
+            data_source <- NULL
+            if (!is.null(model$data)) {
+                data_source <- model$data
+            } else if (!is.null(model$model)) {
+                data_source <- model$model
+            }
+            
             for (var in names(model$xlevels)) {
-                if (var %in% names(data_source)) {
-                                        # Calculate counts for each level
-                    level_counts <- table(data_source[[var]], useNA = "no")
-                    
-                                        # Add to dt for matching rows
-                    for (level in names(level_counts)) {
-                        dt[variable == var & group == level, n_group := as.numeric(level_counts[level])]
+                levels <- model$xlevels[[var]]
+                
+                ## Calculate n for each level if data available
+                if (!is.null(data_source) && var %in% names(data_source)) {
+                    for (level in levels) {
+                        level_n <- sum(data_source[[var]] == level, na.rm = TRUE)
+                        dt[variable == var & group == level, n_group := level_n]
                         
-                                        # For logistic/Cox, also calculate events per group
+                        ## For binomial GLM, also calculate events
                         if (model_class == "glm" && model$family$family == "binomial") {
-                                        # Get the outcome variable
                             outcome_var <- all.vars(model$formula)[1]
                             if (outcome_var %in% names(data_source)) {
                                 level_data <- data_source[data_source[[var]] == level & !is.na(data_source[[var]]), ]

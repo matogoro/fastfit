@@ -8,13 +8,17 @@ tbl2tex(
   table,
   file,
   format_headers = TRUE,
-  add_padding = TRUE,
+  var_padding = TRUE,
+  cell_padding = "normal",
   bold_significant = TRUE,
   sig_threshold = 0.05,
   align = NULL,
   indent_groups = FALSE,
   condense_table = FALSE,
   booktabs = FALSE,
+  zebra_stripes = FALSE,
+  stripe_color = "gray!20",
+  dark_header = FALSE,
   caption = NULL,
   label = NULL,
   ...
@@ -29,8 +33,12 @@ tbl2tex(
 \item{format_headers}{Logical. If TRUE, formats column headers by converting
 underscores to spaces and applying title case. Default is TRUE.}
 
-\item{add_padding}{Logical. If TRUE, adds vertical spacing around variable
+\item{var_padding}{Logical. If TRUE, adds vertical spacing around variable
 groups for better readability. Default is TRUE.}
+
+\item{cell_padding}{Character string or numeric. Add vertical padding to text
+within cells. Choices are "none", "normal" (default), "relaxed", "loose", or
+a number representing a custom multiplier.}
 
 \item{bold_significant}{Logical. If TRUE, wraps significant p-values in
 \\textbf{} commands. Default is TRUE.}
@@ -51,6 +59,15 @@ rows. Makes indent_groups = TRUE by default. Default is FALSE.}
 
 \item{booktabs}{Logical. If TRUE, uses booktabs package commands for
 professional-quality rules. Default is FALSE.}
+
+\item{zebra_stripes}{Logical. If TRUE, adds alternating row colors for variable
+groups. Requires \\usepackage[table]{xcolor} in preamble. Default is FALSE.}
+
+\item{stripe_color}{Character string. LaTeX color specification for zebra stripes
+(e.g., "gray!20", "blue!10"). Default is "gray!20".}
+
+\item{dark_header}{Logical. If TRUE, creates white text on black background for
+header row. Requires \\usepackage[table]{xcolor} in preamble. Default is FALSE.}
 
 \item{caption}{Character string. Table caption for \\caption{} command.}
 
@@ -88,12 +105,15 @@ exceptions):
   \item \code{varwidth}
   \item \code{float}
   \item \code{caption}
-  \item \code{xcolor}
-  \item \code{colortbl}
+  \item \code{xcolor} (required for zebra_stripes or dark_header)
+  \item \code{colortbl} (required for zebra_stripes or dark_header)
 }
 When \code{booktabs = TRUE}, uses \code{\\toprule}, \code{\\midrule}, and
     \code{\\bottomrule} for cleaner table appearance. This requires
     \code{\\usepackage{booktabs}} in the LaTeX preamble.
+
+When \code{dark_header = TRUE} or \code{zebra_stripes = TRUE}, requires
+    \code{\\usepackage[table]{xcolor}} in the LaTeX preamble.
 
 The indent_groups option is particularly useful for regression tables with
     categorical variables, creating a clear visual hierarchy.
@@ -115,7 +135,7 @@ tbl2tex(final_results, "publication.tex",
         label = "tab:regression")
 
 # Multi-line caption
-tbl2pdf(table, "results.pdf",
+tbl2tex(table, "results.tex",
         caption = "Table 1 - Regression results\\\\\\\\
                   aHR = adjusted hazard ratio\\\\\\\\
                   \\\\textsuperscript{1}Note goes here")
@@ -128,6 +148,16 @@ tbl2tex(model_output, "model.tex",
 # Custom alignment
 tbl2tex(wide_table, "aligned.tex",
         align = c("l", "l", "r", "r", "c"))
+        
+# Table with dark header
+tbl2tex(results, "dark_header.tex",
+        dark_header = TRUE,
+        bold_significant = TRUE)
+        
+# Table with zebra stripes
+tbl2tex(results, "striped.tex",
+        zebra_stripes = TRUE,
+        stripe_color = "blue!10")
 }
 }
 \seealso{

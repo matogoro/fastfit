@@ -9,7 +9,7 @@
 #' @param caption Character string. Table caption for \\caption{} command.
 #' @param format_headers Logical. If TRUE, formats column headers by converting
 #'   underscores to spaces and applying title case. Default is TRUE.
-#' @param variable_padding Logical. If TRUE, adds vertical spacing around variable
+#' @param var_padding Logical. If TRUE, adds vertical spacing around variable
 #'   groups for better readability. Default is TRUE.
 #' @param cell_padding Character string or numeric. Add vertical padding to text
 #'   within cells. Choices are "none", "normal" (default), "relaxed", "loose", or
@@ -124,7 +124,7 @@
 tbl2tex <- function (table,
                      file,
                      format_headers = TRUE,
-                     variable_padding = TRUE, 
+                     var_padding = TRUE, 
                      cell_padding = "normal",
                      bold_significant = TRUE,
                      sig_threshold = 0.05,
@@ -210,7 +210,7 @@ tbl2tex <- function (table,
     }
     
                                         # Track padding rows if adding padding
-    if (variable_padding && ("Variable" %in% names(df) || "variable" %in% names(df))) {
+    if (var_padding && ("Variable" %in% names(df) || "variable" %in% names(df))) {
                                         # Before adding padding, adjust var_groups if necessary
         if (!is.null(var_groups)) {
                                         # Find where padding rows will be inserted
@@ -251,7 +251,7 @@ tbl2tex <- function (table,
                 if (i %% 2 != 0) {  # Odd variable groups get shading
                     start_idx <- var_starts[i]
                     end_idx <- if (i < length(var_starts)) {
-                                   if (variable_padding) {
+                                   if (var_padding) {
                                        var_starts[i + 1] - 2
                                    } else {
                                        var_starts[i + 1] - 1
@@ -283,7 +283,7 @@ tbl2tex <- function (table,
                 if (i %% 2 != 0) {
                     start_idx <- var_starts[i]
                     end_idx <- if (i < length(var_starts)) {
-                                   if (variable_padding) {
+                                   if (var_padding) {
                                        var_starts[i + 1] - 2
                                    } else {
                                        var_starts[i + 1] - 1

@@ -13,7 +13,8 @@ uscreen(
   p_threshold = 1,
   conf_level = 0.95,
   add_reference_rows = TRUE,
-  show_n_events = c("n", "events"),
+  show_n = TRUE,
+  show_events = TRUE,
   digits = 2,
   digits_p = 3,
   var_labels = NULL,
@@ -48,10 +49,9 @@ between 0 and 1. Default is 0.95 (95 percent CI).}
 \item{add_reference_rows}{Logical. If TRUE, adds rows for reference categories
 of factor variables with baseline values (OR/HR = 1). Default is TRUE.}
 
-\item{show_n_events}{Character vector specifying which optional columns to display.
-Options: "n", "events" (or "Events"). Default is c("n", "events") for 
-survival/logistic models, "n" only for other models. Set to NULL to hide
-these columns entirely.}
+\item{show_n}{Logical. Whether to show the sample size column. Default is TRUE.}
+
+\item{show_events}{Logical. Whether to show the events column. Default is TRUE.}
 
 \item{digits}{Integer specifying decimal places for effect estimates (OR, HR, etc).
 Default is 2.}
@@ -110,44 +110,15 @@ only for non-reference categories.
 The formatted output is ready for export via tbl2pdf(), tbl2tex(), or tbl2html().
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic logistic regression screening
-data(mtcars)
-results <- uscreen(mtcars, 
-                   outcome = "am",
-                   predictors = c("mpg", "cyl", "disp", "hp"),
-                   model_type = "glm",
-                   family = "binomial")
-print(results)
+data(clintrial)
 
-# Cox regression with custom labels
-library(survival)
-data(lung)
-labels <- c(age = "Age (years)", 
-            sex = "Sex", 
-            ph.ecog = "ECOG Score")
-cox_screen <- uscreen(lung,
-                      outcome = "Surv(time, status)",
-                      predictors = c("age", "sex", "ph.ecog"),
-                      model_type = "coxph",
-                      var_labels = labels)
-
-# Filter by p-value threshold
-significant <- uscreen(mydata,
-                       outcome = "disease",
-                       predictors = c("var1", "var2", "var3"),
-                       p_threshold = 0.05)
-
-# Keep models for diagnostics
-with_models <- uscreen(mydata,
-                       outcome = "outcome",
-                       predictors = vars,
-                       keep_models = TRUE)
-models <- attr(with_models, "models")
-plot(models[["age"]])  # Diagnostic plots
-
-# Export to PDF
-tbl2pdf(results, "screening_results.pdf")
+# Example screening
+results <- uscreen(clintrial,
+                   outcome = "your_outcome_var",
+                   predictors = c("var1", "var2"),
+                   model_type = "glm")
 }
 
 }

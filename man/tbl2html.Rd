@@ -9,11 +9,14 @@ tbl2html(
   file,
   caption = NULL,
   format_headers = TRUE,
-  add_padding = FALSE,
+  variable_padding = FALSE,
   bold_significant = TRUE,
   sig_threshold = 0.05,
   indent_groups = FALSE,
   condense_table = FALSE,
+  zebra_stripes = FALSE,
+  stripe_color = "#EEEEEE",
+  dark_header = FALSE,
   include_css = TRUE,
   ...
 )
@@ -30,7 +33,7 @@ tbl2html(
 display (converts underscores to spaces, applies proper casing). Default
 is TRUE.}
 
-\item{add_padding}{Logical. If TRUE, adds padding around variable groups
+\item{variable_padding}{Logical. If TRUE, adds padding around variable groups
 for improved readability. Default is FALSE.}
 
 \item{bold_significant}{Logical. If TRUE, wraps significant p-values in

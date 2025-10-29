@@ -442,10 +442,10 @@ calculate_model_scores <- function(comparison, model_type, custom_weights = NULL
     }
     
     ## Add final score to comparison table
-    comparison$`Composite Score` <- round(scores$total, 1)
+    comparison$`FastFit Score` <- round(scores$total, 1)
     
     ## Sort by score (highest first)
-    setorder(comparison, -`Composite Score`)
+    setorder(comparison, -`FastFit Score`)
     
     ## Store detailed scores as attribute
     setattr(comparison, "detailed_scores", scores)
@@ -466,7 +466,7 @@ print.compfit_result <- function(x, ...) {
     weights <- attr(x, "weights")
     ## In print.compfit_result function:
     if (!is.null(weights)) {
-        cat("\nComposite Score Weights:\n")
+        cat("\nFastFit Score Weights:\n")
         for (metric in names(weights)) {
             ## Formatting for metric names
             display_name <- switch(metric,
@@ -490,13 +490,13 @@ print.compfit_result <- function(x, ...) {
     ## Identify best model
     if (nrow(x) > 0) {
         best_model <- x$Model[1]  # Already sorted by score
-        cat("\nRecommended Model: ", best_model, " (Composite Score: ", x$`Composite Score`[1], ")\n", sep = "")
+        cat("\nRecommended Model: ", best_model, " (FastFit Score: ", x$`FastFit Score`[1], ")\n", sep = "")
     }
     
     cat("\nModels ranked by selection score:\n")
     NextMethod("print", x)
 
-    cat("\nScore interpretation: 85+ Excellent, 75-84 Very Good, 65-74 Good, 55-64 Fair, < 55 Poor\n")
+    cat("\nFastFit Score interpretation: 85+ Excellent, 75-84 Very Good, 65-74 Good, 55-64 Fair, < 55 Poor\n")
     
     if (!is.null(attr(x, "coefficients"))) {
         cat("\nNote: Coefficient comparison available via attr(result, 'coefficients')\n")

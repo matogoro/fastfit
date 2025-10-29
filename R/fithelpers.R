@@ -5,7 +5,8 @@ format_model_table <- function(data,
                                digits = 2, 
                                digits_p = 3, 
                                var_labels = NULL,
-                               show_n_events = c("n", "Events"),
+                               show_n = TRUE,
+                               show_events = TRUE,
                                reference_label = "reference",
                                exponentiate = NULL) {
     
@@ -15,7 +16,7 @@ format_model_table <- function(data,
     if ("model_type" %in% names(result)) {
         model_type <- unique(result$model_type)[1]
         if (grepl("Linear", model_type, ignore.case = TRUE)) {
-            show_n_events <- setdiff(show_n_events, c("Events", "events"))
+            show_events <- FALSE
         }
     }
     
@@ -193,33 +194,17 @@ format_model_table <- function(data,
         }
     }
 
-    ## Handle show_n_events parameter
-    if (is.null(show_n_events)) {
-        ## User explicitly wants no n or events columns
-        show_n_events <- character(0)
-    } else if (is.character(show_n_events)) {
-        ## Validate the input
-        valid_options <- c("n", "Events", "events")
-        invalid <- setdiff(show_n_events, valid_options)
-        if (length(invalid) > 0) {
-            warning("Invalid show_n_events options ignored: ", paste(invalid, collapse = ", "))
-            show_n_events <- intersect(show_n_events, valid_options)
-        }
-        ## Normalize "events" to "Events"
-        show_n_events[show_n_events == "events"] <- "Events"
-    }
-    
     ## Select columns for final output
     display_cols <- character()
     
     if ("Variable" %in% names(result)) display_cols <- c(display_cols, "Variable")
     if ("Group" %in% names(result)) display_cols <- c(display_cols, "Group")
 
-    if (("n" %in% show_n_events) && ("n" %in% names(result))) {
+    if ((show_n) && ("n" %in% names(result))) {
         display_cols <- c(display_cols, "n")
     }
     
-    if (("Events" %in% show_n_events || "events" %in% show_n_events) && ("events" %in% names(result))) {
+    if ((show_events) && ("events" %in% names(result))) {
         display_cols <- c(display_cols, "events")
     }
     

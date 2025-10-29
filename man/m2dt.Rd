@@ -8,7 +8,8 @@ m2dt(
   model,
   conf_level = 0.95,
   keep_qc_stats = TRUE,
-  terms_to_exclude = "(Intercept)",
+  include_intercept = TRUE,
+  terms_to_exclude = NULL,
   add_reference_rows = TRUE,
   reference_label = "reference"
 )
@@ -26,9 +27,13 @@ between 0 and 1. Default is 0.95 (95\% CI).}
 AIC, BIC, R-squared, concordance, and model fit tests. These appear as 
 additional columns in the output. Default is TRUE.}
 
+\item{include_intercept}{Logical. If TRUE, includes the model intercept in output.
+If FALSE, removes the intercept row from results. Useful for creating cleaner
+presentation tables. Default is TRUE for backward compatibility.}
+
 \item{terms_to_exclude}{Character vector of term names to exclude from output.
-Useful for removing intercepts or other unwanted parameters. Default is
-"(Intercept)".}
+Useful for removing specific unwanted parameters. Default is NULL. Note: If
+include_intercept is FALSE, "(Intercept)" is automatically added to this list.}
 
 \item{add_reference_rows}{Logical. If TRUE, adds rows for reference categories
 of factor variables with appropriate labels and baseline values (OR/HR = 1,
@@ -70,3 +75,4 @@ Extracts coefficients, confidence intervals, and comprehensive model statistics
 from fitted regression models and converts them to a standardized data.table 
 format suitable for further analysis or publication.
 }
+\keyword{internal}

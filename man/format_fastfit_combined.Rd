@@ -12,7 +12,8 @@ format_fastfit_combined(
   predictors,
   columns,
   metrics,
-  show_n_events,
+  show_n,
+  show_events,
   var_labels,
   exponentiate = NULL
 )

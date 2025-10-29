@@ -2,6 +2,8 @@
 #'
 #' Fits multiple regression models and provides a comprehensive comparison table
 #' with model quality metrics, convergence diagnostics, and selection guidance.
+#' Provides a package-specific heuristic ("FastFit Score") combining multiple
+#' quality metrics to facilitate rapid model comparison.
 #'
 #' @param data A data.frame or data.table containing the dataset.
 #' @param outcome Character string specifying the outcome variable. For survival
@@ -43,15 +45,15 @@
 #'   \item{best_model}{Name of recommended model}
 #'
 #' @details
-#' The function fits all specified models and computes comprehensive quality
-#' metrics for comparison. The composite score combines multiple metrics:
-#' lower AIC/BIC (information criteria), higher concordance (discrimination),
-#' and model convergence status.
+#' This function fits all specified models and computes comprehensive quality
+#' metrics for comparison. It also generates a composite score ("FastFit Score")
+#' that combines multiple metrics: lower AIC/BIC (information criteria), higher
+#' concordance (discrimination), and model convergence status.
 #' 
 #' For GLMs, McFadden's pseudo-R-squared is calculated as 1 - (logLik/logLik_null).
 #' For survival models, the global p-value comes from the log-rank test.
 #' 
-#' Models that fail to converge are flagged and penalized in the composite score.
+#' Models that fail to converge are flagged and penalized in the FastFit Score.
 #' 
 #' Scoring weights can be customized based on model type:
 #' \itemize{
@@ -60,6 +62,10 @@
 #'   \item Linear: "convergence", "aic", "pseudo_r2", "rmse"
 #' }
 #' Default weights emphasize discrimination (concordance) and model fit (AIC).
+#'
+#' n.b.: The FastFit score is designed to be a tool to quickly rank various models
+#' by their quality metrics.  It should be used alongside traditional model
+#' selection criteria rather than as a definitive selection method.
 #'
 #' @examples
 #' \dontrun{
@@ -214,7 +220,7 @@ compfit <- function(data,
                                    BIC = if (!is.null(metrics$bic) && !is.na(metrics$bic)) round(metrics$bic, 1) else NA_real_,
                                    `Pseudo-R^2` = if (!is.null(metrics$pseudo_r2) && !is.na(metrics$pseudo_r2)) round(metrics$pseudo_r2, 3) else NA_real_,
                                    Concordance = if (!is.null(metrics$concordance) && !is.na(metrics$concordance)) round(metrics$concordance, 3) else NA_real_,
-                                   `Global p` = if (!is.null(metrics$global_p) && !is.na(metrics$global_p)) format_pvalue(metrics$global_p, 3) else NA_character_
+                                   `Global p` = if (!is.null(metrics$global_p) && !is.na(metrics$global_p)) format_pvalues_fit(metrics$global_p, 3) else NA_character_
                                )
             
             ## Add Brier Score only for GLM
@@ -233,11 +239,11 @@ compfit <- function(data,
     if (model_type == "glm") {
         setcolorder(comparison, c("Model", "N", "Events", "Predictors", "Converged",
                                   "AIC", "BIC", "Pseudo-R^2", "Concordance", "Brier Score",
-                                  "Global p", "Composite Score"))
+                                  "Global p", "FastFit Score"))
     } else {
         setcolorder(comparison, c("Model", "N", "Events", "Predictors", "Converged",
                                   "AIC", "BIC", "Pseudo-R^2", "Concordance",
-                                  "Global p", "Composite Score"))
+                                  "Global p", "FastFit Score"))
     }
     ## Attach attributes
     setattr(comparison, "models", models)

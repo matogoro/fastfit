@@ -157,8 +157,34 @@ coxforest <- function(model, data = NULL,
         concordance.se = as.numeric(conc_values["se(C)"])
     )
     
+    ## Calculate total events in original data and percentage analyzed
+    formula_terms <- all.vars(model$formula)
+    if (length(formula_terms) >= 2) {
+        event_var <- formula_terms[2]
+        event_data <- data[[event_var]]
+        
+        ## Handle factor event indicators (rare but possible)
+        if (is.factor(event_data)) {
+            event_binary <- as.numeric(event_data) == 2
+        } else {
+            event_binary <- event_data
+        }
+        
+        total_events <- sum(event_binary, na.rm = TRUE)
+        gmodel$pct_events_analyzed <- (gmodel$nevent / total_events) * 100
+    } else {
+        total_events <- NA
+        gmodel$pct_events_analyzed <- NA
+    }
+    
     ## Format events and AIC with commas
     gmodel$nevent_formatted <- format(gmodel$nevent, big.mark = ",", scientific = FALSE)
+    gmodel$nevent_with_pct <- if(!is.na(gmodel$pct_events_analyzed)) {
+                                  paste0(gmodel$nevent_formatted, " (", 
+                                         sprintf("%.1f%%", gmodel$pct_events_analyzed), ")")
+                              } else {
+                                  gmodel$nevent_formatted
+                              }
     gmodel$AIC_formatted <- format(round(gmodel$AIC, 2), big.mark = ",", scientific = FALSE, nsmall = 2)
 
     ## Calculate 95% CI for concordance if both concordance and SE are available
@@ -412,28 +438,28 @@ coxforest <- function(model, data = NULL,
     ## Create formatted columns for display
     to_show_exp_clean[, hr := ifelse(is.na(estimate), 
                                      NA_real_,
-                                  exp(estimate))]
+                                     exp(estimate))]
 
                                         # For header rows (with NA N values), show empty strings instead of "reference"
     to_show_exp_clean[, hr_formatted := ifelse(is.na(N) & is.na(estimate),
                                                "",  # Empty for header rows
-                                     ifelse(is.na(estimate), 
-                                            ref_label,
-                                            format(round(exp(estimate), digits), nsmall = digits)))]
+                                        ifelse(is.na(estimate), 
+                                               ref_label,
+                                               format(round(exp(estimate), digits), nsmall = digits)))]
 
     to_show_exp_clean[, conf_low_formatted := ifelse(is.na(conf_low), 
                                                      NA_character_,
                                                      format(round(exp(conf_low), digits), nsmall = digits))]
     to_show_exp_clean[, conf_high_formatted := ifelse(is.na(conf_high), 
                                                       NA_character_,
-                                                   format(round(exp(conf_high), digits), nsmall = digits))]
+                                                      format(round(exp(conf_high), digits), nsmall = digits))]
 
     ## Format p-values
     to_show_exp_clean[, p_formatted := ifelse(is.na(p_value), 
-                                           NA_character_,
-                                    ifelse(p_value < 0.001, 
-                                           "< 0.001",
-                                           format(round(p_value, 3), nsmall = 3)))]
+                                              NA_character_,
+                                       ifelse(p_value < 0.001, 
+                                              "< 0.001",
+                                              format(round(p_value, 3), nsmall = 3)))]
 
     ## Create the combined HR string with expression for italic p
     to_show_exp_clean[, hr_string_expr := ifelse(
@@ -694,79 +720,79 @@ coxforest <- function(model, data = NULL,
                           label = "Variable", fontface = "bold", hjust = 0,
                           size = header_font) +
 
-        {if (indent_groups || condense_table) {
-                                            # When indented/condensed, use conditional formatting
-             ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_variable),
-                               label = to_show_exp_clean$var_display, 
-                               fontface = ifelse(grepl("^    ", to_show_exp_clean$var_display), "plain", "bold"), 
-                               hjust = 0,
-                               size = annot_font)
-         } else {
-                                            # Original formatting
-             ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_variable),
-                               label = to_show_exp_clean$var_display, fontface = "bold", hjust = 0,
-                               size = annot_font)
-         }} +
-        
-        ## Group/level column
+    {if (indent_groups || condense_table) {
+                                        # When indented/condensed, use conditional formatting
+         ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_variable),
+                           label = to_show_exp_clean$var_display, 
+                           fontface = ifelse(grepl("^    ", to_show_exp_clean$var_display), "plain", "bold"), 
+                           hjust = 0,
+                           size = annot_font)
+     } else {
+                                        # Original formatting
+         ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_variable),
+                           label = to_show_exp_clean$var_display, fontface = "bold", hjust = 0,
+                           size = annot_font)
+     }} +
     
-        {if (!(indent_groups || condense_table)) {
-             list(
-                 ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = exp(y_level),
-                                   label = "Group", fontface = "bold", hjust = 0,
-                                   size = header_font),
-                 ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_level),
-                                   label = to_show_exp_clean$level, hjust = 0,
-                                   size = annot_font)
-             )
-         }} +
-        
-        ## N column (conditional)
-        {if (show_n) {
-             list(
-                 ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = exp(y_n),
-                                   label = "n", fontface = "bold.italic", hjust = 0.5,
-                                   size = header_font),
-                 ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_n),
-                                   label = to_show_exp_clean$n_formatted, hjust = 0.5,
-                                   size = annot_font)
-             )
-         }} +
-        
-        ## Events column (conditional)
-        {if (show_events) {
-             list(
-                 ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = exp(y_events),
-                                   label = "Events", fontface = "bold", hjust = 0.5,
-                                   size = header_font),
-                 ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_events),
-                                   label = to_show_exp_clean$events_formatted, hjust = 0.5,
-                                   size = annot_font)
-             )
-         }} +
-        
-        ## Effect column
-        ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.4, y = exp(y_hr),
-                          label = "bold('aHR (95% CI); '*bolditalic(p)*'-value')",
-                          hjust = 0, size = header_font, parse = TRUE) +
-        
-        ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_hr),
-                          label = to_show_exp_clean$hr_string_expr, hjust = 0,
-                          size = annot_font, parse = TRUE) +
-        
-        ## X-axis label
-        ggplot2::annotate(geom = "text", x = -1.5, y = 1,
-                          label = "Hazard Ratio", fontface = "bold",
-                          hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
-        
-        ## Model statistics footer
-        ggplot2::annotate(geom = "text", x = 0.5, y = exp(y_variable),
-                          label = paste0("Total events: ", gmodel$nevent_formatted,
-                                         "\nGlobal log-rank p: ", global_p_formatted,
-                                         "\n", concordance_string,
-                                         "\nAIC: ", gmodel$AIC_formatted),
-                          size = annot_font, hjust = 0, vjust = 1.2, fontface = "italic")
-        
+    ## Group/level column
+    
+    {if (!(indent_groups || condense_table)) {
+         list(
+             ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = exp(y_level),
+                               label = "Group", fontface = "bold", hjust = 0,
+                               size = header_font),
+             ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_level),
+                               label = to_show_exp_clean$level, hjust = 0,
+                               size = annot_font)
+         )
+     }} +
+    
+    ## N column (conditional)
+    {if (show_n) {
+         list(
+             ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = exp(y_n),
+                               label = "n", fontface = "bold.italic", hjust = 0.5,
+                               size = header_font),
+             ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_n),
+                               label = to_show_exp_clean$n_formatted, hjust = 0.5,
+                               size = annot_font)
+         )
+     }} +
+    
+    ## Events column (conditional)
+    {if (show_events) {
+         list(
+             ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = exp(y_events),
+                               label = "Events", fontface = "bold", hjust = 0.5,
+                               size = header_font),
+             ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_events),
+                               label = to_show_exp_clean$events_formatted, hjust = 0.5,
+                               size = annot_font)
+         )
+     }} +
+    
+    ## Effect column
+    ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.4, y = exp(y_hr),
+                      label = "bold('aHR (95% CI); '*bolditalic(p)*'-value')",
+                      hjust = 0, size = header_font, parse = TRUE) +
+    
+    ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_hr),
+                      label = to_show_exp_clean$hr_string_expr, hjust = 0,
+                      size = annot_font, parse = TRUE) +
+    
+    ## X-axis label
+    ggplot2::annotate(geom = "text", x = -1.5, y = 1,
+                      label = "Hazard Ratio", fontface = "bold",
+                      hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
+    
+    ## Model statistics footer
+    ggplot2::annotate(geom = "text", x = 0.5, y = exp(y_variable),
+                      label = paste0("Events analyzed: ", gmodel$nevent_with_pct,
+                                     "\nGlobal log-rank p: ", global_p_formatted,
+                                     "\n", concordance_string,
+                                     "\nAIC: ", gmodel$AIC_formatted),
+                      size = annot_font, hjust = 0, vjust = 1.2, fontface = "italic")
+    
     ## Convert units back for output if needed
     if (units != "in") {
         rec_width <- convert_units(rec_width, from = "inches", to = units)

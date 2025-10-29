@@ -34,10 +34,8 @@
 #'   between 0 and 1. Default is 0.95 (95 percent CI).
 #' @param add_reference_rows Logical. If TRUE, adds rows for reference categories
 #'   of factor variables. Default is TRUE.
-#' @param show_n_events Character vector specifying which optional columns to display.
-#'   Options: "n", "events" (or "Events"). Default is c("n", "events") for 
-#'   survival/logistic models, "n" only for other models. Set to NULL to hide
-#'   these columns entirely.
+#' @param show_n Logical. Whether to show the sample size column. Default is TRUE.
+#' @param show_events Logical. Whether to show the events column. Default is TRUE.
 #' @param digits Integer specifying decimal places for effect estimates.
 #'   Default is 2.
 #' @param digits_p Integer specifying decimal places for p-values.
@@ -144,7 +142,8 @@ fit <- function(data,
                 weights = NULL,
                 conf_level = 0.95,
                 add_reference_rows = TRUE,
-                show_n_events = c("n", "events"),
+                show_n = TRUE,
+                show_events = TRUE,
                 digits = 2,
                 digits_p = 3,
                 var_labels = NULL,
@@ -247,11 +246,13 @@ fit <- function(data,
     raw_data <- m2dt(model, 
                      conf_level = conf_level,
                      keep_qc_stats = keep_qc_stats,
+                     include_intercept = FALSE,
                      add_reference_rows = add_reference_rows)
 
     ## Format results for publication
     formatted <- format_model_table(raw_data,
-                                    show_n_events = show_n_events,
+                                    show_n = show_n,
+                                    show_events = show_events,
                                     digits = digits,
                                     digits_p = digits_p,
                                     var_labels = var_labels,

@@ -152,8 +152,14 @@ lmforest <- function(model, data = NULL,
     ## Calculate F-test p-value
     gmodel$f_pvalue <- pf(gmodel$f_statistic, gmodel$f_df1, gmodel$f_df2, lower.tail = FALSE)
     
+    ## Calculate total observations and percentage analyzed
+    total_obs <- nrow(data)
+    gmodel$pct_analyzed <- (gmodel$nobs / total_obs) * 100
+    
     ## Format for display
     gmodel$nobs_formatted <- format(gmodel$nobs, big.mark = ",", scientific = FALSE)
+    gmodel$nobs_with_pct <- paste0(gmodel$nobs_formatted, " (", 
+                                   sprintf("%.1f%%", gmodel$pct_analyzed), ")")
     gmodel$AIC_formatted <- format(round(gmodel$AIC, 2), big.mark = ",", scientific = FALSE, nsmall = 2)
     
     ## Extract statistics for every variable - preserving order
@@ -311,7 +317,7 @@ lmforest <- function(model, data = NULL,
                     }
                 }
             }
-    }
+        }
     } else {
         all_terms_df[, inds := ifelse(level == "-", var, paste0(var, level))]
     }
@@ -345,46 +351,46 @@ lmforest <- function(model, data = NULL,
     to_show_exp_clean[, effect := estimate]
     to_show_exp_clean[, effect_formatted := ifelse(is.na(N) & is.na(estimate),
                                                    "",
-                                         ifelse(is.na(estimate), 
-                                                ref_label,
-                                                format(round(estimate, digits), nsmall = digits)))]
+                                            ifelse(is.na(estimate), 
+                                                   ref_label,
+                                                   format(round(estimate, digits), nsmall = digits)))]
     to_show_exp_clean[, conf_low_formatted := ifelse(is.na(conf_low), 
                                                      NA_character_,
                                                      format(round(conf_low, digits), nsmall = digits))]
     to_show_exp_clean[, conf_high_formatted := ifelse(is.na(conf_high), 
                                                       NA_character_,
-                                                   format(round(conf_high, digits), nsmall = digits))]
+                                                      format(round(conf_high, digits), nsmall = digits))]
     
     ## Format p-values
     to_show_exp_clean[, p_formatted := ifelse(is.na(p_value), 
-                                           NA_character_,
-                                    ifelse(p_value < 0.001, 
-                                           "< 0.001",
-                                           format(round(p_value, 3), nsmall = 3)))]
+                                              NA_character_,
+                                       ifelse(p_value < 0.001, 
+                                              "< 0.001",
+                                              format(round(p_value, 3), nsmall = 3)))]
     
     ## Create the combined effect string with expression for italic p
     to_show_exp_clean[, effect_string_expr := ifelse(
-                         is.na(N) & is.na(estimate),
-                         "''",
-                         fcase(
-                             is.na(estimate), paste0("'", ref_label, "'"),
-                             
-                             p_value < 0.001 & (conf_low < 0 | conf_high < 0),
-                             paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
-                                    conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
-                             
-                             p_value < 0.001,
-                             paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
-                                    conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
-                             
-                             conf_low < 0 | conf_high < 0,
-                             paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
-                                    conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'"),
-                             
-                             default = paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
-                                              conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'")
-                         )
-                     )]
+                            is.na(N) & is.na(estimate),
+                            "''",
+                            fcase(
+                                is.na(estimate), paste0("'", ref_label, "'"),
+                                
+                                p_value < 0.001 & (conf_low < 0 | conf_high < 0),
+                                paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
+                                       conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
+                                
+                                p_value < 0.001,
+                                paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
+                                       conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
+                                
+                                conf_low < 0 | conf_high < 0,
+                                paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
+                                       conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'"),
+                                
+                                default = paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
+                                                 conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'")
+                            )
+                        )]
     
     ## Format N with thousands separator
     to_show_exp_clean[, n_formatted := ifelse(is.na(N), "", format(N, big.mark = ",", scientific = FALSE))]
@@ -686,11 +692,11 @@ lmforest <- function(model, data = NULL,
         
         ## Model statistics at bottom
         ggplot2::annotate(geom = "text", x = 0.5, y = y_variable,
-                          label = paste0("Observations: ", gmodel$nobs_formatted,
+                          label = paste0("Observations analyzed: ", gmodel$nobs_with_pct,
                                          "\nR²: ", round(gmodel$r_squared, 3),
                                          " (Adjusted: ", round(gmodel$adj_r_squared, 3), ")",
                                          "\nF-statistic: ", round(gmodel$f_statistic, 2),
-                                         " (df1=", gmodel$f_df1, ", df2=", gmodel$f_df2,
+                                         " (df1 = ", gmodel$f_df1, ", df2 = ", gmodel$f_df2,
                                          "); p ", ifelse(gmodel$f_pvalue < 0.001, "< 0.001", 
                                                          paste0("= ", round(gmodel$f_pvalue, 3))),
                                          "\nAIC: ", gmodel$AIC_formatted),

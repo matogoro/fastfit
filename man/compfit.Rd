@@ -72,17 +72,19 @@ A data.table with class "compfit_result" containing:
 \description{
 Fits multiple regression models and provides a comprehensive comparison table
 with model quality metrics, convergence diagnostics, and selection guidance.
+Provides a package-specific heuristic ("FastFit Score") combining multiple
+quality metrics to facilitate rapid model comparison.
 }
 \details{
-The function fits all specified models and computes comprehensive quality
-metrics for comparison. The composite score combines multiple metrics:
-lower AIC/BIC (information criteria), higher concordance (discrimination),
-and model convergence status.
+This function fits all specified models and computes comprehensive quality
+metrics for comparison. It also generates a composite score ("FastFit Score")
+that combines multiple metrics: lower AIC/BIC (information criteria), higher
+concordance (discrimination), and model convergence status.
 
 For GLMs, McFadden's pseudo-R-squared is calculated as 1 - (logLik/logLik_null).
 For survival models, the global p-value comes from the log-rank test.
 
-Models that fail to converge are flagged and penalized in the composite score.
+Models that fail to converge are flagged and penalized in the FastFit Score.
 
 Scoring weights can be customized based on model type:
 \itemize{
@@ -91,6 +93,10 @@ Scoring weights can be customized based on model type:
   \item Linear: "convergence", "aic", "pseudo_r2", "rmse"
 }
 Default weights emphasize discrimination (concordance) and model fit (AIC).
+
+n.b.: The FastFit score is designed to be a tool to quickly rank various models
+by their quality metrics.  It should be used alongside traditional model
+selection criteria rather than as a definitive selection method.
 }
 \examples{
 \dontrun{
