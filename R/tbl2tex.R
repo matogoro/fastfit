@@ -1,124 +1,397 @@
 #' Export Table to LaTeX Format
 #'
-#' Converts a data frame or data.table to LaTeX format suitable for inclusion
-#' in LaTeX documents. Supports various table packages and formatting options.
+#' Converts a data frame, data.table, or matrix to LaTeX source code suitable for 
+#' inclusion in LaTeX documents. Generates publication-quality table markup with 
+#' extensive formatting options including booktabs styling, color schemes, and 
+#' hierarchical displays. Output can be directly \code{\\input{}} or \code{\\include{}} 
+#' into LaTeX manuscripts.
 #'
-#' @param table A data.frame, data.table, or matrix to export.
-#' @param file Character string specifying the output .tex filename. Must have
-#'   .tex extension.
-#' @param caption Character string. Table caption for \\caption{} command.
-#' @param format_headers Logical. If TRUE, formats column headers by converting
-#'   underscores to spaces and applying title case. Default is TRUE.
-#' @param var_padding Logical. If TRUE, adds vertical spacing around variable
-#'   groups for better readability. Default is TRUE.
-#' @param cell_padding Character string or numeric. Add vertical padding to text
-#'   within cells. Choices are "none", "normal" (default), "relaxed", "loose", or
-#'   a number representing a custom multiplier.
-#' @param bold_significant Logical. If TRUE, wraps significant p-values in
-#'   \\textbf{} commands. Default is TRUE.
-#' @param sig_threshold Numeric. P-value threshold for bolding (e.g., 0.05).
-#'   Values below this are considered significant. Default is 0.05.
-#' @param align Character string or vector specifying column alignment. If NULL,
-#'   automatically determines based on column content. Options: "l" (left),
-#'   "c" (center), "r" (right), or "p{width}" for paragraph columns.
-#' @param indent_groups Logical. If TRUE, uses \\hspace to indent grouped rows
-#'   creating a hierarchical display. Default is FALSE.
-#' @param condense_table Logical. If TRUE, decreases table vertical height by
-#'   reducing continuous, survival, and binary categorical variables to single
-#'   rows. Makes indent_groups = TRUE by default. Default is FALSE.
-#' @param booktabs Logical. If TRUE, uses booktabs package commands for
-#'   professional-quality rules. Default is FALSE.
-#' @param zebra_stripes Logical. If TRUE, adds alternating row colors for variable
-#'   groups. Requires \\usepackage[table]{xcolor} in preamble. Default is FALSE.
-#' @param stripe_color Character string. LaTeX color specification for zebra stripes
-#'   (e.g., "gray!20", "blue!10"). Default is "gray!20".
-#' @param dark_header Logical. If TRUE, creates white text on black background for
-#'   header row. Requires \\usepackage[table]{xcolor} in preamble. Default is FALSE.
-#' @param label Character string. LaTeX label for cross-references using \\ref{}.
-#' @param ... Additional arguments passed to xtable::xtable.
+#' @param table A data.frame, data.table, or matrix to export. Can be output from 
+#'   \code{\link{desctbl}}, \code{\link{fit}}, \code{\link{uscreen}}, 
+#'   \code{\link{fastfit}}, \code{\link{compfit}}, or any tabular data.
+#'   
+#' @param file Character string specifying the output .tex filename. Must have 
+#'   \code{.tex} extension. Example: \code{"results.tex"}, \code{"table1.tex"}.
+#'   
+#' @param caption Character string. Table caption for \code{\\caption\{\}} command. 
+#'   Supports multi-line captions using \code{\\\\}. Default is \code{NULL}.
+#'   
+#' @param format_headers Logical. If \code{TRUE}, formats column headers by 
+#'   converting underscores to spaces, italicizing statistical notation (\emph{n}, 
+#'   \emph{p}), and applying title case. Default is \code{TRUE}.
+#'   
+#' @param var_padding Logical. If \code{TRUE}, adds vertical spacing around 
+#'   variable groups using \code{\\addlinespace} for improved readability. 
+#'   Default is \code{TRUE}.
+#'   
+#' @param cell_padding Character string or numeric. Vertical padding within cells:
+#'   \itemize{
+#'     \item \code{"none"} - No extra padding
+#'     \item \code{"normal"} - Standard padding [default]
+#'     \item \code{"relaxed"} - Increased padding
+#'     \item \code{"loose"} - Maximum padding
+#'     \item Numeric - Custom \code{\\arraystretch} value
+#'   }
+#'   
+#' @param bold_significant Logical. If \code{TRUE}, wraps significant p-values 
+#'   in \code{\\textbf\{\}} commands for bold display. Default is \code{TRUE}.
+#'   
+#' @param sig_threshold Numeric. P-value threshold for bolding. Default is 0.05.
+#'   
+#' @param align Character string or vector specifying column alignment:
+#'   \itemize{
+#'     \item \code{"l"} - Left
+#'     \item \code{"c"} - Center  
+#'     \item \code{"r"} - Right
+#'     \item \code{"p\{width\}"} - Paragraph column with specified width
+#'   }
+#'   If \code{NULL}, automatically determines based on content. Can specify 
+#'   per-column as vector. Default is \code{NULL}.
+#'   
+#' @param indent_groups Logical. If \code{TRUE}, uses \code{\\hspace\{\}} to 
+#'   indent grouped rows, creating hierarchical display. Useful for factor 
+#'   variables in regression tables. Default is \code{FALSE}.
+#'   
+#' @param condense_table Logical. If \code{TRUE}, condenses table by showing 
+#'   only essential rows (single row for continuous, non-reference for binary). 
+#'   Automatically sets \code{indent_groups = TRUE}. Default is \code{FALSE}.
+#'   
+#' @param booktabs Logical. If \code{TRUE}, uses booktabs package commands 
+#'   (\code{\\toprule}, \code{\\midrule}, \code{\\bottomrule}) for professional 
+#'   table rules. Requires \code{\\usepackage\{booktabs\}} in LaTeX preamble. 
+#'   Default is \code{FALSE}.
+#'   
+#' @param zebra_stripes Logical. If \code{TRUE}, adds alternating row colors 
+#'   for variable groups using \code{\\rowcolor\{\}}. Requires 
+#'   \code{\\usepackage[table]\{xcolor\}} in preamble. Default is \code{FALSE}.
+#'   
+#' @param stripe_color Character string. LaTeX color specification for zebra 
+#'   stripes (e.g., \code{"gray!20"}, \code{"blue!10"}). Only used when 
+#'   \code{zebra_stripes = TRUE}. Default is \code{"gray!20"}.
+#'   
+#' @param dark_header Logical. If \code{TRUE}, creates white text on black 
+#'   background for header row using \code{\\rowcolor\{black\}} and 
+#'   \code{\\color\{white\}}. Requires \code{\\usepackage[table]\{xcolor\}}. 
+#'   Default is \code{FALSE}.
+#'   
+#' @param label Character string. LaTeX label for cross-references using 
+#'   \code{\\label\{\}} and \code{\\ref\{\}}. Example: \code{"tab:regression"}. 
+#'   Default is \code{NULL}.
+#'   
+#' @param ... Additional arguments passed to \code{\link[xtable]{xtable}}.
 #'
-#' @return Invisibly returns NULL. Creates a .tex file at the specified location.
+#' @return Invisibly returns \code{NULL}. Creates a .tex file at the specified 
+#'   location containing a LaTeX tabular environment.
 #'
 #' @details
-#' The function generates a LaTeX tabular environment that can be directly
-#' included in LaTeX documents using \\input{} or \\include{}. Special characters
-#' are automatically escaped for LaTeX compatibility.
-#'
-#' A comprehensive list of LaTeX packages needed for full functionality is as
-#' follows (installed by default in most LaTeX distributions, with some
-#' exceptions):
-#' \itemize{
-#'   \item \code{fontenc}
-#'   \item \code{inputenc}
-#'   \item \code{array}
-#'   \item \code{booktabs}
-#'   \item \code{longtable}
-#'   \item \code{graphicx}
-#'   \item \code{geometry}
-#'   \item \code{pdflscape}
-#'   \item \code{lscape}
-#'   \item \code{helvet}
-#'   \item \code{standalone}
-#'   \item \code{varwidth}
-#'   \item \code{float}
-#'   \item \code{caption}
-#'   \item \code{xcolor} (required for zebra_stripes or dark_header)
-#'   \item \code{colortbl} (required for zebra_stripes or dark_header)
+#' \strong{Output Format:}
+#' 
+#' The function generates a standalone LaTeX tabular environment that can be:
+#' \enumerate{
+#'   \item Included in documents: \code{\\input\{results.tex\}}
+#'   \item Embedded in table/figure environments
+#'   \item Used in manuscript classes (article, report, etc.)
 #' }
-#' When \code{booktabs = TRUE}, uses \code{\\toprule}, \code{\\midrule}, and
-#'     \code{\\bottomrule} for cleaner table appearance. This requires
-#'     \code{\\usepackage{booktabs}} in the LaTeX preamble.
 #' 
-#' When \code{dark_header = TRUE} or \code{zebra_stripes = TRUE}, requires
-#'     \code{\\usepackage[table]{xcolor}} in the LaTeX preamble.
+#' The output includes:
+#' \itemize{
+#'   \item Complete tabular environment with proper alignment
+#'   \item Horizontal rules (\code{\\hline} or booktabs rules)
+#'   \item Column headers with optional formatting
+#'   \item Data rows with automatic escaping of special characters
+#'   \item Optional caption and label commands
+#' }
 #' 
-#' The indent_groups option is particularly useful for regression tables with
-#'     categorical variables, creating a clear visual hierarchy.
+#' \strong{Required LaTeX Packages:}
 #' 
-#' This function is tailored to outputs from \code{\link{desctbl()}},
-#' \code{\link{fastfit()}}, \code{\link{uscreen()}}, \code{\link{fit()}},
-#' and \code{\link{compfit()}}, although it can theoretically be applied to
-#' any data frame or data.table object.
+#' Add these to your LaTeX document preamble:
 #' 
+#' \emph{Always required:}
+#' ```latex
+#' \usepackage[T1]{fontenc}
+#' \usepackage[utf8]{inputenc}
+#' \usepackage{array}
+#' \usepackage{graphicx}  % If using resizebox
+#' ```
+#' 
+#' \emph{Optional (based on parameters):}
+#' ```latex
+#' \usepackage{booktabs}  % For booktabs = TRUE
+#' \usepackage[table]{xcolor}  % For zebra_stripes or dark_header
+#' ```
+#' 
+#' \strong{Booktabs Style:}
+#' 
+#' When \code{booktabs = TRUE}, the table uses publication-quality rules:
+#' \itemize{
+#'   \item \code{\\toprule} - Heavy rule at top
+#'   \item \code{\\midrule} - Medium rule below headers
+#'   \item \code{\\bottomrule} - Heavy rule at bottom
+#'   \item No vertical rules (booktabs philosophy)
+#'   \item Better spacing around rules
+#' }
+#' 
+#' This is the preferred style for most academic journals.
+#' 
+#' \strong{Color Features:}
+#' 
+#' \emph{Zebra Stripes:}
+#' Creates alternating background colors for visual grouping:
+#' ```r
+#' zebra_stripes = TRUE
+#' stripe_color = "gray!20"  # 20% gray
+#' stripe_color = "blue!10"  # 10% blue  
+#' ```
+#' 
+#' \emph{Dark Header:}
+#' Creates high-contrast header row:
+#' ```r
+#' dark_header = TRUE  # Black background, white text
+#' ```
+#' 
+#' Both require \code{\\usepackage[table]\{xcolor\}} in your document.
+#' 
+#' \strong{Integration with LaTeX Documents:}
+#' 
+#' \emph{Basic inclusion:}
+#' ```latex
+#' \begin{table}[htbp]
+#'   \centering
+#'   \caption{Regression Results}
+#'   \label{tab:regression}
+#'   \input{results.tex}
+#' \end{table}
+#' ```
+#' 
+#' \emph{With resizing:}
+#' ```latex
+#' \begin{table}[htbp]
+#'   \centering
+#'   \caption{Results}
+#'   \resizebox{\textwidth}{!}{\input{results.tex}}
+#' \end{table}
+#' ```
+#' 
+#' \emph{Landscape orientation:}
+#' ```latex
+#' \usepackage{pdflscape}
+#' \begin{landscape}
+#'   \begin{table}[htbp]
+#'     \centering
+#'     \input{wide_results.tex}
+#'   \end{table}
+#' \end{landscape}
+#' ```
+#' 
+#' \strong{Caption Formatting:}
+#' 
+#' Captions in the \code{caption} parameter are written as LaTeX comments in 
+#' the output file for reference. For actual LaTeX captions, wrap the table 
+#' in a table environment (see examples above).
+#' 
+#' \strong{Special Characters:}
+#' 
+#' The function automatically escapes LaTeX special characters in your data:
+#' \itemize{
+#'   \item \code{&} → \code{\\&}
+#'   \item \code{%} → \code{\\%}
+#'   \item \code{$} → \code{\\$}
+#'   \item \code{#} → \code{\\#}
+#'   \item \code{_} → \code{\\_}
+#'   \item \code{\{} → \code{\\{}
+#'   \item \code{\}} → \code{\\}}
+#'   \item \code{~} → \code{\\textasciitilde\{\}}
+#'   \item \code{^} → \code{\\textasciicircum\{\}}
+#' }
+#' 
+#' Variable names and labels should not include these characters unless 
+#' intentionally using LaTeX commands.
+#' 
+#' \strong{Hierarchical Display:}
+#' 
+#' The \code{indent_groups} option is particularly useful for regression tables 
+#' with categorical variables:
+#' \itemize{
+#'   \item Variable names appear unindented and bold
+#'   \item Category levels appear indented beneath
+#'   \item Reference categories clearly identified
+#'   \item Creates professional hierarchical structure
+#' }
+#' 
+#' \strong{Table Width Management:}
+#' 
+#' For tables wider than \code{\\textwidth}:
+#' \enumerate{
+#'   \item Use landscape orientation in LaTeX document
+#'   \item Use \code{\\resizebox} to scale table
+#'   \item Reduce font size in LaTeX: \code{\{\\small \\input\{table.tex\}\}}
+#'   \item Use \code{condense_table = TRUE} to reduce columns
+#'   \item Consider breaking across multiple tables
+#' }
+#' 
+#' \strong{Workflow:}
+#' 
+#' Typical workflow for journal submission:
+#' \enumerate{
+#'   \item Generate table: \code{tbl2tex(results, "table1.tex")}
+#'   \item Create LaTeX document with proper preamble
+#'   \item Include table: \code{\\input\{table1.tex\}}
+#'   \item Compile with pdflatex or other LaTeX engine
+#'   \item Adjust formatting parameters as needed
+#'   \item Regenerate and recompile
+#' }
+#'
+#' @seealso
+#' \code{\link{tbl2pdf}} for direct PDF output,
+#' \code{\link{tbl2html}} for HTML tables,
+#' \code{\link{tbl2docx}} for Word documents,
+#' \code{\link{tbl2pptx}} for PowerPoint,
+#' \code{\link{fit}} for regression tables,
+#' \code{\link{desctbl}} for descriptive tables
+#'
 #' @examples
-#' if (FALSE) {
-#' # Basic LaTeX export
-#' tbl2tex(results, "results.tex")
+#' # Load data and create regression table
+#' data(clintrial)
+#' data(clintrial_labels)
 #' 
-#' # Publication-quality table with booktabs
-#' tbl2tex(final_results, "publication.tex",
+#' results <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "sex", "treatment", "stage"),
+#'     var_labels = clintrial_labels
+#' )
+#' 
+#' # Example 1: Basic LaTeX export
+#' tbl2tex(results, "basic.tex")
+#' 
+#' # Example 2: With booktabs for publication
+#' tbl2tex(results, "publication.tex",
 #'         booktabs = TRUE,
-#'         caption = "Multivariable regression analysis",
+#'         caption = "Multivariable logistic regression results",
 #'         label = "tab:regression")
 #' 
-#' # Multi-line caption
-#' tbl2tex(table, "results.tex",
-#'         caption = "Table 1 - Regression results\\\\
-#'                   aHR = adjusted hazard ratio\\\\
-#'                   \\textsuperscript{1}Note goes here")
+#' # Example 3: Multi-line caption with abbreviations
+#' tbl2tex(results, "detailed.tex",
+#'         booktabs = TRUE,
+#'         caption = "Table 1: Risk Factors for Mortality\\\\
+#'                   aOR = adjusted odds ratio; CI = confidence interval\\\\
+#'                   Model adjusted for age, sex, treatment, and disease stage",
+#'         label = "tab:mortality")
 #' 
-#' # Hierarchical table with indentation
-#' tbl2tex(model_output, "model.tex",
+#' # Example 4: Hierarchical display with indentation
+#' tbl2tex(results, "indented.tex",
 #'         indent_groups = TRUE,
-#'         bold_significant = TRUE)
+#'         booktabs = TRUE)
 #' 
-#' # Custom alignment
-#' tbl2tex(wide_table, "aligned.tex",
-#'         align = c("l", "l", "r", "r", "c"))
-#'         
-#' # Table with dark header
-#' tbl2tex(results, "dark_header.tex",
-#'         dark_header = TRUE,
-#'         bold_significant = TRUE)
-#'         
-#' # Table with zebra stripes
+#' # Example 5: Condensed table (reduced height)
+#' tbl2tex(results, "condensed.tex",
+#'         condense_table = TRUE,
+#'         booktabs = TRUE)
+#' 
+#' # Example 6: With zebra stripes
 #' tbl2tex(results, "striped.tex",
 #'         zebra_stripes = TRUE,
-#'         stripe_color = "blue!10")
-#' }
-#' @seealso
-#' \code{\link{tbl2pdf}} for PDF output,
-#' \code{\link{tbl2html}} for HTML output
+#'         stripe_color = "gray!15",
+#'         booktabs = TRUE)
+#' # Remember to add \usepackage[table]{xcolor} to your LaTeX document
+#' 
+#' # Example 7: Dark header style
+#' tbl2tex(results, "dark_header.tex",
+#'         dark_header = TRUE,
+#'         booktabs = TRUE)
+#' # Requires \usepackage[table]{xcolor}
+#' 
+#' # Example 8: Custom cell padding
+#' tbl2tex(results, "relaxed.tex",
+#'         cell_padding = "relaxed",
+#'         booktabs = TRUE)
+#' 
+#' # Example 9: Custom column alignment
+#' tbl2tex(results, "aligned.tex",
+#'         align = c("l", "l", "r", "r", "c"),
+#'         booktabs = TRUE)
+#' 
+#' # Example 10: No header formatting (keep original names)
+#' tbl2tex(results, "raw_headers.tex",
+#'         format_headers = FALSE)
+#' 
+#' # Example 11: Disable significance bolding
+#' tbl2tex(results, "no_bold.tex",
+#'         bold_significant = FALSE,
+#'         booktabs = TRUE)
+#' 
+#' # Example 12: Stricter significance threshold
+#' tbl2tex(results, "strict_sig.tex",
+#'         bold_significant = TRUE,
+#'         sig_threshold = 0.01,  # Bold only if p < 0.01
+#'         booktabs = TRUE)
+#' 
+#' # Example 13: Complete publication-ready table
+#' tbl2tex(results, "final_table1.tex",
+#'         booktabs = TRUE,
+#'         caption = "Table 1: Multivariable Analysis of Mortality Risk Factors",
+#'         label = "tab:main_results",
+#'         indent_groups = TRUE,
+#'         zebra_stripes = FALSE,  # Many journals prefer no stripes
+#'         bold_significant = TRUE,
+#'         cell_padding = "normal")
+#' 
+#' # Example 14: Descriptive statistics table
+#' desc_table <- desctbl(
+#'     data = clintrial,
+#'     strata = "treatment",
+#'     vars = c("age", "sex", "bmi"),
+#'     var_labels = clintrial_labels
+#' )
+#' 
+#' tbl2tex(desc_table, "table1_descriptive.tex",
+#'         booktabs = TRUE,
+#'         caption = "Table 1: Baseline Characteristics",
+#'         label = "tab:baseline")
+#' 
+#' # Example 15: Model comparison table
+#' models <- list(
+#'     base = c("age", "sex"),
+#'     full = c("age", "sex", "treatment", "stage")
+#' )
+#' 
+#' comparison <- compfit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     model_list = models
+#' )
+#' 
+#' tbl2tex(comparison, "model_comparison.tex",
+#'         booktabs = TRUE,
+#'         caption = "Model Comparison Statistics",
+#'         label = "tab:models")
+#' 
+#' # Example 16: For integration in LaTeX document
+#' # After running tbl2tex(), use in LaTeX:
+#' #
+#' # \begin{table}[htbp]
+#' #   \centering
+#' #   \caption{Your Caption}
+#' #   \label{tab:yourlabel}
+#' #   \input{final_table1.tex}
+#' # \end{table}
+#' 
+#' # Example 17: With resizing in LaTeX
+#' # \begin{table}[htbp]
+#' #   \centering
+#' #   \caption{Wide Table}
+#' #   \resizebox{\textwidth}{!}{\input{wide_results.tex}}
+#' # \end{table}
+#' 
+#' # Example 18: Landscape table in LaTeX
+#' # \usepackage{pdflscape}
+#' # ...
+#' # \begin{landscape}
+#' #   \begin{table}[htbp]
+#' #     \centering
+#' #     \input{landscape_table.tex}
+#' #   \end{table}
+#' # \end{landscape}
 #'
 #' @export
 tbl2tex <- function (table,

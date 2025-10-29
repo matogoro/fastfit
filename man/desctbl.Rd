@@ -2,7 +2,7 @@
 % Please edit documentation in R/desctbl.R
 \name{desctbl}
 \alias{desctbl}
-\title{Create Descriptive Statistics Table with Group Comparisons}
+\title{Create Publication-Ready Descriptive Statistics Tables}
 \usage{
 desctbl(
   data,
@@ -25,115 +25,367 @@ desctbl(
 )
 }
 \arguments{
-\item{data}{A data.frame or data.table containing the dataset to summarize.}
+\item{data}{A data.frame or data.table containing the dataset to summarize.
+The function automatically converts data.frames to data.tables for 
+efficient processing.}
 
-\item{by}{Character string specifying the grouping variable for stratified 
-analysis. When NULL (default), produces overall summaries only.}
+\item{by}{Character string specifying the column name of the grouping variable 
+for stratified analysis (e.g., treatment arm, exposure status). When 
+\code{NULL} (default), produces overall summaries only without group 
+comparisons or statistical tests.}
 
-\item{variables}{Character vector of variable names to summarize. Supports
-standard column names and Surv() expressions (e.g., "Surv(time, status)").}
+\item{variables}{Character vector of variable names to summarize. Can include:
+\itemize{
+  \item Standard column names for continuous or categorical variables
+  \item Survival expressions using \code{Surv()} syntax (e.g., 
+    \code{"Surv(os_months, os_status)"})
+}
+Variables are processed in the order provided.}
 
-\item{stats_continuous}{Character vector specifying statistics to compute for
-continuous variables. Options include "mean_sd", "median_iqr", 
-"median_range", and "range". Default is c("mean_sd", "median_iqr", "range").}
+\item{stats_continuous}{Character vector specifying which statistics to 
+compute for continuous variables. Options include:
+\itemize{
+  \item \code{"mean_sd"} - Mean ± standard deviation
+  \item \code{"median_iqr"} - Median [interquartile range]
+  \item \code{"median_range"} - Median (minimum-maximum)
+  \item \code{"range"} - Minimum-maximum only
+}
+Default is \code{c("mean_sd", "median_iqr", "range")}. Multiple statistics 
+create separate rows for each variable.}
 
-\item{stats_categorical}{Character string specifying format for categorical
-summaries: "n" (count only), "percent" (percentage only), or "n_percent"
-(count with percentage). Default is "n_percent".}
+\item{stats_categorical}{Character string specifying the format for 
+categorical variable summaries:
+\itemize{
+  \item \code{"n"} - Count only
+  \item \code{"percent"} - Percentage only
+  \item \code{"n_percent"} - Count (percentage) [default]
+}}
 
-\item{digits}{Integer specifying decimal places for continuous statistics.
-Default is 1.}
+\item{digits}{Integer specifying the number of decimal places for continuous 
+statistics. Values >= 1000 are automatically formatted with commas 
+regardless of decimal setting. Default is 1.}
 
-\item{digits_p}{Integer specifying decimal places for p-values. Values less
-than 10^(-digits_p) display as "< 0.001" etc. Default is 3.}
+\item{digits_p}{Integer specifying the number of decimal places for p-values. 
+P-values smaller than \code{10^(-digits_p)} are displayed as 
+"< 0.001", "< 0.01", etc. Default is 3.}
 
-\item{na_include}{Logical. If TRUE, missing values are displayed as a 
-separate category. Default is FALSE.}
+\item{na_include}{Logical. If \code{TRUE}, missing values (NAs) are displayed 
+as a separate category/row for each variable. If \code{FALSE}, missing 
+values are silently excluded from calculations. Default is \code{FALSE}.}
 
-\item{na_label}{Character string used to label missing values when 
-na_include = TRUE. Default is "Unknown".}
+\item{na_label}{Character string used to label the missing values row when 
+\code{na_include = TRUE}. Default is \code{"Unknown"}.}
 
-\item{na_percent}{Logical. Controls percentage calculation when na_include = TRUE.
-Categorical values only. If TRUE, percentages include missing/NAs in denominator
-(all sum to 100%). If FALSE, percentages exclude missing/NAs from denominator.
-Default is FALSE.}
+\item{na_percent}{Logical. Controls how percentages are calculated for 
+categorical variables when \code{na_include = TRUE}:
+\itemize{
+  \item If \code{TRUE}, percentages include NAs in the denominator (all 
+    categories sum to 100\%)
+  \item If \code{FALSE}, percentages exclude NAs from the denominator 
+    (non-missing categories sum to 100\%, missing shown separately)
+}
+Only affects categorical variables. Default is \code{FALSE}.}
 
-\item{test}{Logical. If TRUE, performs appropriate statistical tests for
-group comparisons. Default is TRUE.}
+\item{test}{Logical. If \code{TRUE}, performs appropriate statistical tests 
+for group comparisons and adds a p-value column. Requires \code{by} to be 
+specified. Tests are automatically selected based on variable type and 
+test parameters. Default is \code{TRUE}.}
 
-\item{test_continuous}{Character string specifying test for continuous variables:
-"auto" (automatic selection based on statistic type), "t" (t-test),
-"aov" (ANOVA), "wrs" (Wilcoxon rank-sum), or "kwt" (Kruskal-Wallis).
-Default is "auto".}
+\item{test_continuous}{Character string specifying the statistical test for 
+continuous variables:
+\itemize{
+  \item \code{"auto"} - Automatic selection: t-test/ANOVA for means, 
+    Wilcoxon/Kruskal-Wallis for medians [default]
+  \item \code{"t"} - Independent samples t-test (2 groups only)
+  \item \code{"aov"} - One-way ANOVA (2+ groups)
+  \item \code{"wrs"} - Wilcoxon rank-sum test (2 groups only)
+  \item \code{"kwt"} - Kruskal-Wallis test (2+ groups)
+}}
 
-\item{test_categorical}{Character string specifying test for categorical variables:
-"auto" (automatic selection based on expected frequencies), "fisher"
-(Fisher's exact test), or "chisq" (chi-squared test). Default is "auto".}
+\item{test_categorical}{Character string specifying the statistical test for 
+categorical variables:
+\itemize{
+  \item \code{"auto"} - Automatic selection: Fisher's exact test if any 
+    expected cell frequency < 5, otherwise chi-squared [default]
+  \item \code{"fisher"} - Fisher's exact test
+  \item \code{"chisq"} - Chi-squared test
+}}
 
-\item{total}{Logical or character string. Controls total column placement:
-TRUE or "first" places total column first, "last" places it after groups,
-FALSE excludes it. Default is TRUE.}
+\item{total}{Logical or character string controlling the total column:
+\itemize{
+  \item \code{TRUE} or \code{"first"} - Include total column as first 
+    column after Variable/Group [default]
+  \item \code{"last"} - Include total column as last column before p-value
+  \item \code{FALSE} - Exclude total column
+}}
 
 \item{total_label}{Character string for the total column header. 
-Default is "Total".}
+Default is \code{"Total"}.}
 
-\item{var_labels}{Named character vector for custom variable labels. Names
-should match variable names, values are display labels.}
+\item{var_labels}{Named character vector or list providing custom display 
+labels for variables. Names should match variable names (or \code{Surv()} 
+expressions), values are the display labels. Variables not in \code{var_labels} 
+use their original names. Can also be used to label the grouping variable 
+specified in \code{by}. Default is \code{NULL}.}
 
-\item{...}{Additional arguments passed to statistical test functions.}
+\item{...}{Additional arguments passed to the underlying statistical test 
+functions (e.g., \code{var.equal = TRUE} for t-tests, 
+\code{simulate.p.value = TRUE} for Fisher's test).}
 }
 \value{
-A data.table with class "desctbl" containing formatted descriptive
-  statistics. The table has columns for variable, group, and statistics by
-  group. Numeric values >= 1000 are formatted with commas.
+A data.table with S3 class \code{"desctbl"} containing formatted 
+  descriptive statistics. The table structure includes:
+  \describe{
+    \item{Variable}{Character. Variable name or label (from \code{var_labels})}
+    \item{Group}{Character. For continuous variables: statistic type 
+      (e.g., "Mean ± SD", "Median [IQR]"). For categorical variables: 
+      category level. Empty for variable name rows.}
+    \item{Total}{Character. Statistics for total sample (if \code{total = TRUE})}
+    \item{Group columns}{Character. Statistics for each group level (when 
+      \code{by} is specified). Column names match group levels.}
+    \item{p-value}{Character. Formatted p-values from statistical tests 
+      (when \code{test = TRUE} and \code{by} is specified)}
+  }
   
-  The returned object includes attributes:
-  - raw_data: Numeric version of the table for further analysis
-  - by_variable: The grouping variable used
-  - variables: Vector of analyzed variables
+  The first row always shows sample sizes for each column.
+  
+  Numeric values >= 1000 are formatted with commas for readability 
+  (e.g., "1,245" instead of "1245").
+  
+  The returned object includes the following attributes accessible via 
+  \code{attr()}:
+  \describe{
+    \item{raw_data}{A data.table containing unformatted numeric values 
+      suitable for further statistical analysis or custom formatting. 
+      Includes additional columns for standard deviations, quartiles, etc.}
+    \item{by_variable}{Character. The grouping variable name used (value 
+      of \code{by} parameter)}
+    \item{variables}{Character vector. The variables analyzed (value of 
+      \code{variables} parameter)}
+  }
 }
 \description{
-Generates publication-ready descriptive statistics tables with automatic 
-variable type detection, group comparisons, and statistical testing. 
-Handles continuous, categorical, and survival variables with appropriate
-summary statistics and tests.
+Generates comprehensive descriptive statistics tables with automatic variable 
+type detection, group comparisons, and appropriate statistical testing. This 
+function is designed to create "Table 1" style summaries commonly used in 
+clinical and epidemiological research, with full support for continuous, 
+categorical, and survival variables.
 }
 \details{
-The function automatically detects variable types and applies appropriate
-summaries. For continuous variables with test = "auto", t-tests or ANOVA
-are used for means, while Wilcoxon or Kruskal-Wallis tests are used for
-medians. For categorical variables with test = "auto", Fisher's exact test
-is used when expected frequencies are less than 5, otherwise chi-squared.
+\strong{Variable Type Detection:}
 
-Survival variables should be specified using Surv() syntax from the survival
-package. These display median survival with 95\% confidence intervals and
-use log-rank tests for group comparisons.
+The function automatically detects variable types and applies appropriate 
+summaries:
+\itemize{
+  \item \strong{Continuous}: Numeric variables (integer or double) receive 
+    statistics specified in \code{stats_continuous}
+  \item \strong{Categorical}: Character, factor, or logical variables receive 
+    frequency counts and percentages
+  \item \strong{Survival}: Variables specified as \code{Surv(time, event)} 
+    display median survival with 95\% confidence intervals
+}
+
+\strong{Statistical Testing:}
+
+When \code{test = TRUE} and \code{by} is specified:
+\itemize{
+  \item \strong{Continuous with "auto"}: Parametric tests (t-test, ANOVA) 
+    for mean-based statistics; non-parametric tests (Wilcoxon, Kruskal-Wallis) 
+    for median-based statistics
+  \item \strong{Categorical with "auto"}: Fisher's exact test when any 
+    expected cell frequency < 5; chi-squared test otherwise
+  \item \strong{Survival}: Log-rank test for comparing survival curves
+  \item \strong{Range statistics}: No p-value computed (ranges are descriptive)
+}
+
+\strong{Missing Data Handling:}
+
+Missing values are handled differently by variable type:
+\itemize{
+  \item \strong{Continuous}: NAs excluded from calculations; optionally 
+    shown as count when \code{na_include = TRUE}
+  \item \strong{Categorical}: NAs can be included as a category when 
+    \code{na_include = TRUE}. The \code{na_percent} parameter controls 
+    whether percentages are calculated with or without NAs in denominator
+  \item \strong{Survival}: NAs in time or event excluded from analysis
+}
+
+\strong{Formatting Conventions:}
+\itemize{
+  \item Mean ± SD: "45.2 ± 12.3"
+  \item Median [IQR]: "38.0 [28.0-52.0]"
+  \item Median (Range): "38.0 (18.0-75.0)"
+  \item Range: "18.0-75.0" or "18.0 to 75.0" (for negative numbers)
+  \item Survival: "24.5 (21.2-28.9)" months [median (95\% CI)]
+  \item Counts >= 1000: Formatted with commas (e.g., "1,234")
+  \item P-values: Formatted to specified decimal places; very small values 
+    shown as "< 0.001"
+}
 }
 \examples{
-\dontrun{
-# Basic descriptive table
-desctbl(mtcars, variables = c("mpg", "cyl", "am"))
+# Load example data
+data(clintrial)
+data(clintrial_labels)
+library(data.table)
 
-# Grouped comparison with custom labels
-labels <- c(mpg = "Miles per Gallon", cyl = "Cylinders", am = "Transmission")
-desctbl(mtcars, by = "vs", variables = c("mpg", "cyl", "am"),
-        var_labels = labels)
+# Example 1: Basic descriptive table without grouping
+desctbl(clintrial, 
+        variables = c("age", "sex", "bmi"))
 
-# Including missing values
-desctbl(data, by = "treatment", variables = c("age", "sex"),
-        na_include = TRUE, na_label = "Missing")
+# Example 2: Grouped comparison by treatment
+desctbl(clintrial, 
+        by = "treatment",
+        variables = c("age", "sex", "bmi", "smoking"))
 
-# Survival analysis
-desctbl(lung, by = "sex", 
-        variables = c("age", "ph.ecog", "Surv(time, status)"))
+# Example 3: Using custom variable labels
+desctbl(clintrial,
+        by = "treatment", 
+        variables = c("age", "bmi", "sex"),
+        var_labels = clintrial_labels)
 
-# Access raw numeric data
-result <- desctbl(data, by = "group", variables = vars)
+# Example 4: Including missing values as a category
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "sex", "smoking"),
+        na_include = TRUE,
+        na_label = "Missing")
+
+# Example 5: Customizing continuous statistics
+# Show only median with IQR
+desctbl(clintrial,
+        by = "sex",
+        variables = c("age", "bmi", "creatinine"),
+        stats_continuous = "median_iqr")
+
+# Example 6: Show multiple continuous statistics
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "bmi"),
+        stats_continuous = c("mean_sd", "median_iqr", "range"))
+
+# Example 7: Survival analysis with log-rank test
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "sex", "Surv(os_months, os_status)"),
+        var_labels = clintrial_labels)
+
+# Example 8: Controlling test selection
+# Use only non-parametric tests
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "bmi", "hemoglobin"),
+        test_continuous = "kwt")  # Kruskal-Wallis for all
+
+# Example 9: Chi-squared test only for categorical variables
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("sex", "smoking", "hypertension"),
+        test_categorical = "chisq")
+
+# Example 10: Customize p-value precision
+desctbl(clintrial,
+        by = "sex",
+        variables = c("age", "bmi", "treatment"),
+        digits_p = 4)  # Show p-values to 4 decimal places
+
+# Example 11: Position total column last
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "sex", "bmi"),
+        total = "last")
+
+# Example 12: Exclude total column
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "sex", "bmi"),
+        total = FALSE)
+
+# Example 13: Categorical statistics - counts only
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("sex", "race", "smoking"),
+        stats_categorical = "n")
+
+# Example 14: Categorical statistics - percentages only
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("sex", "smoking"),
+        stats_categorical = "percent")
+
+# Example 15: Different decimal precision
+desctbl(clintrial,
+        by = "sex",
+        variables = c("age", "bmi", "creatinine"),
+        digits = 2)  # 2 decimal places for continuous vars
+
+# Example 16: Complex table with multiple variable types
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "sex", "bmi", "smoking", 
+                     "hypertension", "diabetes",
+                     "Surv(os_months, os_status)"),
+        var_labels = clintrial_labels,
+        stats_continuous = c("mean_sd", "median_iqr"),
+        na_include = TRUE)
+
+# Example 17: Access raw numeric data for further analysis
+result <- desctbl(clintrial,
+                  by = "treatment",
+                  variables = c("age", "bmi", "sex"))
 raw_data <- attr(result, "raw_data")
-}
+print(raw_data)
+# Raw data includes unformatted numbers, SDs, quartiles, etc.
+
+# Example 18: Check which grouping variable was used
+result <- desctbl(clintrial,
+                  by = "treatment",
+                  variables = c("age", "sex"))
+attr(result, "by_variable")  # "treatment"
+
+# Example 19: NA percentage calculation options
+# Include NAs in percentage denominator (all sum to 100\%)
+desctbl(clintrial,
+        by = "treatment",
+        variables = "smoking",
+        na_include = TRUE,
+        na_percent = TRUE)
+
+# Exclude NAs from denominator (non-missing sum to 100\%)
+desctbl(clintrial,
+        by = "treatment",
+        variables = "smoking",
+        na_include = TRUE,
+        na_percent = FALSE)
+
+# Example 20: Passing additional test arguments
+# Equal variance t-test
+desctbl(clintrial,
+        by = "sex",
+        variables = "age",
+        test_continuous = "t",
+        var.equal = TRUE)
+
+# Example 21: Complete Table 1 for publication
+table1 <- desctbl(
+    data = clintrial,
+    by = "treatment",
+    variables = c(
+        "age", "sex", "race", "ethnicity", "bmi",
+        "smoking", "hypertension", "diabetes",
+        "ecog", "creatinine", "hemoglobin",
+        "site", "stage", "grade",
+        "Surv(os_months, os_status)"
+    ),
+    var_labels = clintrial_labels,
+    stats_continuous = c("median_iqr", "range"),
+    total = TRUE,
+    na_include = FALSE
+)
+print(table1)
 
 }
 \seealso{
-\code{\link{exporttbl}} for exporting to PDF/LaTeX/HTML,
-  \code{\link{fastfit}} for regression analysis
+\code{\link{setlabels}} for setting variable labels,
+\code{\link{m2dt}} for regression model tables,
+\code{\link[survival]{Surv}} for survival object specification
 }

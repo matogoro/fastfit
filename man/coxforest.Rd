@@ -2,7 +2,7 @@
 % Please edit documentation in R/coxforest.R
 \name{coxforest}
 \alias{coxforest}
-\title{Create a Forest Plot for Cox Proportional Hazards Models}
+\title{Create Forest Plot for Cox Proportional Hazards Models}
 \usage{
 coxforest(
   model,
@@ -30,82 +30,405 @@ coxforest(
 )
 }
 \arguments{
-\item{model}{A Cox proportional hazards model object of class \code{coxph} 
-from the \code{survival} package.}
+\item{model}{A fitted Cox proportional hazards model object of class \code{coxph} 
+from the \code{survival} package. Should be fitted using 
+\code{\link[survival]{coxph}}.}
 
-\item{data}{A data frame or data.table containing the original data used to 
-fit the model. If NULL (default), the function attempts to extract data 
-from the model object.}
+\item{data}{A data.frame or data.table containing the original data used to 
+fit the model. If \code{NULL} (default), the function attempts to extract 
+data from the model object (\code{model$data}, evaluation of \code{model$call$data}, 
+or \code{model$model}). Providing data explicitly is strongly recommended.}
 
-\item{title}{Character string specifying the plot title. Default is "Cox Proportional Hazards Model".}
+\item{title}{Character string specifying the plot title displayed at the top. 
+Default is \code{"Cox Proportional Hazards Model"}. Use descriptive titles 
+for publication.}
 
-\item{effect_label}{Character string for the effect measure label. Default is "Hazard Ratio".}
+\item{effect_label}{Character string for the effect measure label on the 
+forest plot axis. Default is \code{"Hazard Ratio"}. Alternatives might include 
+"HR" for space-constrained plots.}
 
 \item{digits}{Integer specifying the number of decimal places for hazard ratios 
 and confidence intervals. Default is 2.}
 
-\item{font_size}{Numeric value controlling the base font size. 
-Default is 1.0.}
+\item{font_size}{Numeric multiplier controlling the base font size for all 
+text elements. Default is 1.0.}
 
-\item{annot_size}{Numeric value controlling the relative font size for annotations. 
-Default is 3.88.}
+\item{annot_size}{Numeric value controlling the relative font size for data 
+annotations. Default is 3.88.}
 
-\item{header_size}{Numeric value controlling the relative font size for headers. 
-Default is 5.82.}
+\item{header_size}{Numeric value controlling the relative font size for column 
+headers. Default is 5.82.}
 
-\item{title_size}{Numeric value controlling the relative font size for the plot title. 
-Default is 23.28.}
+\item{title_size}{Numeric value controlling the relative font size for the 
+main plot title. Default is 23.28.}
 
-\item{plot_width}{Numeric value specifying the intended plot width in inches.
-Used to optimize tbl_width calculation. Default is NULL.}
+\item{plot_width}{Numeric value specifying the intended output width in 
+specified \code{units}. Used for optimizing layout. Default is \code{NULL} 
+(automatic). Recommended: 10-16 inches.}
 
-\item{plot_height}{Numeric value specifying the intended plot height in inches.
-Default is NULL.}
+\item{plot_height}{Numeric value specifying the intended output height in 
+specified \code{units}. Default is \code{NULL} (automatic based on number 
+of rows).}
 
-\item{tbl_width}{Numeric value between 0 and 1 specifying the proportion of plot 
-width allocated to the data table. If NULL (default), automatically calculated
-based on content and plot dimensions.}
+\item{tbl_width}{Numeric value between 0 and 1 specifying the proportion of 
+total plot width allocated to the data table. Default is 0.6 (60\% table, 
+40\% forest plot).}
 
-\item{show_n}{Logical. Whether to show the sample size column. Default is TRUE.}
+\item{show_n}{Logical. If \code{TRUE}, includes a column showing group-specific 
+sample sizes. Default is \code{TRUE}.}
 
-\item{show_events}{Logical. Whether to show the events column. Default is TRUE.}
+\item{show_events}{Logical. If \code{TRUE}, includes a column showing the 
+number of events (deaths, failures) for each group. Critical for survival 
+analysis interpretation. Default is \code{TRUE}.}
 
-\item{indent_groups}{Logical. Whether to indent group levels under variables.
-Default is FALSE.}
+\item{indent_groups}{Logical. If \code{TRUE}, indents factor levels under 
+their parent variable, creating hierarchical structure. The "Group" column 
+is hidden when \code{TRUE}. Default is \code{FALSE}.}
 
-\item{condense_table}{Logical. Whether to condense binary variables into single rows.
-Forces indent_groups = TRUE. Default is FALSE.}
+\item{condense_table}{Logical. If \code{TRUE}, condenses binary categorical 
+variables into single rows. Automatically sets \code{indent_groups = TRUE}. 
+Default is \code{FALSE}.}
 
-\item{center_padding}{Numeric value specifying the padding width between the table
-and the forest plot. Default is 4.}
+\item{center_padding}{Numeric value specifying horizontal spacing between 
+table and forest plot. Default is 4.}
 
-\item{zebra_stripes}{Logical. Whether to use alternating background shading 
-for different variables to improve readability. Default is TRUE.}
+\item{zebra_stripes}{Logical. If \code{TRUE}, applies alternating gray 
+background shading to different variables for improved readability. 
+Default is \code{TRUE}.}
 
 \item{ref_label}{Character string to display for reference categories. 
-Default is "reference".}
+Default is \code{"reference"}.}
 
-\item{var_labels}{Named character vector for custom variable labels. Names should 
-match variable names in the model, values are the display labels.}
+\item{var_labels}{Named character vector providing custom display labels for 
+variables. Example: \code{c(age = "Age (years)", stage = "Disease Stage")}. 
+Default is \code{NULL}.}
 
-\item{color}{Character string specifying the color for hazard ratio point estimates. 
-Default is "#8A61D8" (purple).}
+\item{color}{Character string specifying the color for hazard ratio point 
+estimates in the forest plot. Default is \code{"#8A61D8"} (purple). Use 
+hex codes or R color names.}
 
-\item{units}{Units used for measurement. Default is inches ("in").}
+\item{units}{Character string specifying units for plot dimensions: 
+\code{"in"} (inches), \code{"cm"}, or \code{"mm"}. Default is \code{"in"}.}
 }
 \value{
-A ggplot object containing the forest plot. The object has an attribute
-  "recommended_dims" with suggested width and height. If \code{ggpubr} 
-  is installed, returns a ggplot object via \code{ggpubr::as_ggplot()}. 
-  Otherwise, draws the plot directly and returns it invisibly.
+A \code{ggplot} object containing the complete forest plot. The plot 
+  can be displayed, saved, or further customized.
+  
+  The returned object includes an attribute \code{"recommended_dims"} 
+  accessible via \code{attr(plot, "recommended_dims")}, containing:
+  \describe{
+    \item{width}{Numeric. Recommended plot width in specified units}
+    \item{height}{Numeric. Recommended plot height in specified units}
+  }
+  
+  Recommendations are printed to console if dimensions are not specified.
 }
 \description{
-Generates a publication-ready forest plot combining a data table and 
-graphical representation of hazard ratios from a Cox proportional hazards model.
-The plot includes variable names, group levels, sample sizes, hazard ratios 
-with confidence intervals, and p-values.
+Generates a publication-ready forest plot that combines a formatted data table 
+with a graphical representation of hazard ratios from a Cox proportional hazards 
+survival model. The plot integrates variable names, group levels, sample sizes, 
+event counts, hazard ratios with confidence intervals, p-values, and model 
+diagnostics in a single comprehensive visualization designed for manuscripts 
+and presentations.
+}
+\details{
+\strong{Survival-Specific Features:}
+
+The Cox forest plot includes several survival analysis-specific components:
+\itemize{
+  \item \strong{Event counts}: Number of events (deaths, failures) shown for 
+    each predictor category, critical for assessing statistical power
+  \item \strong{Hazard ratios}: Always exponentiated coefficients (never raw), 
+    interpreted as the multiplicative change in hazard
+  \item \strong{Log scale}: Forest plot uses log scale for HR (reference line at 1)
+  \item \strong{Model diagnostics}: Includes concordance (C-index), global 
+    log-rank test p-value, and AIC
+}
+
+\strong{Plot Components:}
+
+\enumerate{
+  \item \strong{Title}: Centered at top
+  \item \strong{Data Table} (left): Contains:
+    \itemize{
+      \item Variable and Group columns
+      \item n: Sample sizes by group
+      \item Events: Event counts by group (critical for survival)
+      \item aHR (95\% CI); \emph{p}-value: Adjusted hazard ratios with CIs and p-values
+    }
+  \item \strong{Forest Plot} (right):
+    \itemize{
+      \item Point estimates (squares sized by sample size)
+      \item 95\% confidence intervals
+      \item Reference line at HR = 1
+      \item Log scale for hazard ratios
+    }
+  \item \strong{Model Statistics} (footer):
+    \itemize{
+      \item Events analyzed (with percentage of total)
+      \item Global log-rank test p-value
+      \item Concordance (C-index) with standard error
+      \item AIC
+    }
+}
+
+\strong{Interpreting Hazard Ratios:}
+
+\itemize{
+  \item \strong{HR = 1}: No effect on hazard (reference)
+  \item \strong{HR > 1}: Increased hazard (worse survival)
+  \item \strong{HR < 1}: Decreased hazard (better survival)
+  \item Example: HR = 2.0 means twice the hazard of the event at any time
+}
+
+\strong{Event Counts:}
+
+The "Events" column is particularly important in survival analysis:
+\itemize{
+  \item Indicates the number of actual events (not censored observations) 
+    in each group
+  \item Essential for assessing statistical power
+  \item Categories with very few events may have unreliable HR estimates
+  \item The footer shows total events analyzed and percentage of all events 
+    in the original data
+}
+
+\strong{Concordance (C-index):}
+
+The concordance statistic displayed in the footer indicates discrimination:
+\itemize{
+  \item Range: 0.5 to 1.0
+  \item 0.5 = random prediction (coin flip)
+  \item 0.7-0.8 = acceptable discrimination
+  \item >0.8 = excellent discrimination
+  \item Standard error provided for confidence interval calculation
+}
+
+\strong{Global Log-Rank Test:}
+
+The global p-value tests the null hypothesis that all coefficients are zero:
+\itemize{
+  \item Significant p-value (< 0.05) indicates the model as a whole predicts survival
+  \item Non-significant global test doesn't preclude significant individual 
+    predictors
+  \item Based on the score (log-rank) test
+}
+
+\strong{Stratification and Clustering:}
+
+If the model includes stratification (\code{strata()}) or clustering 
+(\code{cluster()}):
+\itemize{
+  \item Stratified variables are not shown in the forest plot (they don't 
+    have HRs)
+  \item Clustering affects standard errors but not point estimates
+  \item Both are handled automatically by the function
+}
+
+\strong{Proportional Hazards Assumption:}
+
+The forest plot assumes proportional hazards (constant HR over time). Users 
+should verify this assumption using:
+\itemize{
+  \item \code{cox.zph(model)} for testing
+  \item Stratification for variables violating the assumption
+  \item Time-dependent coefficients if needed
+}
+}
+\examples{
+# Load example data
+data(clintrial)
+data(clintrial_labels)
+library(survival)
+
+# Example 1: Basic Cox model forest plot
+model1 <- coxph(Surv(os_months, os_status) ~ age + sex + treatment,
+                data = clintrial)
+
+plot1 <- coxforest(model1, data = clintrial)
+print(plot1)
+
+# Example 2: With custom labels and title
+plot2 <- coxforest(
+    model = model1,
+    data = clintrial,
+    title = "Prognostic Factors for Overall Survival",
+    var_labels = clintrial_labels
+)
+print(plot2)
+
+# Example 3: Comprehensive multivariable model
+model3 <- coxph(
+    Surv(os_months, os_status) ~ age + sex + bmi + smoking + 
+        treatment + stage + grade,
+    data = clintrial
+)
+
+plot3 <- coxforest(
+    model = model3,
+    data = clintrial,
+    var_labels = clintrial_labels,
+    indent_groups = TRUE
+)
+print(plot3)
+
+# Example 4: Condensed layout for many binary predictors
+model4 <- coxph(
+    Surv(os_months, os_status) ~ age + sex + smoking + 
+        hypertension + diabetes + surgery,
+    data = clintrial
+)
+
+plot4 <- coxforest(
+    model = model4,
+    data = clintrial,
+    condense_table = TRUE,
+    var_labels = clintrial_labels
+)
+print(plot4)
+
+# Example 5: Custom color scheme
+plot5 <- coxforest(
+    model = model1,
+    data = clintrial,
+    color = "#E74C3C",  # Red
+    zebra_stripes = FALSE,
+    var_labels = clintrial_labels
+)
+print(plot5)
+
+# Example 6: Hide sample sizes, show only events
+plot6 <- coxforest(
+    model = model1,
+    data = clintrial,
+    show_n = FALSE,
+    show_events = TRUE,
+    var_labels = clintrial_labels
+)
+print(plot6)
+
+# Example 7: Adjust table width
+plot7 <- coxforest(
+    model = model3,
+    data = clintrial,
+    tbl_width = 0.65,  # More space for long variable names
+    var_labels = clintrial_labels
+)
+print(plot7)
+
+# Example 8: Specify exact dimensions
+plot8 <- coxforest(
+    model = model1,
+    data = clintrial,
+    plot_width = 14,
+    plot_height = 8,
+    var_labels = clintrial_labels
+)
+
+# Example 9: Use recommended dimensions for saving
+plot9 <- coxforest(model1, data = clintrial)
+dims <- attr(plot9, "recommended_dims")
+
+# Save to PDF
+# ggsave("survival_forest.pdf", plot9,
+#        width = dims$width, height = dims$height)
+
+# Example 10: Different units (centimeters)
+plot10 <- coxforest(
+    model = model1,
+    data = clintrial,
+    plot_width = 35,
+    plot_height = 25,
+    units = "cm",
+    var_labels = clintrial_labels
+)
+
+# Example 11: Stratified Cox model
+# Stratification variable (site) won't appear in plot
+model11 <- coxph(
+    Surv(os_months, os_status) ~ age + sex + treatment + strata(site),
+    data = clintrial
+)
+
+plot11 <- coxforest(
+    model = model11,
+    data = clintrial,
+    title = "Stratified by Study Site",
+    var_labels = clintrial_labels
+)
+print(plot11)
+
+# Example 12: With clustering for robust SE
+model12 <- coxph(
+    Surv(os_months, os_status) ~ age + sex + treatment + cluster(site),
+    data = clintrial
+)
+
+plot12 <- coxforest(
+    model = model12,
+    data = clintrial,
+    title = "Clustered by Study Site",
+    var_labels = clintrial_labels
+)
+print(plot12)
+# Standard errors account for site clustering
+
+# Example 13: Custom reference label
+plot13 <- coxforest(
+    model = model1,
+    data = clintrial,
+    ref_label = "1.00 (ref)",
+    var_labels = clintrial_labels
+)
+print(plot13)
+
+# Example 14: Presentation-sized fonts
+plot14 <- coxforest(
+    model = model1,
+    data = clintrial,
+    font_size = 1.4,
+    title_size = 28,
+    var_labels = clintrial_labels
+)
+print(plot14)
+
+# Example 15: Publication-ready final plot
+final_model <- coxph(
+    Surv(os_months, os_status) ~ age + sex + bmi + smoking + 
+        hypertension + diabetes + ecog + treatment + stage + grade,
+    data = clintrial
+)
+
+final_plot <- coxforest(
+    model = final_model,
+    data = clintrial,
+    title = "Multivariable Cox Regression: Prognostic Factors for Overall Survival",
+    var_labels = clintrial_labels,
+    indent_groups = TRUE,
+    zebra_stripes = TRUE,
+    show_n = TRUE,
+    show_events = TRUE,
+    color = "#8A61D8"
+)
+
+# Check model fit
+summary(final_model)
+
+# Verify proportional hazards assumption
+# cox.zph(final_model)
+
+# Save for publication
+dims <- attr(final_plot, "recommended_dims")
+# ggsave("figure2_survival.pdf", final_plot,
+#        width = dims$width, height = dims$height)
+# ggsave("figure2_survival.png", final_plot,
+#        width = dims$width, height = dims$height, dpi = 300)
+
 }
 \seealso{
+\code{\link{glmforest}} for logistic/GLM forest plots,
+\code{\link{lmforest}} for linear model forest plots,
 \code{\link[survival]{coxph}} for fitting Cox models,
-\code{\link[ggplot2]{ggplot}} for the underlying plotting system
+\code{\link[survival]{cox.zph}} for testing proportional hazards assumption,
+\code{\link{fit}} for fastfit regression modeling
 }

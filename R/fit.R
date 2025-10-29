@@ -1,134 +1,373 @@
-#' Unified Interface for Model Fitting with Formatted Output
+#' Fit Regression Model with Publication-Ready Output
 #'
-#' Provides a consistent interface for fitting various regression models with
-#' automatic formatting of results for publication. Supports multiple model types
-#' with a unified syntax.
+#' Provides a unified interface for fitting various types of regression models 
+#' with automatic formatting of results for publication. Supports generalized 
+#' linear models, linear models, survival models, and mixed effects models with 
+#' consistent syntax and output formatting. Handles both univariable and 
+#' multivariable models automatically.
 #'
-#' @param data A data.frame or data.table containing the analysis dataset.
-#' @param outcome Character string specifying the outcome variable. For survival
-#'   analysis, use Surv() syntax (e.g., "Surv(time, status)").
-#' @param predictors Character vector of predictor variable names to include
-#'   in the model.
-#' @param model_type Character string specifying the regression model type:
-#'   \itemize{
-#'     \item "glm" - Generalized linear model
-#'     \item "lm" - Linear model
-#'     \item "coxph" - Cox proportional hazards
-#'     \item "clogit" - Conditional logistic regression
-#'     \item "coxme" - Mixed effects Cox model
-#'     \item "glmer" - Generalized linear mixed effects model
-#'   }
-#'   Default is "glm".
-#' @param family For GLM models, the error distribution family. Common options:
-#'   "binomial" (logistic), "poisson" (count), "gaussian" (normal), "Gamma".
-#'   Default is "binomial". See \code{\link[stats]{family}}.
-#' @param interaction_terms Character vector of interaction terms using colon syntax.
-#'   Example: c("age:sex", "treatment:stage"). Default is NULL.
-#' @param strata For Cox/conditional logistic models, character string naming the
-#'   stratification variable. Default is NULL.
-#' @param cluster For Cox models, character string naming the variable for robust
-#'   clustered standard errors. Default is NULL.
-#' @param weights Character string naming the weights variable in data. The weights
-#'   column should contain numeric values. Default is NULL.
-#' @param conf_level Numeric confidence level for confidence intervals. Must be
-#'   between 0 and 1. Default is 0.95 (95 percent CI).
-#' @param add_reference_rows Logical. If TRUE, adds rows for reference categories
-#'   of factor variables. Default is TRUE.
-#' @param show_n Logical. Whether to show the sample size column. Default is TRUE.
-#' @param show_events Logical. Whether to show the events column. Default is TRUE.
-#' @param digits Integer specifying decimal places for effect estimates.
-#'   Default is 2.
-#' @param digits_p Integer specifying decimal places for p-values.
-#'   Default is 3.
-#' @param var_labels Named character vector for custom variable labels.
-#'   Default is NULL.
-#' @param keep_qc_stats Logical. If TRUE, includes model quality statistics
-#'   (AIC, BIC, concordance, etc) in the raw data attribute. Default is TRUE.
-#' @param exponentiate Logical. Whether to exponentiate coefficients. Default is NULL,
-#'   which automatically displays exponentiated coefficients for logistic/Poisson/Cox
-#'   regression models and raw coefficients for log-link or linear regression models.
-#' @param ... Additional arguments passed to the underlying model function
-#'   (e.g., subset, na.action, control parameters).
-#'
-#' @return A data.table with class "fit_result" containing formatted results:
-#'   \item{Variable}{Predictor name with custom label if provided}
-#'   \item{Group}{Factor level, interaction term, or statistic label}
-#'   \item{n}{Sample size}
-#'   \item{events}{Number of events (survival/logistic models)}
-#'   \item{Multivariable aOR/aHR/aRR (95\% CI)}{Adjusted effect with CI}
-#'   \item{p-value}{Formatted p-value}
+#' @param data A data.frame or data.table containing the analysis dataset. The 
+#'   function automatically converts data.frames to data.tables for efficient 
+#'   processing.
 #'   
-#'   Attributes include:
-#'   \item{model}{The fitted model object}
-#'   \item{raw_data}{Unformatted numeric results}
-#'   \item{formula_str}{The model formula as a string}
-#'   \item{model_scope}{Either "Univariable" or "Multivariable"}
-#'   \item{model_type}{The regression type used}
+#' @param outcome Character string specifying the outcome variable name. For 
+#'   survival analysis, use \code{Surv()} syntax from the survival package 
+#'   (e.g., \code{"Surv(time, status)"} or \code{"Surv(os_months, os_status)"}).
+#'   
+#' @param predictors Character vector of predictor variable names to include in 
+#'   the model. All predictors are included simultaneously (multivariable model). 
+#'   For univariable models, provide a single predictor. Can include continuous, 
+#'   categorical (factor), or binary variables.
+#'   
+#' @param model_type Character string specifying the type of regression model. 
+#'   Options include:
+#'   \itemize{
+#'     \item \code{"glm"} - Generalized linear model [default]
+#'     \item \code{"lm"} - Linear regression
+#'     \item \code{"coxph"} - Cox proportional hazards (survival)
+#'     \item \code{"clogit"} - Conditional logistic regression
+#'     \item \code{"coxme"} - Mixed effects Cox model
+#'     \item \code{"glmer"} - Generalized linear mixed effects model
+#'   }
+#'   
+#' @param family For GLM models, the error distribution and link function. Common 
+#'   options include:
+#'   \itemize{
+#'     \item \code{"binomial"} - Logistic regression [default]
+#'     \item \code{"poisson"} - Poisson regression for count data
+#'     \item \code{"gaussian"} - Normal linear regression via GLM
+#'     \item \code{"Gamma"} - Gamma regression for positive continuous data
+#'   }
+#'   See \code{\link[stats]{family}} for all options. Ignored for non-GLM models.
+#'   
+#' @param interaction_terms Character vector of interaction terms using colon 
+#'   notation (e.g., \code{c("age:sex", "treatment:stage")}). Interaction terms 
+#'   are added to the model in addition to main effects. Default is \code{NULL} 
+#'   (no interactions).
+#'   
+#' @param strata For Cox or conditional logistic models, character string naming 
+#'   the stratification variable. Creates separate baseline hazards for each 
+#'   stratum level without estimating stratum effects. Default is \code{NULL}.
+#'   
+#' @param cluster For Cox models, character string naming the variable for 
+#'   robust clustered standard errors. Accounts for within-cluster correlation 
+#'   (e.g., patients within hospitals). Default is \code{NULL}.
+#'   
+#' @param weights Character string naming the weights variable in \code{data}. 
+#'   The specified column should contain numeric values for observation weights. 
+#'   Used for weighted regression, survey data, or inverse probability weighting. 
+#'   Default is \code{NULL}.
+#'   
+#' @param conf_level Numeric confidence level for confidence intervals. Must be 
+#'   between 0 and 1. Default is 0.95 (95\% confidence intervals).
+#'   
+#' @param add_reference_rows Logical. If \code{TRUE}, adds rows for reference 
+#'   categories of factor variables with baseline values (OR/HR/RR = 1, 
+#'   coefficient = 0). Default is \code{TRUE}.
+#'   
+#' @param show_n Logical. If \code{TRUE}, includes the sample size column in 
+#'   the output. Default is \code{TRUE}.
+#'   
+#' @param show_events Logical. If \code{TRUE}, includes the events column in 
+#'   the output (for survival and logistic regression). Default is \code{TRUE}.
+#'   
+#' @param digits Integer specifying the number of decimal places for effect 
+#'   estimates (OR, HR, RR, coefficients). Default is 2.
+#'   
+#' @param digits_p Integer specifying the number of decimal places for p-values. 
+#'   P-values smaller than \code{10^(-digits_p)} are displayed as "< 0.001", 
+#'   etc. Default is 3.
+#'   
+#' @param var_labels Named character vector or list providing custom display 
+#'   labels for variables. Names should match variable names, values are display 
+#'   labels. Default is \code{NULL}.
+#'   
+#' @param keep_qc_stats Logical. If \code{TRUE}, includes model quality statistics 
+#'   (AIC, BIC, R-squared, concordance, etc.) in the raw data attribute for 
+#'   model diagnostics and comparison. Default is \code{TRUE}.
+#'   
+#' @param exponentiate Logical. Whether to exponentiate coefficients. Default 
+#'   is \code{NULL}, which automatically exponentiates for logistic, Poisson, 
+#'   and Cox models, and displays raw coefficients for linear models. Set to 
+#'   \code{TRUE} to force exponentiation or \code{FALSE} to force coefficients.
+#'   
+#' @param ... Additional arguments passed to the underlying model fitting 
+#'   function (\code{\link[stats]{glm}}, \code{\link[stats]{lm}}, 
+#'   \code{\link[survival]{coxph}}, \code{\link[lme4]{glmer}}, etc.). Common 
+#'   options include \code{subset}, \code{na.action}, and model-specific control 
+#'   parameters.
+#'
+#' @return A data.table with S3 class \code{"fit_result"} containing formatted 
+#'   regression results. The table structure includes:
+#'   \describe{
+#'     \item{Variable}{Character. Predictor name or custom label}
+#'     \item{Group}{Character. For factor variables: category level. For 
+#'       interactions: interaction term. For continuous: typically empty}
+#'     \item{n}{Integer. Total sample size (if \code{show_n = TRUE})}
+#'     \item{n_group}{Integer. Sample size for this factor level}
+#'     \item{events}{Integer. Total number of events (if \code{show_events = TRUE})}
+#'     \item{events_group}{Integer. Events for this factor level}
+#'     \item{Univariable/Multivariable OR/HR/RR/Estimate (95\% CI)}{Character. 
+#'       Formatted effect estimate with confidence interval. Label depends on 
+#'       model scope (univariable vs multivariable) and type. Multivariable 
+#'       models use adjusted notation: aOR, aHR, aRR}
+#'     \item{p-value}{Character. Formatted p-value from Wald test}
+#'   }
+#'   
+#'   The returned object includes the following attributes accessible via \code{attr()}:
+#'   \describe{
+#'     \item{model}{The fitted model object (glm, lm, coxph, etc.). Access for 
+#'       diagnostics, predictions, or further analysis}
+#'     \item{raw_data}{data.table. Unformatted numeric results with columns for 
+#'       coefficients, standard errors, confidence bounds, quality statistics, etc.}
+#'     \item{outcome}{Character. The outcome variable name}
+#'     \item{predictors}{Character vector. The predictor variable names}
+#'     \item{formula_str}{Character. The complete model formula as a string}
+#'     \item{model_scope}{Character. "Univariable" (one predictor) or 
+#'       "Multivariable" (multiple predictors)}
+#'     \item{model_type}{Character. The regression model type used}
+#'     \item{interaction_terms}{Character vector (if interactions specified). 
+#'       The interaction terms included}
+#'     \item{strata}{Character (if stratification used). The stratification variable}
+#'     \item{cluster}{Character (if clustering used). The cluster variable}
+#'     \item{weights}{Character (if weighting used). The weights variable}
+#'   }
 #'
 #' @details
-#' The function automatically detects whether the model is univariable (single
-#' predictor) or multivariable (multiple predictors) and labels the output
-#' accordingly. For multivariable models, effect estimates are labeled as
-#' adjusted (aOR, aHR, aRR).
+#' \strong{Model Scope Detection:}
 #' 
-#' Interaction terms are specified using colon notation and are included in
-#' addition to main effects. For stratified analyses in survival models, the
-#' strata variable creates separate baseline hazards for each stratum level.
+#' The function automatically detects whether the model is:
+#' \itemize{
+#'   \item \strong{Univariable}: Single predictor (e.g., \code{predictors = "age"})
+#'     - Effect estimates labeled as "Univariable OR", "Univariable HR", etc.
+#'     - Represents crude (unadjusted) association
+#'   \item \strong{Multivariable}: Multiple predictors (e.g., 
+#'     \code{predictors = c("age", "sex", "treatment")})
+#'     - Effect estimates labeled as "Multivariable aOR", "Multivariable aHR", etc.
+#'     - "a" prefix indicates "adjusted" for other variables in the model
+#'     - Represents associations adjusted for confounding
+#' }
 #' 
-#' The formatted output is publication-ready and can be exported directly using
-#' tbl2pdf(), tbl2tex(), or tbl2html() functions.
-#'
-#' @examples
-#' \dontrun{
-#' # Multivariable logistic regression
-#' model1 <- fit(data = mydata,
-#'               outcome = "disease",
-#'               predictors = c("age", "sex", "smoking"),
-#'               model_type = "glm",
-#'               family = "binomial")
-#' print(model1)
+#' \strong{Interaction Terms:}
 #' 
-#' # Cox model with stratification
-#' library(survival)
-#' cox_model <- fit(data = lung,
-#'                  outcome = "Surv(time, status)",
-#'                  predictors = c("age", "sex", "ph.ecog"),
-#'                  model_type = "coxph",
-#'                  strata = "inst")
+#' Interactions are specified using colon notation and added to the model:
+#' \itemize{
+#'   \item \code{interaction_terms = c("age:treatment")} creates interaction 
+#'     between age and treatment
+#'   \item Main effects for both variables are automatically included
+#'   \item Multiple interactions can be specified: 
+#'     \code{c("age:sex", "treatment:stage")}
+#'   \item For interactions between categorical variables, separate terms are 
+#'     created for each combination of levels
+#' }
 #' 
-#' # Model with interactions and custom labels
-#' labels <- c(age = "Age (years)",
-#'             bmi = "Body Mass Index",
-#'             treatment = "Treatment Group")
-#' interact_model <- fit(data = trial_data,
-#'                       outcome = "response",
-#'                       predictors = c("age", "bmi", "treatment"),
-#'                       interaction_terms = c("age:treatment"),
-#'                       var_labels = labels)
+#' \strong{Stratification (Cox/Conditional Logistic):}
 #' 
-#' # Linear regression with weights
-#' weighted_model <- fit(data = survey_data,
-#'                       outcome = "income",
-#'                       predictors = c("education", "experience"),
-#'                       model_type = "lm",
-#'                       weights = "survey_weight")
+#' The \code{strata} parameter creates separate baseline hazards:
+#' \itemize{
+#'   \item Allows baseline hazard to vary across strata without estimating 
+#'     stratum effects
+#'   \item Useful when proportional hazards assumption violated across strata
+#'   \item Example: \code{strata = "center"} for multicenter studies
+#'   \item Stratification variable is not included as a predictor
+#' }
 #' 
-#' # Access the underlying model
-#' raw_model <- attr(model1, "model")
-#' summary(raw_model)
+#' \strong{Clustering (Cox Models):}
 #' 
-#' # Access raw numeric results
-#' raw_data <- attr(model1, "raw_data")
+#' The \code{cluster} parameter computes robust standard errors:
+#' \itemize{
+#'   \item Accounts for within-cluster correlation (e.g., multiple observations 
+#'     per patient)
+#'   \item Uses sandwich variance estimator
+#'   \item Does not change point estimates, only standard errors and p-values
+#' }
 #' 
-#' # Export formatted results
-#' tbl2pdf(model1, "regression_results.pdf")
+#' \strong{Weighting:}
+#' 
+#' The \code{weights} parameter enables weighted regression:
+#' \itemize{
+#'   \item For survey data with sampling weights
+#'   \item Inverse probability weighting for causal inference
+#'   \item Frequency weights for aggregated data
+#'   \item Weights should be in a column of \code{data}
+#' }
+#' 
+#' \strong{Effect Measures by Model Type:}
+#' \itemize{
+#'   \item \strong{Logistic} (\code{family = "binomial"}): Odds ratios (OR/aOR)
+#'   \item \strong{Cox} (\code{model_type = "coxph"}): Hazard ratios (HR/aHR)
+#'   \item \strong{Poisson} (\code{family = "poisson"}): Rate ratios (RR/aRR)
+#'   \item \strong{Linear}: Raw coefficient estimates
 #' }
 #'
-#' @seealso
-#' \code{\link{uscreen}} for univariable screening,
-#' \code{\link{fastfit}} for complete analysis workflow,
-#' \code{\link{m2dt}} for model-to-data.table conversion,
-#' \code{\link{tbl2pdf}} for PDF export
+#' @seealso 
+#' \code{\link{uscreen}} for univariable screening of multiple predictors,
+#' \code{\link{fastfit}} for complete univariable-to-multivariable workflow,
+#' \code{\link{compfit}} for comparing multiple models,
+#' \code{\link{m2dt}} for model-to-table conversion
+#'
+#' @examples
+#' # Load example data
+#' data(clintrial)
+#' data(clintrial_labels)
+#' library(survival)
+#' 
+#' # Example 1: Univariable logistic regression
+#' uni_model <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = "age"
+#' )
+#' print(uni_model)
+#' # Labeled as "Univariable OR"
+#' 
+#' # Example 2: Multivariable logistic regression
+#' multi_model <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "sex", "bmi", "treatment"),
+#'     var_labels = clintrial_labels
+#' )
+#' print(multi_model)
+#' # Labeled as "Multivariable aOR" (adjusted OR)
+#' 
+#' # Example 3: Cox proportional hazards model
+#' cox_model <- fit(
+#'     data = clintrial,
+#'     outcome = "Surv(os_months, os_status)",
+#'     predictors = c("age", "sex", "treatment", "stage"),
+#'     model_type = "coxph",
+#'     var_labels = clintrial_labels
+#' )
+#' print(cox_model)
+#' 
+#' # Example 4: Model with interaction terms
+#' interact_model <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "treatment", "sex"),
+#'     interaction_terms = c("age:treatment"),
+#'     var_labels = clintrial_labels
+#' )
+#' print(interact_model)
+#' 
+#' # Example 5: Cox model with stratification
+#' strat_model <- fit(
+#'     data = clintrial,
+#'     outcome = "Surv(os_months, os_status)",
+#'     predictors = c("age", "sex", "treatment"),
+#'     model_type = "coxph",
+#'     strata = "site",  # Separate baseline hazards by site
+#'     var_labels = clintrial_labels
+#' )
+#' print(strat_model)
+#' 
+#' # Example 6: Cox model with clustering
+#' cluster_model <- fit(
+#'     data = clintrial,
+#'     outcome = "Surv(os_months, os_status)",
+#'     predictors = c("age", "treatment"),
+#'     model_type = "coxph",
+#'     cluster = "site",  # Robust SEs accounting for site clustering
+#'     var_labels = clintrial_labels
+#' )
+#' print(cluster_model)
+#' 
+#' # Example 7: Linear regression
+#' linear_model <- fit(
+#'     data = clintrial,
+#'     outcome = "bmi",
+#'     predictors = c("age", "sex", "smoking"),
+#'     model_type = "lm",
+#'     var_labels = clintrial_labels
+#' )
+#' print(linear_model)
+#' 
+#' # Example 8: Poisson regression for count data
+#' poisson_model <- fit(
+#'     data = clintrial,
+#'     outcome = "los_days",
+#'     predictors = c("age", "treatment", "surgery", "stage"),
+#'     model_type = "glm",
+#'     family = "poisson",
+#'     var_labels = clintrial_labels
+#' )
+#' print(poisson_model)
+#' # Returns rate ratios (RR/aRR)
+#' 
+#' # Example 9: Access the underlying fitted model
+#' result <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "sex", "bmi")
+#' )
+#' 
+#' # Get the model object
+#' model_obj <- attr(result, "model")
+#' summary(model_obj)
+#' 
+#' # Model diagnostics
+#' plot(model_obj)
+#' 
+#' # Predictions
+#' preds <- predict(model_obj, type = "response")
+#' 
+#' # Example 10: Access raw numeric data
+#' raw_data <- attr(result, "raw_data")
+#' print(raw_data)
+#' # Contains unformatted coefficients, SEs, CIs, AIC, BIC, etc.
+#' 
+#' # Example 11: Multiple interactions
+#' complex_model <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "sex", "treatment", "bmi"),
+#'     interaction_terms = c("age:treatment", "sex:bmi"),
+#'     var_labels = clintrial_labels
+#' )
+#' print(complex_model)
+#' 
+#' # Example 12: Customize output columns
+#' minimal <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "sex", "treatment"),
+#'     show_n = FALSE,
+#'     show_events = FALSE,
+#'     add_reference_rows = FALSE
+#' )
+#' print(minimal)
+#' 
+#' # Example 13: Different confidence levels
+#' ci90 <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "treatment"),
+#'     conf_level = 0.90  # 90% confidence intervals
+#' )
+#' print(ci90)
+#' 
+#' # Example 14: Force coefficient display instead of OR
+#' coef_model <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "bmi"),
+#'     exponentiate = FALSE  # Show log odds instead of OR
+#' )
+#' print(coef_model)
+#' 
+#' # Example 15: Check model quality statistics
+#' result <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "sex", "treatment", "stage"),
+#'     keep_qc_stats = TRUE
+#' )
+#' 
+#' raw <- attr(result, "raw_data")
+#' cat("AIC:", raw$AIC[1], "\n")
+#' cat("BIC:", raw$BIC[1], "\n")
+#' cat("C-statistic:", raw$c_statistic[1], "\n")
 #'
 #' @export
 fit <- function(data, 

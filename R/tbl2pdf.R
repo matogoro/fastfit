@@ -1,117 +1,373 @@
 #' Export Table to PDF Format
 #'
-#' Converts a data frame or data.table to a formatted PDF document using LaTeX
-#' as an intermediate format. Supports automatic page sizing, landscape orientation,
-#' and various formatting options for publication-ready output.
+#' Converts a data frame, data.table, or matrix to a professionally formatted PDF 
+#' document using LaTeX as an intermediate format. Provides extensive control over 
+#' page layout, typography, and formatting for publication-ready output. Particularly 
+#' well-suited for tables from regression analyses, descriptive statistics, and 
+#' model comparisons.
 #'
-#' @param table A data.frame, data.table, or matrix to export.
-#' @param file Character string specifying the output PDF filename. Must have
-#'   .pdf extension.
-#' @param orientation Character string: "portrait" (default) or "landscape".
-#' @param paper Character string specifying paper size: "letter" (default), "a4",
-#'   "legal", or "auto" for content-based sizing.
-#' @param margins Numeric vector of length 4 specifying margins in inches as
-#'   c(top, right, bottom, left). Default is c(1, 1, 1, 1).
-#' @param fit_to_page Logical. If TRUE, scales table to fit page width. Default
-#'   is TRUE.
-#' @param font_size Numeric. Base font size in points. Default is 8.
-#' @param caption Character string. Optional caption to display below table.
-#' @param format_headers Logical. If TRUE, formats column headers (e.g., converts
-#'   underscores to spaces). Default is TRUE.
-#' @param var_padding Logical. If TRUE, adds spacing around variable groups.
-#'   Default is TRUE.
-#' @param cell_padding Character string or numeric. Add vertical padding to text
-#'   within cells. Choices are "none", "normal" (default), "relaxed", "loose", or
-#'   a number representing a custom multiplier.
-#' @param bold_significant Logical. If TRUE, bolds p-values below significance
-#'   threshold. Default is TRUE.
-#' @param sig_threshold Numeric. P-value threshold for boldface. Default is 0.05.
-#' @param align Character string or vector specifying column alignment. If NULL,
-#'   automatically determines based on content. Use "l" (left), "c" (center),
-#'   or "r" (right).
-#' @param indent_groups Logical. If TRUE, indents grouped rows hierarchically.
-#'   Default is FALSE.
-#' @param condense_table Logical. If TRUE, decreases table vertical height by
-#'   reducing continuous, survival, and binary categorical variables to single
-#'   rows. Makes indent_groups = TRUE by default. Default is FALSE.
-#' @param zebra_stripes Logical. If TRUE, adds alternating row shading. Default is FALSE.
-#' @param stripe_color Character string. Uses LaTeX color names. Default is "gray!20".
-#' @param show_logs Logical. If TRUE, keeps log files after PDF creation.
-#'   Default is FALSE.
-#' @param ... Additional arguments passed to xtable::xtable.
+#' @param table A data.frame, data.table, or matrix to export. Can be output from 
+#'   \code{\link{desctbl}}, \code{\link{fit}}, \code{\link{uscreen}}, 
+#'   \code{\link{fastfit}}, \code{\link{compfit}}, or any tabular data structure.
+#'   
+#' @param file Character string specifying the output PDF filename. Must have 
+#'   \code{.pdf} extension. Example: \code{"results.pdf"}, \code{"Table1.pdf"}.
+#'   
+#' @param orientation Character string specifying page orientation: 
+#'   \itemize{
+#'     \item \code{"portrait"} - Vertical orientation [default]
+#'     \item \code{"landscape"} - Horizontal orientation (recommended for wide tables)
+#'   }
+#'   
+#' @param paper Character string specifying paper size:
+#'   \itemize{
+#'     \item \code{"letter"} - US Letter (8.5" × 11") [default]
+#'     \item \code{"a4"} - A4 (210mm × 297mm)
+#'     \item \code{"legal"} - US Legal (8.5" × 14")
+#'     \item \code{"auto"} - Auto-size to content (no margins, crops to fit)
+#'   }
+#'   
+#' @param margins Numeric vector of length 4 specifying margins in inches as 
+#'   \code{c(top, right, bottom, left)}. Default is \code{c(1, 1, 1, 1)}. 
+#'   Ignored when \code{paper = "auto"}.
+#'   
+#' @param fit_to_page Logical. If \code{TRUE}, scales table to fit within the 
+#'   text width (respects margins). Useful for wide tables that would otherwise 
+#'   overflow. Default is \code{TRUE}.
+#'   
+#' @param font_size Numeric. Base font size in points. Default is 8. Smaller 
+#'   values accommodate more content; larger values improve readability. 
+#'   Typical range: 6-12 points.
+#'   
+#' @param caption Character string. Optional caption displayed below the table. 
+#'   Supports LaTeX formatting for multi-line captions, superscripts, italics, etc. 
+#'   See Details for formatting guidance. Default is \code{NULL}.
+#'   
+#' @param format_headers Logical. If \code{TRUE}, applies automatic formatting 
+#'   to column headers: converts underscores to spaces, italicizes statistical 
+#'   notation (\emph{n}, \emph{p}), and improves readability. Default is \code{TRUE}.
+#'   
+#' @param var_padding Logical. If \code{TRUE}, adds vertical spacing between 
+#'   different variables in the table, creating visual grouping. Particularly 
+#'   useful for regression tables with multiple predictors. Default is \code{TRUE}.
+#'   
+#' @param cell_padding Character string or numeric specifying vertical padding 
+#'   within table cells:
+#'   \itemize{
+#'     \item \code{"none"} - No extra padding (most compact)
+#'     \item \code{"normal"} - Standard padding [default]
+#'     \item \code{"relaxed"} - Increased padding
+#'     \item \code{"loose"} - Maximum padding
+#'     \item Numeric value - Custom multiplier (e.g., \code{1.5})
+#'   }
+#'   Adjusts \code{\\arraystretch} in LaTeX.
+#'   
+#' @param bold_significant Logical. If \code{TRUE}, applies bold formatting to 
+#'   p-values below the significance threshold, making significant results stand 
+#'   out visually. Default is \code{TRUE}.
+#'   
+#' @param sig_threshold Numeric. P-value threshold for bold formatting. Only 
+#'   used when \code{bold_significant = TRUE}. Default is 0.05. Common alternatives: 
+#'   0.01, 0.10.
+#'   
+#' @param align Character string or vector specifying column alignment. Options:
+#'   \itemize{
+#'     \item \code{"l"} - Left aligned
+#'     \item \code{"c"} - Center aligned
+#'     \item \code{"r"} - Right aligned
+#'   }
+#'   If \code{NULL} (default), automatically determines alignment based on content 
+#'   (text left, numbers right). Can specify per-column: \code{c("l", "l", "r", "r")}.
+#'   
+#' @param indent_groups Logical. If \code{TRUE}, indents factor levels/groups 
+#'   under their parent variable using horizontal space, creating a hierarchical 
+#'   display. Useful for factor variables in regression tables. Default is \code{FALSE}.
+#'   
+#' @param condense_table Logical. If \code{TRUE}, condenses the table by:
+#'   \itemize{
+#'     \item Showing only one row per continuous variable (estimate + CI)
+#'     \item Showing only non-reference categories for binary factors
+#'     \item Automatically setting \code{indent_groups = TRUE}
+#'   }
+#'   Significantly reduces table height. Default is \code{FALSE}.
+#'   
+#' @param zebra_stripes Logical. If \code{TRUE}, applies alternating gray 
+#'   background shading to different variables (not individual rows) for improved 
+#'   visual grouping and readability. Default is \code{FALSE}.
+#'   
+#' @param stripe_color Character string. LaTeX color specification for zebra 
+#'   stripes. Default is \code{"gray!20"} (20\% gray). Can use other colors like 
+#'   \code{"blue!10"}, \code{"red!15"}. Requires \code{zebra_stripes = TRUE}.
+#'   
+#' @param dark_header Logical. If \code{TRUE}, creates a dark (black) background 
+#'   with white text for the header row. Provides strong visual contrast. 
+#'   Default is \code{FALSE}.
+#'   
+#' @param show_logs Logical. If \code{TRUE}, retains LaTeX log and auxiliary 
+#'   files after PDF compilation for troubleshooting. If \code{FALSE}, deletes 
+#'   these files. Default is \code{TRUE}.
+#'   
+#' @param ... Additional arguments passed to \code{\link[xtable]{xtable}} for 
+#'   advanced LaTeX table customization.
 #'
-#' @return Invisibly returns NULL. Creates a PDF file at the specified location.
+#' @return Invisibly returns \code{NULL}. Creates a PDF file at the specified 
+#'   location. If compilation fails, check the \code{.log} file (if 
+#'   \code{show_logs = TRUE}) for error details.
 #'
 #' @details
-#' This function uses LaTeX as an intermediate format to generate PDFs.  As such,
-#' a working installation of a LaTeX distribution is required (e.g., TinyTeX,
-#' TeX Live, MiKTeX, MacTeX, etc.).  Prior to execution, this function checks
-#' for LaTeX availability and provides installation guidance if missing.
-#'
-#' A comprehensive list of LaTeX packages needed for full functionality is as
-#' follows (installed by default in most LaTeX distributions, with some
-#' exceptions):
+#' \strong{LaTeX Requirements:}
+#' 
+#' This function requires a working LaTeX installation. The function checks for 
+#' LaTeX availability and provides installation guidance if missing.
+#' 
+#' \emph{Recommended LaTeX distributions:}
 #' \itemize{
-#'   \item \code{fontenc}
-#'   \item \code{inputenc}
-#'   \item \code{array}
-#'   \item \code{booktabs}
-#'   \item \code{longtable}
-#'   \item \code{graphicx}
-#'   \item \code{geometry}
-#'   \item \code{pdflscape}
-#'   \item \code{lscape}
-#'   \item \code{helvet}
-#'   \item \code{standalone}
-#'   \item \code{varwidth}
-#'   \item \code{float}
-#'   \item \code{caption}
-#'   \item \code{xcolor}
-#'   \item \code{colortbl}
+#'   \item \strong{TinyTeX} (lightweight, R-integrated): Install via 
+#'     \code{tinytex::install_tinytex()}
+#'   \item \strong{TeX Live} (comprehensive, cross-platform)
+#'   \item \strong{MiKTeX} (Windows)
+#'   \item \strong{MacTeX} (macOS)
 #' }
-#' When \code{paper = "auto"}, the function attempts to size the PDF to content using
-#' either the standalone document class or pdfcrop utility if available.
 #' 
-#' While this function attempts to gracefully handle special characters that need
-#' escaping in LaTeX, user-inputted text needs to be properly escaped for the output
-#' text to render appropriately (\emph{see} the multi-line caption example included
-#' below).
+#' \emph{Required LaTeX packages} (auto-installed with most distributions):
+#' \itemize{
+#'   \item fontenc, inputenc - Character encoding
+#'   \item array, booktabs, longtable - Table formatting
+#'   \item graphicx - Scaling tables
+#'   \item geometry - Page layout
+#'   \item pdflscape, lscape - Landscape orientation
+#'   \item helvet - Sans-serif fonts
+#'   \item standalone, varwidth - Auto-sizing (for \code{paper = "auto"})
+#'   \item float, caption - Floats and captions
+#'   \item xcolor, colortbl - Colors (for \code{zebra_stripes} or \code{dark_header})
+#' }
+#' 
+#' \strong{Caption Formatting:}
+#' 
+#' Captions support LaTeX commands for rich formatting:
+#' ```r
+#' # Multi-line caption with line breaks
+#' caption = "Table 1: Multivariable Analysis\\\\
+#'           OR = odds ratio; CI = confidence interval"
+#' 
+#' # With superscripts and italics
+#' caption = "Table 1: Results\\\\
+#'           \\textsuperscript{a}Adjusted for age\\\\
+#'           \\textit{p}-values from Wald tests"
+#' 
+#' # With special characters (must escape)
+#' caption = "Results for \\$1000 increase in income (\\%)"
+#' ```
+#' 
+#' LaTeX special characters that need escaping: \code{& % $ # _ { } ~ ^ \\}
+#' 
+#' \strong{Auto-Sizing (paper = "auto"):}
+#' 
+#' When \code{paper = "auto"}, the function attempts to create a minimal PDF 
+#' sized exactly to the table content:
+#' \enumerate{
+#'   \item Tries to use the \code{standalone} LaTeX class (cleanest output)
+#'   \item Falls back to \code{pdfcrop} utility if standalone unavailable
+#'   \item Falls back to minimal margins if neither available
+#' }
+#' 
+#' Auto-sized PDFs are ideal for:
+#' \itemize{
+#'   \item Including in other documents
+#'   \item Flexible embedding in presentations
+#'   \item Maximum space efficiency
+#' }
+#' 
+#' \strong{Table Width Management:}
+#' 
+#' For wide tables that don't fit on the page:
+#' \enumerate{
+#'   \item Use \code{orientation = "landscape"}
+#'   \item Use \code{fit_to_page = TRUE} (default) to auto-scale
+#'   \item Reduce \code{font_size} (e.g., 7 or 6)
+#'   \item Use \code{condense_table = TRUE} to reduce columns/rows
+#'   \item Consider \code{paper = "auto"} for maximum flexibility
+#' }
+#' 
+#' \strong{Optimized for FastFit Tables:}
+#' 
+#' This function is specifically designed for tables produced by:
+#' \itemize{
+#'   \item \code{\link{desctbl}} - Descriptive statistics tables
+#'   \item \code{\link{fit}} - Single model regression tables
+#'   \item \code{\link{uscreen}} - Univariable screening tables
+#'   \item \code{\link{fastfit}} - Combined univariable/multivariable tables
+#'   \item \code{\link{compfit}} - Model comparison tables
+#' }
+#' 
+#' The function automatically detects and formats these table types, including:
+#' \itemize{
+#'   \item Sample size rows (N = X)
+#'   \item Variable grouping
+#'   \item P-value highlighting
+#'   \item Proper alignment of estimates and CIs
+#' }
+#' 
+#' \strong{Troubleshooting:}
+#' 
+#' If PDF compilation fails:
+#' \enumerate{
+#'   \item Check that LaTeX is installed: Run \code{Sys.which("pdflatex")}
+#'   \item Set \code{show_logs = TRUE} and examine the .log file
+#'   \item Common issues:
+#'     \itemize{
+#'       \item Missing LaTeX packages: Install via package manager
+#'       \item Special characters in text: Escape properly
+#'       \item Very wide tables: Use landscape or reduce font size
+#'       \item Caption formatting: Check LaTeX syntax
+#'     }
+#' }
 #'
-#' This function is tailored to outputs from \code{\link{desctbl()}},
-#' \code{\link{fastfit()}}, \code{\link{uscreen()}}, \code{\link{fit()}},
-#' and \code{\link{compfit()}}, although it can theoretically be applied to
-#' any data frame or data.table object.
-#' 
+#' @seealso
+#' \code{\link{tbl2tex}} for LaTeX source files,
+#' \code{\link{tbl2html}} for HTML output,
+#' \code{\link{tbl2docx}} for Microsoft Word,
+#' \code{\link{tbl2pptx}} for PowerPoint,
+#' \code{\link{desctbl}} for descriptive tables,
+#' \code{\link{fit}} for regression tables
+#'
 #' @examples
-#' if (FALSE) {
-#' # Basic export
-#' tbl2pdf(results_table, "results.pdf")
+#' # Load example data and create a regression table
+#' data(clintrial)
+#' data(clintrial_labels)
+#' library(survival)
 #' 
-#' # Landscape orientation with caption
-#' tbl2pdf(wide_table, "wide_results.pdf",
-#'         orientation = "landscape",
-#'         caption = "Table 1: Regression Results")
+#' # Create a regression table
+#' results <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "sex", "treatment", "stage"),
+#'     var_labels = clintrial_labels
+#' )
 #' 
-#' # Multi-line caption
-#' tbl2pdf(table, "results.pdf",
-#'         caption = "Table 1 - Regression results\\\\
-#'                   aHR = adjusted hazard ratio\\\\
-#'                   \\textsuperscript{1}Note goes here")
+#' # Example 1: Basic PDF export
+#' tbl2pdf(results, "basic_results.pdf")
 #' 
-#' # Auto-sized output with group indentation
-#' tbl2pdf(grouped_table, "grouped.pdf",
-#'         paper = "auto",
+#' # Example 2: Landscape orientation for wide tables
+#' tbl2pdf(results, "wide_results.pdf",
+#'         orientation = "landscape")
+#' 
+#' # Example 3: With caption
+#' tbl2pdf(results, "captioned.pdf",
+#'         caption = "Table 1: Multivariable logistic regression results")
+#' 
+#' # Example 4: Multi-line caption with formatting
+#' tbl2pdf(results, "formatted_caption.pdf",
+#'         caption = "Table 1: Risk Factors for Mortality\\\\
+#'                   aOR = adjusted odds ratio; CI = confidence interval\\\\
+#'                   \\textsuperscript{a}Adjusted for age, sex, and treatment")
+#' 
+#' # Example 5: Auto-sized PDF (no fixed page dimensions)
+#' tbl2pdf(results, "autosize.pdf",
+#'         paper = "auto")
+#' 
+#' # Example 6: A4 paper with custom margins
+#' tbl2pdf(results, "a4_custom.pdf",
+#'         paper = "a4",
+#'         margins = c(0.75, 0.75, 0.75, 0.75))
+#' 
+#' # Example 7: Larger font for readability
+#' tbl2pdf(results, "large_font.pdf",
+#'         font_size = 11)
+#' 
+#' # Example 8: Indented hierarchical display
+#' tbl2pdf(results, "indented.pdf",
 #'         indent_groups = TRUE)
 #' 
-#' # Custom margins and font size
-#' tbl2pdf(table, "custom.pdf",
-#'         margins = c(0.5, 0.5, 0.5, 0.5),
-#'         font_size = 10)
-#' }
-#' @seealso
-#' \code{\link{tbl2tex}} for LaTeX output,
-#' \code{\link{tbl2html}} for HTML output.
+#' # Example 9: Condensed table (reduced height)
+#' tbl2pdf(results, "condensed.pdf",
+#'         condense_table = TRUE)
 #' 
+#' # Example 10: With zebra stripes
+#' tbl2pdf(results, "striped.pdf",
+#'         zebra_stripes = TRUE,
+#'         stripe_color = "gray!15")
+#' 
+#' # Example 11: Dark header style
+#' tbl2pdf(results, "dark_header.pdf",
+#'         dark_header = TRUE)
+#' 
+#' # Example 12: Combination of formatting options
+#' tbl2pdf(results, "publication_ready.pdf",
+#'         orientation = "portrait",
+#'         paper = "letter",
+#'         font_size = 9,
+#'         caption = "Table 2: Multivariable Analysis\\\\
+#'                   Model adjusted for age, sex, and clinical factors",
+#'         indent_groups = TRUE,
+#'         zebra_stripes = TRUE,
+#'         bold_significant = TRUE,
+#'         sig_threshold = 0.05)
+#' 
+#' # Example 13: Adjust cell padding
+#' tbl2pdf(results, "relaxed_padding.pdf",
+#'         cell_padding = "relaxed")  # More spacious
+#' 
+#' # Example 14: No scaling (natural table width)
+#' tbl2pdf(results, "no_scale.pdf",
+#'         fit_to_page = FALSE,
+#'         font_size = 10)
+#' 
+#' # Example 15: Hide significance bolding
+#' tbl2pdf(results, "no_bold.pdf",
+#'         bold_significant = FALSE)
+#' 
+#' # Example 16: Custom column alignment
+#' tbl2pdf(results, "custom_align.pdf",
+#'         align = c("l", "l", "r", "r", "c"))
+#' 
+#' # Example 17: Descriptive statistics table
+#' desc_table <- desctbl(
+#'     data = clintrial,
+#'     strata = "treatment",
+#'     vars = c("age", "sex", "bmi", "stage"),
+#'     var_labels = clintrial_labels
+#' )
+#' 
+#' tbl2pdf(desc_table, "descriptive.pdf",
+#'         caption = "Table 1: Baseline Characteristics by Treatment Group",
+#'         landscape = TRUE)
+#' 
+#' # Example 18: Model comparison table
+#' models <- list(
+#'     base = c("age", "sex"),
+#'     full = c("age", "sex", "bmi", "treatment")
+#' )
+#' 
+#' comparison <- compfit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     model_list = models
+#' )
+#' 
+#' tbl2pdf(comparison, "model_comparison.pdf",
+#'         caption = "Table 3: Model Comparison Statistics")
+#' 
+#' # Example 19: Very wide table with aggressive fitting
+#' wide_model <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "sex", "race", "bmi", "smoking", 
+#'                   "hypertension", "diabetes", "treatment", "stage")
+#' )
+#' 
+#' tbl2pdf(wide_model, "very_wide.pdf",
+#'         orientation = "landscape",
+#'         paper = "legal",  # Even wider than letter
+#'         font_size = 7,
+#'         fit_to_page = TRUE,
+#'         condense_table = TRUE)
+#' 
+#' # Example 20: Troubleshooting - keep logs
+#' tbl2pdf(results, "debug.pdf",
+#'         show_logs = TRUE)
+#' # If it fails, check debug.log for error messages
+#'
 #' @export
 tbl2pdf <- function (table,
                      file,

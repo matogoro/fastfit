@@ -2,7 +2,7 @@
 % Please edit documentation in R/glmforest.R
 \name{glmforest}
 \alias{glmforest}
-\title{Create a Forest Plot for Generalized Linear Models}
+\title{Create Forest Plot for Generalized Linear Models}
 \usage{
 glmforest(
   model,
@@ -31,83 +31,441 @@ glmforest(
 )
 }
 \arguments{
-\item{model}{A generalized linear model object of class \code{glm}.}
+\item{model}{A fitted generalized linear model object of class \code{glm}. 
+The model should be fitted using \code{\link[stats]{glm}} with appropriate 
+family specification (binomial, poisson, gaussian, etc.).}
 
-\item{data}{A data frame or data.table containing the original data used to 
-fit the model. If NULL (default), the function attempts to extract data 
-from the model object.}
+\item{data}{A data.frame or data.table containing the original data used to 
+fit the model. If \code{NULL} (default), the function attempts to extract 
+data from the model object itself (via \code{model$data} or \code{model$model}). 
+Providing the data explicitly is recommended for reliability.}
 
-\item{title}{Character string specifying the plot title. Default is "Generalized Linear Model".}
+\item{title}{Character string specifying the plot title displayed at the top. 
+Default is \code{"Generalized Linear Model"}. Use descriptive titles like 
+"Risk Factors for Disease Outcome" for publication.}
 
-\item{effect_label}{Character string for the effect measure label. Default is "Odds Ratio" 
-for logistic regression, "Risk Ratio" for log-link models.}
+\item{effect_label}{Character string for the effect measure label on the 
+forest plot axis. If \code{NULL} (default), automatically determined based 
+on model family and link function: "Odds Ratio" for logistic regression 
+(\code{family = binomial, link = logit}), "Risk Ratio" for log-link models, 
+"Exp(Coefficient)" for other exponential families, or "Coefficient" for 
+identity link.}
 
-\item{digits}{Integer specifying the number of decimal places for effect estimates 
-and confidence intervals. Default is 2.}
+\item{digits}{Integer specifying the number of decimal places for effect 
+estimates and confidence intervals in the data table. Default is 2.}
 
-\item{font_size}{Numeric value controlling the base font size. 
-Default is 1.0.}
+\item{font_size}{Numeric multiplier controlling the base font size for all 
+text elements. Values > 1 increase all fonts proportionally, values < 1 
+decrease them. Default is 1.0. Useful for adjusting readability across 
+different output sizes.}
 
-\item{annot_size}{Numeric value controlling the relative font size for annotations. 
-Default is 3.88.}
+\item{annot_size}{Numeric value controlling the relative font size for 
+data annotations (variable names, values in table cells). Default is 3.88. 
+Adjust relative to \code{font_size}.}
 
-\item{header_size}{Numeric value controlling the relative font size for headers. 
-Default is 5.82.}
+\item{header_size}{Numeric value controlling the relative font size for 
+column headers ("Variable", "Group", "n", etc.). Default is 5.82. Headers 
+are typically larger than annotations for hierarchy.}
 
-\item{title_size}{Numeric value controlling the relative font size for the plot title. 
-Default is 23.28.}
+\item{title_size}{Numeric value controlling the relative font size for the 
+main plot title. Default is 23.28. The title is typically the largest text 
+element.}
 
-\item{plot_width}{Numeric value specifying the intended plot width in inches.
-Used to optimize tbl_width calculation. Default is NULL.}
+\item{plot_width}{Numeric value specifying the intended output width in 
+specified \code{units}. Used for optimizing layout and text sizing. 
+Default is \code{NULL} (automatic). Recommended: 10-16 inches for standard 
+publications.}
 
-\item{plot_height}{Numeric value specifying the intended plot height in inches.
-Default is NULL.}
+\item{plot_height}{Numeric value specifying the intended output height in 
+specified \code{units}. Default is \code{NULL} (automatic based on number 
+of rows). The function provides recommendations if not specified.}
 
-\item{tbl_width}{Numeric value between 0 and 1 specifying the proportion of plot 
-width allocated to the data table. If NULL (default), automatically calculated
-based on content and plot dimensions.}
+\item{tbl_width}{Numeric value between 0 and 1 specifying the proportion of 
+total plot width allocated to the data table (left side). The forest plot 
+occupies \code{1 - tbl_width}. Default is 0.6 (60\% table, 40\% forest). 
+Increase for longer variable names, decrease to emphasize the forest plot.}
 
-\item{show_n}{Logical. Whether to show the sample size column. Default is TRUE.}
+\item{show_n}{Logical. If \code{TRUE}, includes a column showing group-specific 
+sample sizes for categorical variables and total sample size for continuous 
+variables. Default is \code{TRUE}.}
 
-\item{show_events}{Logical. Whether to show the events column. Default is TRUE.}
+\item{show_events}{Logical. If \code{TRUE}, includes a column showing the 
+number of events for each group. Relevant for logistic regression (number 
+of cases) and other binary outcomes. Default is \code{TRUE}.}
 
-\item{indent_groups}{Logical. Whether to indent group levels under variables.
-Default is FALSE.}
+\item{indent_groups}{Logical. If \code{TRUE}, indents factor levels under 
+their parent variable name, creating a hierarchical visual structure. When 
+\code{TRUE}, the "Group" column is hidden. Default is \code{FALSE}.}
 
-\item{condense_table}{Logical. Whether to condense binary variables into single rows.
-Forces indent_groups = TRUE. Default is FALSE.}
+\item{condense_table}{Logical. If \code{TRUE}, condenses binary categorical 
+variables into single rows by showing only the non-reference category. 
+Automatically sets \code{indent_groups = TRUE}. Useful for tables with 
+many binary variables. Default is \code{FALSE}.}
 
-\item{center_padding}{Numeric value specifying the padding width between the table
-and the forest plot. Default is 4.}
+\item{center_padding}{Numeric value specifying the horizontal spacing (in 
+character units) between the data table and forest plot. Increase for more 
+separation, decrease to fit more content. Default is 4.}
 
-\item{zebra_stripes}{Logical. Whether to use alternating background shading 
-for different variables to improve readability. Default is TRUE.}
+\item{zebra_stripes}{Logical. If \code{TRUE}, applies alternating gray 
+background shading to different variables (not rows) to improve visual 
+grouping and readability. Default is \code{TRUE}.}
 
-\item{ref_label}{Character string to display for reference categories. 
-Default is "reference".}
+\item{ref_label}{Character string to display for reference categories of 
+factor variables. Typically shown in place of effect estimates. 
+Default is \code{"reference"}. Common alternatives: "ref", "1.00 (ref)".}
 
-\item{var_labels}{Named character vector for custom variable labels. Names should 
-match variable names in the model, values are the display labels.}
+\item{var_labels}{Named character vector or list providing custom display 
+labels for variables. Names should match variable names in the model, 
+values are the labels to display. Example: 
+\code{c(age = "Age (years)", bmi = "Body Mass Index")}. Default is \code{NULL} 
+(use original variable names).}
 
-\item{color}{Character string specifying the color for effect estimate point estimates. 
-Default is "#3A7E8A" (teal).}
+\item{color}{Character string specifying the color for effect estimate point 
+markers in the forest plot. Use hex codes or R color names. Default is 
+\code{"#3A7E8A"} (teal). Choose colors that contrast well with black 
+error bars.}
 
-\item{exponentiate}{Logical. Whether to exponentiate coefficients. Default is TRUE 
-for logit and log links, FALSE otherwise.}
+\item{exponentiate}{Logical. If \code{TRUE}, exponentiates coefficients to 
+display odds ratios, risk ratios, etc. If \code{FALSE}, shows raw 
+coefficients. Default is \code{NULL}, which automatically exponentiates 
+for logit, log, and cloglog links, and shows raw coefficients for identity 
+link.}
 
-\item{units}{Units used for measurement. Default is inches ("in").}
+\item{units}{Character string specifying the units for plot dimensions. 
+Options: \code{"in"} (inches), \code{"cm"} (centimeters), \code{"mm"} 
+(millimeters). Default is \code{"in"}. Affects interpretation of 
+\code{plot_width} and \code{plot_height}.}
 }
 \value{
-A ggplot object containing the forest plot. The object has an attribute
-  "recommended_dims" with suggested width and height in inches.
+A \code{ggplot} object containing the complete forest plot. The plot 
+  can be:
+  \itemize{
+    \item Displayed directly: \code{print(plot)}
+    \item Saved to file: \code{ggsave("forest.pdf", plot, width = 12, height = 8)}
+    \item Further customized with ggplot2 functions
+  }
+  
+  The returned object includes an attribute \code{"recommended_dims"} 
+  accessible via \code{attr(plot, "recommended_dims")}, which is a list 
+  containing:
+  \describe{
+    \item{width}{Numeric. Recommended plot width in specified units}
+    \item{height}{Numeric. Recommended plot height in specified units}
+  }
+  
+  These recommendations are automatically calculated based on the number of 
+  variables, text sizes, and layout parameters, and are printed to console 
+  if \code{plot_width} or \code{plot_height} are not specified.
 }
 \description{
-Generates a publication-ready forest plot combining a data table and 
-graphical representation of odds ratios (or other effect measures) from a GLM.
-The plot includes variable names, group levels, sample sizes, effect estimates 
-with confidence intervals, and p-values.
+Generates a publication-ready forest plot that combines a formatted data table 
+with a graphical representation of effect estimates (odds ratios, risk ratios, 
+or coefficients) from a generalized linear model. The plot integrates variable 
+names, group levels, sample sizes, effect estimates with confidence intervals, 
+p-values, and model diagnostics in a single comprehensive visualization designed 
+for manuscripts and presentations.
+}
+\details{
+\strong{Plot Components:}
+
+The forest plot consists of several integrated components:
+\enumerate{
+  \item \strong{Title}: Centered at top, describes the analysis
+  \item \strong{Data Table} (left side): Contains columns for:
+    \itemize{
+      \item Variable: Predictor names (or custom labels)
+      \item Group: Factor levels (optional, hidden when indenting)
+      \item n: Sample sizes by group (optional)
+      \item Events: Event counts by group (optional)
+      \item Effect (95\% CI); \emph{p}-value: Formatted estimates with p-values
+    }
+  \item \strong{Forest Plot} (right side): Graphical display with:
+    \itemize{
+      \item Point estimates (squares sized by sample size)
+      \item 95\% confidence intervals (error bars)
+      \item Reference line (at OR/RR = 1 or coefficient = 0)
+      \item Log scale for odds/risk ratios
+      \item Labeled axis
+    }
+  \item \strong{Model Statistics} (footer): Summary of:
+    \itemize{
+      \item Observations analyzed (with percentage of total data)
+      \item Model family (Binomial, Poisson, etc.)
+      \item Deviance statistics
+      \item Pseudo-R² (McFadden's)
+      \item AIC
+    }
+}
+
+\strong{Automatic Effect Measure Selection:}
+
+When \code{effect_label = NULL} and \code{exponentiate = NULL}, the function 
+intelligently selects the appropriate effect measure:
+\itemize{
+  \item \strong{Logistic regression} (\code{family = binomial(link = "logit")}): 
+    Odds Ratios (OR)
+  \item \strong{Log-link models} (\code{link = "log"}): Risk Ratios (RR) 
+    or Rate Ratios
+  \item \strong{Other exponential families}: Exp(Coefficient)
+  \item \strong{Identity link}: Raw coefficients
+}
+
+\strong{Reference Categories:}
+
+For factor variables, the first level (determined by factor ordering or 
+alphabetically for character variables) serves as the reference category:
+\itemize{
+  \item Displayed with the \code{ref_label} instead of an estimate
+  \item No confidence interval or p-value shown
+  \item Visually aligned with other categories
+  \item When \code{condense_table = TRUE}, reference-only variables may be 
+    omitted entirely
+}
+
+\strong{Layout Optimization:}
+
+The function automatically optimizes layout based on content:
+\itemize{
+  \item Calculates appropriate axis ranges to accommodate all confidence intervals
+  \item Selects meaningful tick marks on log or linear scales
+  \item Sizes point markers proportional to sample size (larger = more data)
+  \item Adjusts table width based on variable name lengths when \code{tbl_width = NULL}
+  \item Recommends overall dimensions based on number of rows
+}
+
+\strong{Visual Grouping Options:}
+
+Three display modes are available:
+\enumerate{
+  \item \strong{Standard} (\code{indent_groups = FALSE}, 
+    \code{condense_table = FALSE}): 
+    Separate "Variable" and "Group" columns, all categories shown
+  \item \strong{Indented} (\code{indent_groups = TRUE}, 
+    \code{condense_table = FALSE}): 
+    Hierarchical display with groups indented under variables
+  \item \strong{Condensed} (\code{condense_table = TRUE}): 
+    Binary variables shown in single rows, automatically indented
+}
+
+\strong{Zebra Striping:}
+
+When \code{zebra_stripes = TRUE}, alternating variables (not individual rows) 
+receive light gray backgrounds. This helps visually group all levels of a 
+factor variable together, making the plot easier to read especially with 
+many multi-level factors.
+
+\strong{Model Statistics Display:}
+
+The footer shows key diagnostic information:
+\itemize{
+  \item \strong{Observations analyzed}: Total N and percentage of original 
+    data (accounting for missing values)
+  \item \strong{Null/Residual Deviance}: Model fit improvement
+  \item \strong{Pseudo-R²}: McFadden's R² = 1 - (log L₁ / log L₀)
+  \item \strong{AIC}: For model comparison (lower is better)
+}
+
+For logistic regression, concordance (C-statistic/AUC) may also be displayed 
+if available.
+
+\strong{Saving Plots:}
+
+Use \code{ggplot2::ggsave()} with recommended dimensions:
+```r
+p <- glmforest(model, data)
+dims <- attr(p, "recommended_dims")
+ggsave("forest.pdf", p, width = dims$width, height = dims$height)
+```
+
+Or specify custom dimensions:
+```r
+ggsave("forest.png", p, width = 12, height = 8, dpi = 300)
+```
+}
+\examples{
+# Load example data
+data(clintrial)
+data(clintrial_labels)
+
+# Example 1: Basic logistic regression forest plot
+model1 <- glm(os_status ~ age + sex + bmi + treatment,
+              data = clintrial,
+              family = binomial)
+
+plot1 <- glmforest(model1, data = clintrial)
+print(plot1)
+
+# Example 2: With custom variable labels
+plot2 <- glmforest(
+    model = model1,
+    data = clintrial,
+    title = "Risk Factors for Mortality",
+    var_labels = clintrial_labels
+)
+print(plot2)
+
+# Example 3: Customize appearance
+plot3 <- glmforest(
+    model = model1,
+    data = clintrial,
+    title = "Adjusted Odds Ratios",
+    color = "#D62728",  # Red points
+    font_size = 1.2,    # Larger text
+    zebra_stripes = FALSE,
+    var_labels = clintrial_labels
+)
+print(plot3)
+
+# Example 4: Indented layout for hierarchical view
+plot4 <- glmforest(
+    model = model1,
+    data = clintrial,
+    indent_groups = TRUE,
+    var_labels = clintrial_labels
+)
+print(plot4)
+# Group column hidden, levels indented under variables
+
+# Example 5: Condensed layout for many binary variables
+model5 <- glm(os_status ~ age + sex + smoking + hypertension + 
+                  diabetes + surgery,
+              data = clintrial,
+              family = binomial)
+
+plot5 <- glmforest(
+    model = model5,
+    data = clintrial,
+    condense_table = TRUE,
+    var_labels = clintrial_labels
+)
+print(plot5)
+# Binary variables shown in single rows
+
+# Example 6: Hide sample size and events columns
+plot6 <- glmforest(
+    model = model1,
+    data = clintrial,
+    show_n = FALSE,
+    show_events = FALSE,
+    var_labels = clintrial_labels
+)
+print(plot6)
+
+# Example 7: Adjust table/forest proportions
+plot7 <- glmforest(
+    model = model1,
+    data = clintrial,
+    tbl_width = 0.7,  # More space for table
+    var_labels = clintrial_labels
+)
+print(plot7)
+
+# Example 8: Get and use recommended dimensions
+plot8 <- glmforest(model1, data = clintrial)
+
+dims <- attr(plot8, "recommended_dims")
+cat("Recommended: ", dims$width, "x", dims$height, "inches\n")
+
+# Save with recommended dimensions
+# ggsave("forest.pdf", plot8, width = dims$width, height = dims$height)
+
+# Example 9: Specify exact output dimensions
+plot9 <- glmforest(
+    model = model1,
+    data = clintrial,
+    plot_width = 14,
+    plot_height = 10,
+    var_labels = clintrial_labels
+)
+# No dimension recommendations printed
+
+# Example 10: Use different units (centimeters)
+plot10 <- glmforest(
+    model = model1,
+    data = clintrial,
+    plot_width = 30,  # 30 cm
+    plot_height = 20,  # 20 cm
+    units = "cm",
+    var_labels = clintrial_labels
+)
+
+# Example 11: Poisson regression for count data
+model11 <- glm(los_days ~ age + treatment + surgery + stage,
+               data = clintrial,
+               family = poisson)
+
+plot11 <- glmforest(
+    model = model11,
+    data = clintrial,
+    title = "Rate Ratios for Length of Stay",
+    effect_label = "Rate Ratio",
+    var_labels = clintrial_labels
+)
+print(plot11)
+# Shows rate ratios instead of odds ratios
+
+# Example 12: Force display of raw coefficients
+plot12 <- glmforest(
+    model = model1,
+    data = clintrial,
+    exponentiate = FALSE,  # Show log odds
+    effect_label = "Log Odds",
+    var_labels = clintrial_labels
+)
+print(plot12)
+# Reference line at 0 instead of 1
+
+# Example 13: Custom reference label
+plot13 <- glmforest(
+    model = model1,
+    data = clintrial,
+    ref_label = "1.00 (ref)",
+    var_labels = clintrial_labels
+)
+print(plot13)
+
+# Example 14: Adjust font sizes for presentations
+plot14 <- glmforest(
+    model = model1,
+    data = clintrial,
+    font_size = 1.5,      # 50\% larger
+    title_size = 30,      # Larger title
+    var_labels = clintrial_labels
+)
+print(plot14)
+
+# Example 15: Complete publication-ready plot
+final_model <- glm(
+    os_status ~ age + sex + bmi + smoking + hypertension + 
+        diabetes + treatment + stage,
+    data = clintrial,
+    family = binomial
+)
+
+final_plot <- glmforest(
+    model = final_model,
+    data = clintrial,
+    title = "Multivariable Logistic Regression: Risk Factors for Mortality",
+    var_labels = clintrial_labels,
+    indent_groups = TRUE,
+    zebra_stripes = TRUE,
+    color = "#3A7E8A",
+    font_size = 1.0,
+    digits = 2
+)
+
+# Save for publication
+dims <- attr(final_plot, "recommended_dims")
+# ggsave("figure1.pdf", final_plot, 
+#        width = dims$width, height = dims$height)
+# ggsave("figure1.png", final_plot,
+#        width = dims$width, height = dims$height, dpi = 300)
+
 }
 \seealso{
-\code{\link[stats]{glm}} for fitting GLM models,
-\code{\link[ggplot2]{ggplot}} for the underlying plotting system
+\code{\link{coxforest}} for Cox proportional hazards forest plots,
+\code{\link{lmforest}} for linear model forest plots,
+\code{\link[stats]{glm}} for fitting GLMs,
+\code{\link{fit}} for fastfit regression modeling,
+\code{\link[ggplot2]{ggsave}} for saving plots
 }

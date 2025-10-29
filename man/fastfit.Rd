@@ -2,7 +2,7 @@
 % Please edit documentation in R/fastfit.R
 \name{fastfit}
 \alias{fastfit}
-\title{Perform Complete Statistical Analysis Pipeline}
+\title{Complete Regression Analysis Workflow}
 \usage{
 fastfit(
   data,
@@ -29,138 +29,449 @@ fastfit(
 )
 }
 \arguments{
-\item{data}{Data.frame or data.table containing the analysis dataset.}
+\item{data}{Data.frame or data.table containing the analysis dataset. The 
+function automatically converts data.frames to data.tables for processing.}
 
-\item{outcome}{Character string specifying the outcome variable name.}
+\item{outcome}{Character string specifying the outcome variable name. For 
+survival analysis, use \code{Surv()} syntax (e.g., \code{"Surv(os_months, os_status)"}).}
 
-\item{predictors}{Character vector of predictor variable names to analyze.}
+\item{predictors}{Character vector of predictor variable names to analyze. 
+All predictors are tested in univariable models. The subset included in 
+the multivariable model depends on the \code{method} parameter.}
 
-\item{method}{Character string specifying variable selection strategy:
-"screen" (univariable to multivariable based on p-value threshold),
-"all" (all predictors in both analyses), or
-"custom" (all in univariable, selected in multivariable). Default is "screen".}
+\item{method}{Character string specifying the variable selection strategy:
+\itemize{
+  \item \code{"screen"} - Automatic selection based on univariable p-value 
+    threshold. Only predictors with p ≤ \code{p_threshold} in univariable 
+    analysis are included in the multivariable model [default]
+  \item \code{"all"} - Include all predictors in both univariable and 
+    multivariable analyses (no selection)
+  \item \code{"custom"} - Manual selection. All predictors in univariable 
+    analysis, but only those specified in \code{multi_predictors} are 
+    included in multivariable model
+}}
 
-\item{multi_predictors}{Character vector of predictors for multivariable
-model when method is "custom". Default is NULL.}
+\item{multi_predictors}{Character vector of predictors to include in the 
+multivariable model when \code{method = "custom"}. Required when using 
+custom selection. Ignored for other methods. Default is \code{NULL}.}
 
-\item{p_threshold}{Numeric p-value threshold for variable selection when
-method is "screen". Default is 0.05.}
+\item{p_threshold}{Numeric p-value threshold for automatic variable selection 
+when \code{method = "screen"}. Predictors with univariable p-value ≤ 
+threshold are included in multivariable model. Common values: 0.05 (strict), 
+0.10 (moderate), 0.20 (liberal screening). Default is 0.05. Ignored for 
+other methods.}
 
-\item{columns}{Character string specifying which columns to display:
-"both", "uni", or "multi". Default is "both".}
+\item{columns}{Character string specifying which result columns to display:
+\itemize{
+  \item \code{"both"} - Show both univariable and multivariable results 
+    side-by-side [default]
+  \item \code{"uni"} - Show only univariable results
+  \item \code{"multi"} - Show only multivariable results
+}}
 
-\item{model_type}{Character string: "glm", "lm", "coxph", or "clogit".
-Default is "glm".}
+\item{model_type}{Character string specifying the regression model type:
+\itemize{
+  \item \code{"glm"} - Generalized linear model [default]
+  \item \code{"lm"} - Linear regression
+  \item \code{"coxph"} - Cox proportional hazards
+  \item \code{"clogit"} - Conditional logistic regression
+}}
 
-\item{family}{For GLM models, the error distribution and link function.
-Default is "binomial".}
+\item{family}{For GLM models, the error distribution and link function. 
+Common options: \code{"binomial"} (logistic) [default], \code{"poisson"} 
+(count data), \code{"gaussian"} (linear), \code{"Gamma"}. See 
+\code{\link[stats]{family}}.}
 
-\item{conf_level}{Numeric confidence level for intervals. Default is 0.95.}
+\item{conf_level}{Numeric confidence level for confidence intervals. Must be 
+between 0 and 1. Default is 0.95 (95\% CI).}
 
-\item{add_reference_rows}{Logical. If TRUE, includes reference category rows.
-Default is TRUE.}
+\item{add_reference_rows}{Logical. If \code{TRUE}, adds rows for reference 
+categories of factor variables with baseline values. Default is \code{TRUE}.}
 
-\item{show_n}{Logical. Whether to show the sample size column. Default is TRUE.}
+\item{show_n}{Logical. If \code{TRUE}, includes sample size columns. 
+Default is \code{TRUE}.}
 
-\item{show_events}{Logical. Whether to show the events column. Default is TRUE.}
+\item{show_events}{Logical. If \code{TRUE}, includes events columns (survival 
+and logistic models). Default is \code{TRUE}.}
 
-\item{digits}{Integer specifying decimal places for effect estimates.
+\item{digits}{Integer specifying decimal places for effect estimates. 
 Default is 2.}
 
-\item{digits_p}{Integer specifying decimal places for p-values.
-Default is 3.}
+\item{digits_p}{Integer specifying decimal places for p-values. Default is 3.}
 
-\item{var_labels}{Named character vector for display labels. Names match
-predictors, values are labels. Default is NULL.}
+\item{var_labels}{Named character vector or list for custom variable display 
+labels. Default is \code{NULL}.}
 
-\item{metrics}{Character specification for statistics: "effect" (OR/HR/estimate
-with CI), "p" (p-value only), or "both" (default).}
+\item{metrics}{Character specification for which statistics to display:
+\itemize{
+  \item \code{"both"} - Show effect estimates with CI and p-values [default]
+  \item \code{"effect"} - Show only effect estimates with CI
+  \item \code{"p"} - Show only p-values
+}
+Can also be a character vector: \code{c("effect", "p")} is equivalent to 
+\code{"both"}.}
 
-\item{return_type}{Character string: "table" (formatted results), "model"
-(multivariable model only), or "both" (list with table and model).
-Default is "table".}
+\item{return_type}{Character string specifying what to return:
+\itemize{
+  \item \code{"table"} - Return formatted results table only [default]
+  \item \code{"model"} - Return multivariable model object only
+  \item \code{"both"} - Return list with both table and model
+}}
 
-\item{keep_models}{Logical. If TRUE, stores univariable model objects.
-Default is FALSE.}
+\item{keep_models}{Logical. If \code{TRUE}, stores univariable model objects 
+in the output. Can consume significant memory for many predictors. 
+Default is \code{FALSE}.}
 
-\item{exponentiate}{Logical. Whether to exponentiate coefficients. Default is NULL,
-which automatically displays exponentiated coefficients for logistic/Poisson/Cox
-regression models and raw coefficients for log-link or linear regression models.}
+\item{exponentiate}{Logical. Whether to exponentiate coefficients. Default 
+is \code{NULL} for automatic selection based on model type.}
 
-\item{...}{Additional arguments passed to model fitting functions.}
+\item{...}{Additional arguments passed to model fitting functions (e.g., 
+\code{weights}, \code{subset}, \code{na.action}).}
 }
 \value{
-A data.table with formatted results (when return_type is "table"),
-  a model object (when "model"), or a list with both (when "both").
-  The table includes variable, group, sample sizes, and effect/p-value
-  columns as requested. Includes attributes for outcome, model_type,
-  method, columns, model (if fitted), and n_multi.
+Depends on \code{return_type} parameter:
+  
+  When \code{return_type = "table"} (default): A data.table with S3 class 
+  \code{"fastfit_result"} containing:
+  \describe{
+    \item{Variable}{Character. Predictor name or custom label}
+    \item{Group}{Character. Category level for factors, empty for continuous}
+    \item{n/n_group}{Integer. Sample sizes (if \code{show_n = TRUE})}
+    \item{events/events_group}{Integer. Event counts (if \code{show_events = TRUE})}
+    \item{Univariable OR/HR/RR (95\% CI)}{Character. Unadjusted effect 
+      (if \code{columns} includes "uni" and \code{metrics} includes "effect")}
+    \item{Uni p}{Character. Univariable p-value (if \code{columns} includes 
+      "uni" and \code{metrics} includes "p")}
+    \item{Multivariable aOR/aHR/aRR (95\% CI)}{Character. Adjusted effect 
+      (if \code{columns} includes "multi" and \code{metrics} includes "effect")}
+    \item{Multi p}{Character. Multivariable p-value (if \code{columns} 
+      includes "multi" and \code{metrics} includes "p")}
+  }
+  
+  When \code{return_type = "model"}: The fitted multivariable model object 
+  (glm, lm, coxph, etc.).
+  
+  When \code{return_type = "both"}: A list with two elements:
+  \describe{
+    \item{table}{The formatted results data.table}
+    \item{model}{The fitted multivariable model object}
+  }
+  
+  The table includes the following attributes:
+  \describe{
+    \item{outcome}{Character. The outcome variable name}
+    \item{model_type}{Character. The regression model type}
+    \item{method}{Character. The variable selection method used}
+    \item{columns}{Character. Which columns were displayed}
+    \item{model}{The multivariable model object (if fitted)}
+    \item{uni_results}{The complete univariable screening results}
+    \item{n_multi}{Integer. Number of predictors in multivariable model}
+  }
 }
 \description{
-Executes a comprehensive regression analysis workflow including univariable
-screening, automatic or manual variable selection, and multivariable modeling.
-Supports multiple model types with publication-ready output formatting.
+Executes a comprehensive regression analysis pipeline that combines univariable 
+screening, automatic or manual variable selection, and multivariable modeling 
+in a single function call. This function is designed to streamline the complete 
+analytical workflow from initial exploration to final adjusted models, with 
+publication-ready formatted output showing both univariable and multivariable 
+results side-by-side.
 }
 \details{
-The function implements a complete regression workflow:
+\strong{Analysis Workflow:}
 
-1. Univariable screening: Each predictor is tested individually against
-   the outcome using the specified model type.
-   
-2. Variable selection: Based on the method parameter, variables are selected
-   for multivariable analysis.
-   
-3. Multivariable modeling: Selected variables are combined in a single model.
+The function implements a complete regression analysis pipeline:
+\enumerate{
+  \item \strong{Univariable screening}: Fits separate models for each 
+    predictor (outcome ~ predictor). Each predictor is tested independently 
+    to understand crude associations.
+  \item \strong{Variable selection}: Based on the \code{method} parameter:
+    \itemize{
+      \item \code{"screen"}: Automatically selects predictors with univariable 
+        p ≤ \code{p_threshold}
+      \item \code{"all"}: Includes all predictors (no selection)
+      \item \code{"custom"}: Uses predictors specified in \code{multi_predictors}
+    }
+  \item \strong{Multivariable modeling}: Fits a single model with selected 
+    predictors (outcome ~ predictor1 + predictor2 + ...). Estimates are 
+    adjusted for all other variables in the model.
+  \item \strong{Output formatting}: Combines results into publication-ready 
+    table with appropriate effect measures and formatting.
+}
 
-4. Output formatting: Results are formatted for publication with appropriate
-   effect measures (estimates for linear, OR for logistic, HR for Cox).
+\strong{Variable Selection Strategies:}
 
-The automatic p-value threshold screening (method = "screen") helps identify
-potentially important predictors while reducing multicollinearity. The custom
-method allows for theory-driven model building.
+\emph{Screening Method} (\code{method = "screen"}):
+\itemize{
+  \item Uses p-value threshold for automatic selection
+  \item Liberal thresholds (e.g., 0.20) cast a wide net to avoid missing 
+    important predictors
+  \item Stricter thresholds (e.g., 0.05) focus on strongly associated predictors
+  \item Helps reduce overfitting and multicollinearity
+  \item Common in exploratory analyses and when sample size is limited
+}
+
+\emph{All Method} (\code{method = "all"}):
+\itemize{
+  \item No variable selection - includes all predictors
+  \item Appropriate when all variables are theoretically important
+  \item Risk of overfitting with many predictors relative to sample size
+  \item Useful for confirmatory analyses with pre-specified models
+}
+
+\emph{Custom Method} (\code{method = "custom"}):
+\itemize{
+  \item Manual selection based on subject matter knowledge
+  \item Runs univariable analysis for all predictors (for comparison)
+  \item Includes only specified predictors in multivariable model
+  \item Ideal for theory-driven model building
+  \item Allows comparison of unadjusted vs adjusted effects for all variables
+}
+
+\strong{Interpreting Results:}
+
+When \code{columns = "both"} (default), tables show:
+\itemize{
+  \item \strong{Univariable columns}: Crude associations, unadjusted for 
+    other variables. Labeled as "Univariable OR/HR/RR (95\% CI)" and "Uni p"
+  \item \strong{Multivariable columns}: Adjusted associations, accounting 
+    for all other predictors in the model. Labeled as "Multivariable aOR/aHR/aRR 
+    (95\% CI)" and "Multi p" ("a" = adjusted)
+  \item Variables not meeting selection criteria show "-" in multivariable columns
+}
+
+Comparing univariable and multivariable results helps identify:
+\itemize{
+  \item \strong{Confounding}: Large changes in effect estimates
+  \item \strong{Independent effects}: Similar univariable and multivariable 
+    estimates
+  \item \strong{Mediation}: Attenuated effects in multivariable model
+  \item \strong{Suppression}: Effects that emerge only after adjustment
+}
+
+\strong{Sample Size Considerations:}
+
+Rule of thumb for multivariable models:
+\itemize{
+  \item \strong{Logistic regression}: ≥10 events per predictor variable
+  \item \strong{Cox regression}: ≥10 events per predictor variable  
+  \item \strong{Linear regression}: ≥10-20 observations per predictor
+}
+
+Use screening methods to reduce predictor count when these ratios are not met.
 }
 \examples{
-\dontrun{
-# Basic logistic regression with screening
-result <- fastfit(data = mydata,
-                  outcome = "disease",
-                  predictors = c("age", "sex", "bmi", "smoking"),
-                  method = "screen",
-                  p_threshold = 0.2)
+# Load example data
+data(clintrial)
+data(clintrial_labels)
+library(survival)
 
-# Cox regression with all variables
-cox_result <- fastfit(data = survival_data,
-                      outcome = "survival",
-                      predictors = c("age", "stage", "grade"),
-                      model_type = "coxph",
-                      method = "all")
+# Example 1: Basic screening with p < 0.05 threshold
+result1 <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "sex", "bmi", "smoking", "hypertension", 
+                  "diabetes", "treatment", "stage"),
+    method = "screen",
+    p_threshold = 0.05,
+    var_labels = clintrial_labels
+)
+print(result1)
+# Shows both univariable and multivariable results
+# Only significant univariable predictors in multivariable model
 
-# Custom selection with labels
-labels <- c(age = "Age (years)", sex = "Sex", bmi = "Body Mass Index")
-custom_result <- fastfit(data = mydata,
-                         outcome = "outcome",
-                         predictors = c("age", "sex", "bmi", "smoking"),
-                         method = "custom",
-                         multi_predictors = c("age", "sex"),
-                         var_labels = labels)
+# Example 2: Liberal screening threshold (p < 0.20)
+result2 <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "sex", "bmi", "smoking", "hypertension",
+                  "diabetes", "ecog", "treatment", "stage", "grade"),
+    method = "screen",
+    p_threshold = 0.20,  # More liberal for screening
+    var_labels = clintrial_labels
+)
+print(result2)
 
-# Return both table and model
-both <- fastfit(data = mydata,
-                outcome = "disease",
-                predictors = vars,
-                return_type = "both")
-both$table  # Access table
-summary(both$model)  # Access model
+# Example 3: Include all predictors (no selection)
+result3 <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "sex", "treatment", "stage"),
+    method = "all",
+    var_labels = clintrial_labels
+)
+print(result3)
+# All predictors in both analyses
 
-# Export results
-exporttbl(result, "regression_results.pdf")
-}
+# Example 4: Custom variable selection
+result4 <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "sex", "bmi", "smoking", "treatment", "stage"),
+    method = "custom",
+    multi_predictors = c("age", "treatment", "stage"),  # Manual selection
+    var_labels = clintrial_labels
+)
+print(result4)
+# Univariable for all, multivariable for selected only
+
+# Example 5: Cox regression with screening
+cox_result <- fastfit(
+    data = clintrial,
+    outcome = "Surv(os_months, os_status)",
+    predictors = c("age", "sex", "bmi", "treatment", "stage", "grade"),
+    model_type = "coxph",
+    method = "screen",
+    p_threshold = 0.10,
+    var_labels = clintrial_labels
+)
+print(cox_result)
+# Returns hazard ratios (HR/aHR)
+
+# Example 6: Show only multivariable results
+multi_only <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "sex", "treatment", "stage"),
+    method = "all",
+    columns = "multi",  # Multivariable results only
+    var_labels = clintrial_labels
+)
+print(multi_only)
+
+# Example 7: Show only univariable results
+uni_only <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "sex", "treatment", "stage"),
+    columns = "uni",  # Univariable results only
+    var_labels = clintrial_labels
+)
+print(uni_only)
+
+# Example 8: Show only effect estimates (no p-values)
+effects_only <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "sex", "treatment"),
+    metrics = "effect",  # Effect estimates only
+    var_labels = clintrial_labels
+)
+print(effects_only)
+
+# Example 9: Show only p-values (no effect estimates)
+pvals_only <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "sex", "treatment"),
+    metrics = "p",  # P-values only
+    var_labels = clintrial_labels
+)
+print(pvals_only)
+
+# Example 10: Return both table and model object
+both <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "sex", "treatment", "stage"),
+    method = "all",
+    return_type = "both"
+)
+
+# Access the table
+print(both$table)
+
+# Access the model
+summary(both$model)
+
+# Model diagnostics
+plot(both$model)
+
+# Example 11: Return only the model object
+model_only <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "sex", "treatment"),
+    return_type = "model"
+)
+
+# This returns a glm object directly
+summary(model_only)
+
+# Example 12: Linear regression
+linear_result <- fastfit(
+    data = clintrial,
+    outcome = "bmi",
+    predictors = c("age", "sex", "smoking", "creatinine"),
+    model_type = "lm",
+    method = "all",
+    var_labels = clintrial_labels
+)
+print(linear_result)
+
+# Example 13: Poisson regression
+poisson_result <- fastfit(
+    data = clintrial,
+    outcome = "los_days",
+    predictors = c("age", "treatment", "surgery", "stage"),
+    model_type = "glm",
+    family = "poisson",
+    method = "all",
+    var_labels = clintrial_labels
+)
+print(poisson_result)
+# Returns rate ratios (RR/aRR)
+
+# Example 14: Keep univariable models for diagnostics
+with_models <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "bmi", "creatinine"),
+    keep_models = TRUE
+)
+
+# Access univariable models
+uni_results <- attr(with_models, "uni_results")
+uni_models <- attr(uni_results, "models")
+summary(uni_models[["age"]])
+
+# Example 15: Check how many predictors made it to multivariable
+result <- fastfit(
+    data = clintrial,
+    outcome = "os_status",
+    predictors = c("age", "sex", "bmi", "smoking", "hypertension",
+                  "diabetes", "ecog", "treatment", "stage", "grade"),
+    method = "screen",
+    p_threshold = 0.10
+)
+
+n_multi <- attr(result, "n_multi")
+cat("Predictors in multivariable model:", n_multi, "\n")
+
+# Example 16: Complete publication workflow
+final_table <- fastfit(
+    data = clintrial,
+    outcome = "Surv(os_months, os_status)",
+    predictors = c("age", "sex", "race", "bmi", "smoking", 
+                  "hypertension", "diabetes", "ecog",
+                  "treatment", "stage", "grade"),
+    model_type = "coxph",
+    method = "screen",
+    p_threshold = 0.10,
+    columns = "both",
+    metrics = "both",
+    var_labels = clintrial_labels,
+    digits = 2,
+    digits_p = 3
+)
+print(final_table)
+
+# Can export directly to PDF/LaTeX/HTML for publication
+# tbl2pdf(final_table, "regression_results.pdf")
 
 }
 \seealso{
 \code{\link{uscreen}} for univariable screening only,
-\code{\link{mmodel}} for multivariable modeling only,
-\code{\link{m2dt}} for converting models to tables,
-\code{\link{exporttbl}} for exporting results to PDF/LaTeX/HTML,
+\code{\link{fit}} for fitting a single multivariable model,
+\code{\link{compfit}} for comparing multiple models,
 \code{\link{desctbl}} for descriptive statistics
 }

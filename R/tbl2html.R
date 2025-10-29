@@ -1,72 +1,404 @@
 #' Export Table to HTML Format
 #'
-#' Converts a data frame or data.table to HTML format with optional CSS styling
-#' for web display or inclusion in HTML documents.
+#' Converts a data frame, data.table, or matrix to HTML format with optional CSS 
+#' styling for web display, HTML documents, or embedding in web applications. 
+#' Generates clean, standards-compliant HTML with professional styling options 
+#' including responsive design support, color schemes, and interactive features.
 #'
-#' @param table A data.frame, data.table, or matrix to export.
-#' @param file Character string specifying the output HTML filename. Must have
-#'   .html or .htm extension.
-#' @param caption Character string. Optional caption to display below table.
-#' @param format_headers Logical. If TRUE, formats column headers for better
-#'   display (converts underscores to spaces, applies proper casing). Default
-#'   is TRUE.
-#' @param variable_padding Logical. If TRUE, adds padding around variable groups
-#'   for improved readability. Default is FALSE.
-#' @param bold_significant Logical. If TRUE, wraps significant p-values in
-#'   HTML bold tags. Default is TRUE.
-#' @param sig_threshold Numeric. P-value threshold for significance highlighting.
-#'   Default is 0.05.
-#' @param indent_groups Logical. If TRUE, indents grouped rows using non-breaking
-#'   spaces for hierarchical display. Default is FALSE.
-#' @param condense_table Logical. If TRUE, decreases table vertical height by
-#'   reducing continuous, survival, and binary categorical variables to single
-#'   rows. Makes indent_groups = TRUE by default. Default is FALSE.
-#' @param include_css Logical. If TRUE, includes basic CSS styling in the output
-#'   file. Set to FALSE if including in existing HTML with its own styles.
-#'   Default is TRUE.
-#' @param ... Additional arguments passed to xtable::xtable.
+#' @param table A data.frame, data.table, or matrix to export. Can be output from 
+#'   \code{\link{desctbl}}, \code{\link{fit}}, \code{\link{uscreen}}, 
+#'   \code{\link{fastfit}}, \code{\link{compfit}}, or any tabular data.
+#'   
+#' @param file Character string specifying the output HTML filename. Must have 
+#'   \code{.html} or \code{.htm} extension. Example: \code{"results.html"}.
+#'   
+#' @param caption Character string. Optional caption displayed below the table. 
+#'   Supports basic HTML formatting. Default is \code{NULL}.
+#'   
+#' @param format_headers Logical. If \code{TRUE}, formats column headers by 
+#'   converting underscores to spaces and applying proper casing. Wraps statistical 
+#'   notation (\emph{n}, \emph{p}) in \code{<i>} tags. Default is \code{TRUE}.
+#'   
+#' @param variable_padding Logical. If \code{TRUE}, adds vertical spacing around 
+#'   variable groups for improved readability. Particularly useful for multi-row 
+#'   factor variables. Default is \code{FALSE}.
+#'   
+#' @param bold_significant Logical. If \code{TRUE}, wraps significant p-values 
+#'   in \code{<b>} tags for bold display. Makes important results stand out 
+#'   visually. Default is \code{TRUE}.
+#'   
+#' @param sig_threshold Numeric. P-value threshold for significance highlighting. 
+#'   Only used when \code{bold_significant = TRUE}. Default is 0.05.
+#'   
+#' @param indent_groups Logical. If \code{TRUE}, indents grouped rows using 
+#'   non-breaking spaces (\code{&nbsp;}) for hierarchical display. Useful for 
+#'   factor variables in regression output. Default is \code{FALSE}.
+#'   
+#' @param condense_table Logical. If \code{TRUE}, condenses table by showing 
+#'   only essential rows. Automatically sets \code{indent_groups = TRUE}. 
+#'   Default is \code{FALSE}.
+#'   
+#' @param zebra_stripes Logical. If \code{TRUE}, applies alternating background 
+#'   shading to different variables (not individual rows) for visual grouping. 
+#'   Default is \code{FALSE}.
+#'   
+#' @param stripe_color Character string. HTML color specification for zebra 
+#'   stripes. Can use hex codes (\code{"#EEEEEE"}), RGB (\code{"rgb(238,238,238)"}), 
+#'   or color names (\code{"lightgray"}). Default is \code{"#EEEEEE"}.
+#'   
+#' @param dark_header Logical. If \code{TRUE}, creates black background with 
+#'   white text for the header row. Provides strong visual contrast. 
+#'   Default is \code{FALSE}.
+#'   
+#' @param include_css Logical. If \code{TRUE}, includes embedded CSS styling in 
+#'   the output file for standalone HTML. Set to \code{FALSE} when embedding 
+#'   in existing HTML with its own stylesheet. Default is \code{TRUE}.
+#'   
+#' @param ... Additional arguments passed to \code{\link[xtable]{xtable}}.
 #'
-#' @return Invisibly returns NULL. Creates an HTML file at the specified location.
+#' @return Invisibly returns \code{NULL}. Creates an HTML file at the specified 
+#'   location that can be opened in web browsers or embedded in HTML documents.
 #'
 #' @details
-#' The function generates an HTML table that can be viewed directly in web
-#' browsers or embedded in HTML documents. When \code{include_css = TRUE}, adds
-#' minimal styling for borders, padding, and header formatting.
+#' \strong{Output Format:}
 #' 
-#' The indent_groups option uses HTML non-breaking spaces (&nbsp;) to create
-#' visual hierarchy, useful for categorical variables in regression output.
+#' The function generates standards-compliant HTML5 markup with:
+#' \itemize{
+#'   \item Semantic \code{<table>} structure
+#'   \item Proper \code{<thead>} and \code{<tbody>} sections
+#'   \item Accessible header cells (\code{<th>})
+#'   \item Clean, readable markup
+#'   \item Optional embedded CSS styling
+#' }
 #' 
-#' P-values can be automatically highlighted using bold formatting when they
-#' fall below the significance threshold, making important results easy to identify.
+#' \strong{Standalone vs. Embedded:}
+#' 
+#' \emph{Standalone HTML (\code{include_css = TRUE}):}
+#' \itemize{
+#'   \item Can be opened directly in web browsers
+#'   \item Includes all necessary styling
+#'   \item Self-contained, portable
+#'   \item Suitable for sharing via email or web hosting
+#' }
+#' 
+#' \emph{Embedded HTML (\code{include_css = FALSE}):}
+#' \itemize{
+#'   \item For inclusion in existing HTML documents
+#'   \item No CSS included (use parent document's styles)
+#'   \item Smaller file size
+#'   \item Integrates with web frameworks (Shiny, R Markdown, Quarto)
+#' }
+#' 
+#' \strong{CSS Styling:}
+#' 
+#' When \code{include_css = TRUE}, the function applies professional styling:
+#' \itemize{
+#'   \item \strong{Table:} Border-collapse, sans-serif font (Arial), 20px margin
+#'   \item \strong{Cells:} 8px vertical × 12px horizontal padding, left-aligned text
+#'   \item \strong{Borders:} 1px solid \code{#ddd} (light gray)
+#'   \item \strong{Headers:} Bold text, light gray background (\code{#f2f2f2})
+#'   \item \strong{Numeric columns:} Center-aligned (auto-detected)
+#'   \item \strong{Caption:} Bold, 1.1em font, positioned below table
+#' }
+#' 
+#' \emph{With \code{dark_header = TRUE}:}
+#' \itemize{
+#'   \item Header background: Black (\code{#000000})
+#'   \item Header text: White (\code{#FFFFFF})
+#'   \item Creates high contrast, modern appearance
+#' }
+#' 
+#' \emph{With \code{zebra_stripes = TRUE}:}
+#' \itemize{
+#'   \item Alternating variable groups receive background color
+#'   \item Default color: \code{#EEEEEE} (light gray)
+#'   \item Applied via CSS class \code{.zebra-stripe}
+#'   \item Groups entire variable (all factor levels together)
+#' }
+#' 
+#' \strong{Hierarchical Display:}
+#' 
+#' The \code{indent_groups} option creates visual hierarchy using HTML 
+#' non-breaking spaces:
+#' ```html
+#' <td><b>Treatment</b></td>  <!-- Variable name -->
+#' <td>&nbsp;&nbsp;&nbsp;&nbsp;Control</td>  <!-- Indented level -->
+#' <td>&nbsp;&nbsp;&nbsp;&nbsp;Active</td>   <!-- Indented level -->
+#' ```
+#' 
+#' Benefits:
+#' \itemize{
+#'   \item Clear parent-child relationships
+#'   \item Professional appearance
+#'   \item Easy to scan and interpret
+#'   \item Works across all browsers
+#' }
+#' 
+#' \strong{Responsive Design:}
+#' 
+#' The default CSS supports responsive display:
+#' \itemize{
+#'   \item Tables scroll horizontally on narrow screens
+#'   \item Maintains formatting across devices
+#'   \item Mobile-friendly viewing
+#'   \item Print-friendly styling
+#' }
+#' 
+#' For better mobile support, consider:
+#' \itemize{
+#'   \item Using \code{condense_table = TRUE} to reduce width
+#'   \item Adding viewport meta tag: 
+#'     \code{<meta name="viewport" content="width=device-width, initial-scale=1">}
+#'   \item Wrapping in responsive container: \code{<div style="overflow-x:auto;">}
+#' }
+#' 
+#' \strong{Integration with R Markdown/Quarto:}
+#' 
+#' For R Markdown or Quarto documents:
+#' ```r
+#' # Generate HTML fragment (no CSS)
+#' tbl2html(results, "table.html", include_css = FALSE)
+#' 
+#' # Include in document
+#' ```{r results='asis'}
+#' cat(readLines("table.html"), sep = "\n")
+#' ```
+#' ```
+#' 
+#' Or directly render without file:
+#' ```r
+#' # For inline display
+#' htmltools::HTML(
+#'   capture.output(
+#'     print(xtable::xtable(results), type = "html")
+#'   )
+#' )
+#' ```
+#' 
+#' \strong{Integration with Shiny:}
+#' 
+#' For Shiny applications:
+#' ```r
+#' # In server function
+#' output$results_table <- renderUI({
+#'   tbl2html(results_data(), "temp.html", include_css = FALSE)
+#'   HTML(readLines("temp.html"))
+#' })
+#' 
+#' # Or use directly with DT package for interactive tables
+#' output$interactive_table <- DT::renderDT({
+#'   results_data()
+#' })
+#' ```
+#' 
+#' \strong{Customizing Appearance:}
+#' 
+#' To customize beyond built-in options:
+#' 
+#' \emph{Option 1: Modify generated HTML}
+#' ```r
+#' tbl2html(results, "table.html", include_css = FALSE)
+#' # Add custom CSS in parent HTML document
+#' ```
+#' 
+#' \emph{Option 2: Post-process with HTML/CSS tools}
+#' ```r
+#' # Generate table
+#' tbl2html(results, "table.html")
+#' 
+#' # Edit table.html to add custom classes or styles
+#' # Use CSS to apply custom formatting
+#' ```
+#' 
+#' \strong{Accessibility:}
+#' 
+#' The generated HTML follows accessibility best practices:
+#' \itemize{
+#'   \item Semantic table structure
+#'   \item Proper header cells (\code{<th>}) with scope attributes
+#'   \item Clear visual hierarchy
+#'   \item Adequate color contrast (when using default styles)
+#'   \item Screen reader friendly markup
+#' }
+#' 
+#' For enhanced accessibility:
+#' \itemize{
+#'   \item Add descriptive caption
+#'   \item Ensure sufficient color contrast if customizing
+#'   \item Consider adding \code{summary} attribute for complex tables
+#'   \item Test with screen readers
+#' }
+#' 
+#' \strong{Performance:}
+#' 
+#' HTML tables are efficient for web display:
+#' \itemize{
+#'   \item Fast rendering in modern browsers
+#'   \item Small file sizes (text-based)
+#'   \item No external dependencies required
+#'   \item Can be cached effectively
+#' }
+#' 
+#' For very large tables (>1000 rows):
+#' \itemize{
+#'   \item Consider pagination or virtual scrolling
+#'   \item Use interactive table libraries (DT, reactable)
+#'   \item Consider server-side rendering for dynamic data
+#' }
+#' 
+#' \strong{Browser Compatibility:}
+#' 
+#' Generated HTML works in all modern browsers:
+#' \itemize{
+#'   \item Chrome, Firefox, Safari, Edge (latest versions)
+#'   \item Mobile browsers (iOS Safari, Chrome Mobile)
+#'   \item Internet Explorer 11+ (with minor styling differences)
+#' }
 #'
-#' This function is tailored to outputs from \code{\link{desctbl()}},
-#' \code{\link{fastfit()}}, \code{\link{uscreen()}}, \code{\link{fit()}},
-#' and \code{\link{compfit()}}, although it can theoretically be applied to
-#' any data frame or data.table object.
+#' @seealso
+#' \code{\link{tbl2pdf}} for PDF output,
+#' \code{\link{tbl2tex}} for LaTeX output,
+#' \code{\link{tbl2docx}} for Word documents,
+#' \code{\link{tbl2pptx}} for PowerPoint,
+#' \code{\link{fit}} for regression tables,
+#' \code{\link{desctbl}} for descriptive tables
 #'
 #' @examples
-#' if (FALSE) {
-#' # Basic HTML export
+#' # Load data and create table
+#' data(clintrial)
+#' data(clintrial_labels)
+#' 
+#' results <- fit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     predictors = c("age", "sex", "treatment", "stage"),
+#'     var_labels = clintrial_labels
+#' )
+#' 
+#' # Example 1: Basic HTML export (standalone)
 #' tbl2html(results, "results.html")
+#' # Open results.html in web browser
 #' 
-#' # Without CSS for embedding
-#' tbl2html(table_data, "fragment.html",
+#' # Example 2: With caption
+#' tbl2html(results, "captioned.html",
+#'          caption = "Table 1: Multivariable Logistic Regression Results")
+#' 
+#' # Example 3: For embedding (no CSS)
+#' tbl2html(results, "embed.html",
 #'          include_css = FALSE)
+#' # Include in your HTML document
 #' 
-#' # Hierarchical display with significance highlighting
-#' tbl2html(regression_output, "regression.html",
-#'          indent_groups = TRUE,
+#' # Example 4: Hierarchical display
+#' tbl2html(results, "indented.html",
+#'          indent_groups = TRUE)
+#' 
+#' # Example 5: Condensed table
+#' tbl2html(results, "condensed.html",
+#'          condense_table = TRUE)
+#' 
+#' # Example 6: With zebra stripes
+#' tbl2html(results, "striped.html",
+#'          zebra_stripes = TRUE,
+#'          stripe_color = "#F0F0F0")
+#' 
+#' # Example 7: Dark header style
+#' tbl2html(results, "dark.html",
+#'          dark_header = TRUE)
+#' 
+#' # Example 8: Combination styling
+#' tbl2html(results, "styled.html",
+#'          zebra_stripes = TRUE,
+#'          dark_header = TRUE,
+#'          bold_significant = TRUE)
+#' 
+#' # Example 9: Custom stripe color
+#' tbl2html(results, "blue_stripes.html",
+#'          zebra_stripes = TRUE,
+#'          stripe_color = "#E3F2FD")  # Light blue
+#' 
+#' # Example 10: Disable significance bolding
+#' tbl2html(results, "no_bold.html",
+#'          bold_significant = FALSE)
+#' 
+#' # Example 11: Stricter significance threshold
+#' tbl2html(results, "strict.html",
 #'          bold_significant = TRUE,
 #'          sig_threshold = 0.01)
 #' 
-#' # Clean headers without special formatting
-#' tbl2html(summary_table, "summary.html",
+#' # Example 12: No header formatting
+#' tbl2html(results, "raw_headers.html",
 #'          format_headers = FALSE)
-#' }
-#' @seealso
-#' \code{\link{tbl2pdf}} for PDF output, 
-#' \code{\link{tbl2tex}} for LaTeX output
 #' 
+#' # Example 13: Descriptive statistics table
+#' desc_table <- desctbl(
+#'     data = clintrial,
+#'     strata = "treatment",
+#'     vars = c("age", "sex", "bmi"),
+#'     var_labels = clintrial_labels
+#' )
+#' 
+#' tbl2html(desc_table, "baseline.html",
+#'          caption = "Table 1: Baseline Characteristics by Treatment Group")
+#' 
+#' # Example 14: For R Markdown (no CSS, for inline display)
+#' tbl2html(results, "rmd_table.html",
+#'          include_css = FALSE,
+#'          indent_groups = TRUE)
+#' 
+#' # Then in R Markdown:
+#' # ```{r results='asis', echo=FALSE}
+#' # cat(readLines("rmd_table.html"), sep = "\n")
+#' # ```
+#' 
+#' # Example 15: Email-friendly version
+#' tbl2html(results, "email.html",
+#'          include_css = TRUE,  # Self-contained
+#'          zebra_stripes = TRUE,
+#'          caption = "Regression Results - See Attached")
+#' # Can be directly included in HTML emails
+#' 
+#' # Example 16: Publication-ready web version
+#' tbl2html(results, "publication.html",
+#'          caption = "Table 2: Multivariable Analysis of Risk Factors",
+#'          indent_groups = TRUE,
+#'          zebra_stripes = FALSE,  # Clean look
+#'          bold_significant = TRUE,
+#'          dark_header = FALSE)
+#' 
+#' # Example 17: Modern dark theme
+#' tbl2html(results, "dark_theme.html",
+#'          dark_header = TRUE,
+#'          stripe_color = "#2A2A2A",  # Dark gray stripes
+#'          zebra_stripes = TRUE)
+#' 
+#' # Example 18: Minimal styling for custom CSS
+#' tbl2html(results, "minimal.html",
+#'          include_css = FALSE,
+#'          format_headers = FALSE,
+#'          bold_significant = FALSE)
+#' # Apply your own CSS classes and styling
+#' 
+#' # Example 19: Model comparison table
+#' models <- list(
+#'     base = c("age", "sex"),
+#'     full = c("age", "sex", "treatment", "stage")
+#' )
+#' 
+#' comparison <- compfit(
+#'     data = clintrial,
+#'     outcome = "os_status",
+#'     model_list = models
+#' )
+#' 
+#' tbl2html(comparison, "comparison.html",
+#'          caption = "Model Comparison Statistics")
+#' 
+#' # Example 20: Mobile-optimized table
+#' tbl2html(results, "mobile.html",
+#'          condense_table = TRUE,  # Reduce width
+#'          font_size = 10)  # Note: font_size not in this function,
+#'                           # adjust in CSS if needed
+#'
 #' @export
 tbl2html <- function(table,
                      file,

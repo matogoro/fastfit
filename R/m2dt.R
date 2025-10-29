@@ -1,58 +1,219 @@
-#' Convert Model Object to Data Table
+#' Convert Model to Data Table
 #'
 #' Extracts coefficients, confidence intervals, and comprehensive model statistics 
 #' from fitted regression models and converts them to a standardized data.table 
-#' format suitable for further analysis or publication.
+#' format suitable for further analysis or publication. This is a core utility 
+#' function in the fastfit package for working with regression results.
 #'
-#' @param model A fitted model object. Supported classes include glm (generalized
-#'   linear models), lm (linear models), coxph (Cox proportional hazards),
-#'   clogit (conditional logistic), coxme (mixed effects Cox), and glmer
-#'   (generalized linear mixed effects). Also accepts models wrapped with mmodel().
+#' @param model A fitted model object. Supported classes include:
+#'   \itemize{
+#'     \item \code{glm} - Generalized linear models (logistic, Poisson, etc.)
+#'     \item \code{lm} - Linear models
+#'     \item \code{coxph} - Cox proportional hazards models
+#'     \item \code{clogit} - Conditional logistic regression
+#'     \item \code{coxme} - Mixed effects Cox models
+#'     \item \code{glmer} - Generalized linear mixed effects models
+#'   }
+#'   Also accepts models wrapped with \code{mmodel()}.
+#'   
 #' @param conf_level Numeric confidence level for confidence intervals. Must be
 #'   between 0 and 1. Default is 0.95 (95\% CI).
-#' @param keep_qc_stats Logical. If TRUE, includes model quality statistics such as
-#'   AIC, BIC, R-squared, concordance, and model fit tests. These appear as 
-#'   additional columns in the output. Default is TRUE.
-#' @param include_intercept Logical. If TRUE, includes the model intercept in output.
-#'   If FALSE, removes the intercept row from results. Useful for creating cleaner
-#'   presentation tables. Default is TRUE for backward compatibility.
+#'   
+#' @param keep_qc_stats Logical. If \code{TRUE}, includes model quality statistics 
+#'   such as AIC, BIC, R-squared, concordance, and model fit tests. These appear 
+#'   as additional columns in the output. Default is \code{TRUE}.
+#'   
+#' @param include_intercept Logical. If \code{TRUE}, includes the model intercept 
+#'   in output. If \code{FALSE}, removes the intercept row from results. Useful 
+#'   for creating cleaner presentation tables. Default is \code{TRUE}.
+#'   
 #' @param terms_to_exclude Character vector of term names to exclude from output.
-#'   Useful for removing specific unwanted parameters. Default is NULL. Note: If
-#'   include_intercept is FALSE, "(Intercept)" is automatically added to this list.
-#' @param add_reference_rows Logical. If TRUE, adds rows for reference categories
-#'   of factor variables with appropriate labels and baseline values (OR/HR = 1,
-#'   Estimate = 0). Default is TRUE.
+#'   Useful for removing specific unwanted parameters (e.g., nuisance variables,
+#'   spline terms). Default is \code{NULL}. Note: If \code{include_intercept = FALSE}, 
+#'   "(Intercept)" is automatically added to this list.
+#'   
+#' @param add_reference_rows Logical. If \code{TRUE}, adds rows for reference 
+#'   categories of factor variables with appropriate labels and baseline values 
+#'   (OR/HR = 1, Estimate = 0). This makes tables more complete and easier to 
+#'   interpret. Default is \code{TRUE}.
+#'   
 #' @param reference_label Character string used to label reference category rows
-#'   in the output. Default is "reference".
+#'   in the output. Appears in the \code{reference} column. Default is \code{"reference"}.
 #'
-#' @return A data.table containing extracted model information with the following
-#'   standard columns:
-#'   - model_scope: Univariable (unadjusted) or multivariable (adjusted) model
-#'   - model_type: Type of regression model
-#'   - variable: Variable summarized
-#'   - group: Group summarized
-#'   - n: Sample size
-#'   - events: Number of events (for survival/logistic models)
-#'   - coefficient: Raw coefficient estimate
-#'   - se: Standard error
-#'   - OR/HR/RR/Estimate: Effect estimate (type depends on model)
-#'   - CI_lower, CI_upper: Confidence interval bounds
-#'   - statistic: Test statistic (z or t value)
-#'   - p_value: P-value for coefficient test
-#'   - sig: Significance markers (*** p<0.001, ** p<0.01, * p<0.05)
-#'   - sig_binary: Logical indicator for p<0.05
+#' @return A \code{data.table} containing extracted model information with the 
+#'   following standard columns:
+#'   \describe{
+#'     \item{model_scope}{Character. Either "Univariable" (unadjusted model with 
+#'       single predictor) or "Multivariable" (adjusted model with multiple predictors)}
+#'     \item{model_type}{Character. Type of regression (e.g., "Logistic", "Linear", 
+#'       "Cox PH", "Poisson")}
+#'     \item{variable}{Character. Variable name (for factor variables, the base 
+#'       variable name without the level)}
+#'     \item{group}{Character. Group/level name for factor variables; empty string 
+#'       for continuous variables}
+#'     \item{n}{Integer. Total sample size used in the model}
+#'     \item{n_group}{Integer. Sample size for this specific variable level 
+#'       (factor variables only)}
+#'     \item{events}{Integer. Total number of events in the model (for survival 
+#'       and logistic models)}
+#'     \item{events_group}{Integer. Number of events for this specific variable 
+#'       level (for survival and logistic models with factor variables)}
+#'     \item{coefficient}{Numeric. Raw regression coefficient (log odds, log hazard, 
+#'       etc.)}
+#'     \item{se}{Numeric. Standard error of the coefficient}
+#'     \item{OR/HR/RR/Estimate}{Numeric. Effect estimate - column name depends on 
+#'       model type:
+#'       \itemize{
+#'         \item \code{OR} for logistic regression (odds ratio)
+#'         \item \code{HR} for Cox models (hazard ratio)
+#'         \item \code{RR} for Poisson regression (rate/risk ratio)
+#'         \item \code{Estimate} for linear models or other GLMs
+#'       }}
+#'     \item{CI_lower}{Numeric. Lower bound of confidence interval for effect estimate}
+#'     \item{CI_upper}{Numeric. Upper bound of confidence interval for effect estimate}
+#'     \item{statistic}{Numeric. Test statistic (z-value for GLM/Cox, t-value for LM)}
+#'     \item{p_value}{Numeric. P-value for coefficient test}
+#'     \item{sig}{Character. Significance markers: "***" (p<0.001), "**" (p<0.01), 
+#'       "*" (p<0.05), "." (p<0.10), "" (p≥0.10)}
+#'     \item{sig_binary}{Logical. Binary indicator: \code{TRUE} if p<0.05, 
+#'       \code{FALSE} otherwise}
+#'     \item{reference}{Character. Contains \code{reference_label} for reference 
+#'       category rows when \code{add_reference_rows = TRUE}, empty string otherwise}
+#'   }
 #'   
-#'   Additional quality control columns when keep_qc_stats = TRUE vary by model type:
-#'   - GLM: AIC, BIC, deviance, null_deviance, c_statistic (logistic)
-#'   - LM: R2, adj_R2, sigma, df_residual
-#'   - Cox: concordance, rsq, logtest_stat, wald_test, score_test
+#'   Additional quality control columns when \code{keep_qc_stats = TRUE} (vary by 
+#'   model type):
+#'   \describe{
+#'     \item{GLM models}{AIC, BIC, deviance, null_deviance, df_residual. For logistic 
+#'       regression: c_statistic (concordance/AUC)}
+#'     \item{LM models}{R2 (R-squared), adj_R2 (adjusted R-squared), sigma (residual 
+#'       standard error), df_residual}
+#'     \item{Cox models}{concordance (C-index), rsq (R-squared approximation), 
+#'       logtest_stat, logtest_p (likelihood ratio test), wald_test, wald_p 
+#'       (Wald test), score_test, score_p (score test)}
+#'   }
 #'   
-#'   The output includes attributes:
-#'   - model_class: The class of the input model
-#'   - model_family: The family for GLM models
-#'   - conf_level: The confidence level used
+#'   The output includes the following attributes accessible via \code{attr()}:
+#'   \describe{
+#'     \item{model_class}{Character. The class of the input model object}
+#'     \item{model_family}{Character. The family for GLM models (e.g., "binomial", 
+#'       "gaussian"); \code{NA} for non-GLM models}
+#'     \item{conf_level}{Numeric. The confidence level used for intervals}
+#'   }
 #'
-#' @keywords internal
+#' @details
+#' This function automatically detects whether a model is univariable or multivariable 
+#' by counting the number of unique predictor variables (accounting for factor 
+#' variable expansion). It handles factor variables intelligently by:
+#' \itemize{
+#'   \item Parsing factor terms into base variable names and levels
+#'   \item Computing group-specific sample sizes and event counts
+#'   \item Optionally adding reference category rows with OR/HR = 1
+#'   \item Maintaining factor level ordering from the original model
+#' }
+#' 
+#' For logistic regression (\code{glm} with \code{family = binomial}), the function 
+#' returns odds ratios (OR). For Cox models, it returns hazard ratios (HR). For 
+#' Poisson regression, it returns rate/risk ratios (RR). For linear models and 
+#' other GLMs, it returns the raw coefficient estimates.
+#' 
+#' The function calculates confidence intervals using the normal approximation 
+#' (z-score method) for all model types, which is appropriate for large samples.
+#' 
+#' When \code{add_reference_rows = TRUE}, the function adds rows for reference 
+#' categories of factor variables with:
+#' \itemize{
+#'   \item Effect estimate = 1 (for OR/HR/RR) or 0 (for Estimate)
+#'   \item Coefficient = 0
+#'   \item Standard error, statistic, p-value, and CI bounds = NA
+#'   \item Group-specific sample sizes and event counts calculated from the data
+#'   \item The \code{reference} column populated with \code{reference_label}
+#' }
+#'
+#' @seealso 
+#' \code{\link{glm}}, \code{\link{lm}}, \code{\link[survival]{coxph}}, 
+#' \code{\link[survival]{clogit}}, \code{\link[lme4]{glmer}}
+#' 
+#' @examples
+#' # Load example data
+#' data(clintrial)
+#' 
+#' # Example 1: Simple logistic regression
+#' model1 <- glm(os_status ~ age + sex, 
+#'               data = clintrial, 
+#'               family = binomial)
+#' result1 <- m2dt(model1)
+#' print(result1)
+#' 
+#' # Example 2: Remove intercept from output
+#' result2 <- m2dt(model1, include_intercept = FALSE)
+#' print(result2)
+#' 
+#' # Example 3: Logistic regression with factor variable
+#' model3 <- glm(os_status ~ age + treatment, 
+#'               data = clintrial, 
+#'               family = binomial)
+#' result3 <- m2dt(model3, add_reference_rows = TRUE)
+#' # Note: reference category for treatment is included with OR = 1
+#' print(result3)
+#' 
+#' # Example 4: Custom confidence level and reference label
+#' result4 <- m2dt(model3, 
+#'                 conf_level = 0.90,
+#'                 reference_label = "ref",
+#'                 add_reference_rows = TRUE)
+#' print(result4)
+#' 
+#' # Example 5: Cox proportional hazards model
+#' library(survival)
+#' model5 <- coxph(Surv(os_months, os_status) ~ age + sex + treatment, 
+#'                 data = clintrial)
+#' result5 <- m2dt(model5)
+#' # Returns hazard ratios (HR) instead of odds ratios
+#' print(result5)
+#' 
+#' # Example 6: Linear model with QC statistics
+#' model6 <- lm(bmi ~ age + sex + smoking, data = clintrial)
+#' result6 <- m2dt(model6, keep_qc_stats = TRUE)
+#' # Includes R-squared, AIC, BIC, etc.
+#' print(result6)
+#' 
+#' # Example 7: Exclude specific terms
+#' model7 <- glm(os_status ~ age + sex + treatment + site, 
+#'               data = clintrial, 
+#'               family = binomial)
+#' result7 <- m2dt(model7, 
+#'                 terms_to_exclude = c("siteB", "siteC"),
+#'                 include_intercept = FALSE)
+#' print(result7)
+#' 
+#' # Example 8: Access model attributes
+#' result8 <- m2dt(model1)
+#' attr(result8, "model_class")    # "glm"
+#' attr(result8, "model_family")   # "binomial"
+#' attr(result8, "conf_level")     # 0.95
+#' 
+#' # Example 9: Univariable vs Multivariable detection
+#' uni_model <- glm(os_status ~ age, 
+#'                  data = clintrial, 
+#'                  family = binomial)
+#' uni_result <- m2dt(uni_model)
+#' print(uni_result$model_scope)  # "Univariable"
+#' 
+#' multi_model <- glm(os_status ~ age + sex + treatment, 
+#'                    data = clintrial, 
+#'                    family = binomial)
+#' multi_result <- m2dt(multi_model)
+#' print(multi_result$model_scope)  # "Multivariable"
+#' 
+#' # Example 10: Poisson regression for count data
+#' model10 <- glm(los_days ~ age + treatment, 
+#'                data = clintrial, 
+#'                family = poisson)
+#' result10 <- m2dt(model10)
+#' # Returns rate ratios (RR)
+#' print(result10)
+#' 
 #' @export
 m2dt <- function(model, 
                  conf_level = 0.95,

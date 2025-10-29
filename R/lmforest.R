@@ -1,63 +1,418 @@
-#' Create a Forest Plot for Linear Models
+#' Create Forest Plot for Linear Models
 #'
-#' Generates a publication-ready forest plot combining a data table and 
-#' graphical representation of coefficients from a linear model.
-#' The plot includes variable names, group levels, sample sizes, coefficients
-#' with confidence intervals, and p-values.
+#' Generates a publication-ready forest plot that combines a formatted data table 
+#' with a graphical representation of regression coefficients from a linear model. 
+#' The plot integrates variable names, group levels, sample sizes, coefficients 
+#' with confidence intervals, p-values, and model diagnostics (R², F-statistic, 
+#' AIC) in a single comprehensive visualization designed for manuscripts and 
+#' presentations.
 #'
-#' @param model A linear model object of class \code{lm}.
-#' @param data A data frame or data.table containing the original data used to 
-#'   fit the model. If NULL (default), the function attempts to extract data 
-#'   from the model object.
-#' @param title Character string specifying the plot title. Default is "Linear Model".
-#' @param effect_label Character string for the effect measure label. Default is "Coefficient".
+#' @param model A fitted linear model object of class \code{lm}. Should be fitted 
+#'   using \code{\link[stats]{lm}}. Note: GLM objects are not accepted - use 
+#'   \code{\link{glmforest}} instead.
+#'   
+#' @param data A data.frame or data.table containing the original data used to 
+#'   fit the model. If \code{NULL} (default), the function attempts to extract 
+#'   data from the model object (\code{model$data} or \code{model$model}). 
+#'   Providing data explicitly is recommended.
+#'   
+#' @param title Character string specifying the plot title displayed at the top. 
+#'   Default is \code{"Linear Model"}. Use descriptive titles for publication.
+#'   
+#' @param effect_label Character string for the effect measure label on the 
+#'   forest plot axis. Default is \code{"Coefficient"}. Could be customized to 
+#'   reflect units (e.g., "Change in BMI (kg/m²)").
+#'   
 #' @param digits Integer specifying the number of decimal places for coefficients 
 #'   and confidence intervals. Default is 2.
-#' @param font_size Numeric value controlling the base font size. 
-#'   Default is 1.0.
-#' @param annot_size Numeric value controlling the relative font size for annotations. 
-#'   Default is 3.88.
-#' @param header_size Numeric value controlling the relative font size for headers. 
-#'   Default is 5.82.
-#' @param title_size Numeric value controlling the relative font size for the plot title. 
-#'   Default is 23.28.
-#' @param tbl_width Numeric value between 0 and 1 specifying the proportion of plot 
-#'   width allocated to the data table. If NULL (default), automatically calculated
-#'   based on content and plot dimensions.
-#' @param plot_width Numeric value specifying the intended plot width in inches.
-#'   Used to optimize tbl_width calculation. Default is NULL.
-#' @param plot_height Numeric value specifying the intended plot height in inches.
-#'   Default is NULL.
-#' @param show_n Logical. Whether to show the sample size column. Default is TRUE.
-#' @param indent_groups Logical. Whether to indent group levels under variables.
-#'   Default is FALSE.
-#' @param condense_table Logical. Whether to condense binary variables into single rows.
-#'   Forces indent_groups = TRUE. Default is FALSE.
-#' @param center_padding Numeric value specifying the padding width between the table
-#' and the forest plot. Default is 4.
-#' @param zebra_stripes Logical. Whether to use alternating background shading 
-#'   for different variables to improve readability. Default is TRUE.
-#' @param ref_label Character string to display for reference categories. 
-#'   Default is "reference".
-#' @param var_labels Named character vector for custom variable labels. Names should 
-#'   match variable names in the model, values are the display labels.
-#' @param units Units used for measurement. Default is inches ("in").
-#' @param color Character string specifying the color for coefficient point estimates. 
-#'   Default is "#5A8F5A" (green).
+#'   
+#' @param font_size Numeric multiplier controlling the base font size for all 
+#'   text elements. Default is 1.0.
+#'   
+#' @param annot_size Numeric value controlling the relative font size for data 
+#'   annotations. Default is 3.88.
+#'   
+#' @param header_size Numeric value controlling the relative font size for column 
+#'   headers. Default is 5.82.
+#'   
+#' @param title_size Numeric value controlling the relative font size for the 
+#'   main plot title. Default is 23.28.
+#'   
+#' @param tbl_width Numeric value between 0 and 1 specifying the proportion of 
+#'   total plot width allocated to the data table. Default is 0.6.
+#'   
+#' @param plot_width Numeric value specifying the intended output width in 
+#'   specified \code{units}. Default is \code{NULL} (automatic).
+#'   
+#' @param plot_height Numeric value specifying the intended output height in 
+#'   specified \code{units}. Default is \code{NULL} (automatic).
+#'   
+#' @param show_n Logical. If \code{TRUE}, includes a column showing group-specific 
+#'   sample sizes. Note: Linear models don't have "events" so there's no 
+#'   \code{show_events} parameter. Default is \code{TRUE}.
+#'   
+#' @param indent_groups Logical. If \code{TRUE}, indents factor levels under 
+#'   their parent variable name, creating hierarchical structure. The "Group" 
+#'   column is hidden when \code{TRUE}. Default is \code{FALSE}.
+#'   
+#' @param condense_table Logical. If \code{TRUE}, condenses binary categorical 
+#'   variables into single rows. Automatically sets \code{indent_groups = TRUE}. 
+#'   Default is \code{FALSE}.
+#'   
+#' @param center_padding Numeric value specifying horizontal spacing between 
+#'   table and forest plot. Default is 4.
+#'   
+#' @param zebra_stripes Logical. If \code{TRUE}, applies alternating gray 
+#'   background shading to different variables. Default is \code{TRUE}.
+#'   
+#' @param ref_label Character string to display for reference categories of 
+#'   factor variables. Default is \code{"reference"}.
+#'   
+#' @param var_labels Named character vector providing custom display labels for 
+#'   variables. Example: \code{c(age = "Age (years)", height = "Height (cm)")}. 
+#'   Default is \code{NULL}.
+#'   
+#' @param units Character string specifying units for plot dimensions: 
+#'   \code{"in"} (inches), \code{"cm"}, or \code{"mm"}. Default is \code{"in"}.
+#'   
+#' @param color Character string specifying the color for coefficient point 
+#'   estimates in the forest plot. Default is \code{"#5A8F5A"} (green). Use 
+#'   hex codes or R color names.
 #'
-#' @return A ggplot object containing the forest plot. The object has an attribute
-#'   "recommended_dims" with suggested width and height in inches.
+#' @return A \code{ggplot} object containing the complete forest plot. The plot 
+#'   can be displayed, saved, or further customized.
+#'   
+#'   The returned object includes an attribute \code{"recommended_dims"} 
+#'   accessible via \code{attr(plot, "recommended_dims")}, containing:
+#'   \describe{
+#'     \item{width}{Numeric. Recommended plot width in specified units}
+#'     \item{height}{Numeric. Recommended plot height in specified units}
+#'     \item{units}{Character. The units used}
+#'   }
+#'   
+#'   Recommendations are printed to console if dimensions are not specified.
 #'
-#' @export
-#' @import data.table
-#' @import ggplot2
-#' @importFrom stats AIC confint nobs pf
-#' @importFrom grDevices axisTicks
+#' @details
+#' \strong{Linear Model-Specific Features:}
+#' 
+#' The linear model forest plot differs from logistic and Cox plots in several ways:
+#' \itemize{
+#'   \item \strong{Coefficients}: Raw regression coefficients shown (not exponentiated)
+#'   \item \strong{Reference line}: At coefficient = 0 (not at 1)
+#'   \item \strong{Linear scale}: Forest plot uses linear scale (not log scale)
+#'   \item \strong{No events column}: Only sample sizes shown (no event counts)
+#'   \item \strong{R² statistics}: Model fit assessed by R² and adjusted R²
+#'   \item \strong{F-test}: Overall model significance from F-statistic
+#' }
+#' 
+#' \strong{Plot Components:}
+#' 
+#' \enumerate{
+#'   \item \strong{Title}: Centered at top
+#'   \item \strong{Data Table} (left): Contains:
+#'     \itemize{
+#'       \item Variable: Predictor names
+#'       \item Group: Factor levels (if applicable)
+#'       \item n: Sample sizes by group
+#'       \item Coefficient (95\% CI); \emph{p}-value: Raw coefficients with CIs and p-values
+#'     }
+#'   \item \strong{Forest Plot} (right):
+#'     \itemize{
+#'       \item Point estimates (squares sized by sample size)
+#'       \item 95\% confidence intervals (error bars)
+#'       \item Reference line at coefficient = 0
+#'       \item Linear scale
+#'     }
+#'   \item \strong{Model Statistics} (footer):
+#'     \itemize{
+#'       \item Observations analyzed (with percentage of total data)
+#'       \item R² and adjusted R²
+#'       \item F-statistic with degrees of freedom and p-value
+#'       \item AIC
+#'     }
+#' }
+#' 
+#' \strong{Interpreting Coefficients:}
+#' 
+#' Linear regression coefficients represent the change in the outcome variable 
+#' for a one-unit change in the predictor:
+#' \itemize{
+#'   \item \strong{Continuous predictors}: Coefficient = change in Y per unit of X
+#'   \item \strong{Binary predictors}: Coefficient = difference in Y between groups
+#'   \item \strong{Factor predictors}: Coefficients = differences from reference 
+#'     category
+#'   \item \strong{Sign matters}: Positive = increase in Y, Negative = decrease in Y
+#'   \item \strong{Zero crossing}: CI crossing zero suggests no significant effect
+#' }
+#' 
+#' Example: If the coefficient for "age" is 0.50 when predicting BMI, 
+#' BMI increases by 0.50 kg/m² for each additional year of age.
+#' 
+#' \strong{Model Fit Statistics:}
+#' 
+#' The footer displays key diagnostics:
+#' \itemize{
+#'   \item \strong{R²}: Proportion of variance explained (0 to 1)
+#'     \itemize{
+#'       \item 0.0-0.3: Weak explanatory power
+#'       \item 0.3-0.5: Moderate
+#'       \item 0.5-0.7: Good
+#'       \item >0.7: Strong (rare in social/biological sciences)
+#'     }
+#'   \item \strong{Adjusted R²}: R² penalized for number of predictors
+#'     \itemize{
+#'       \item Always ≤ R²
+#'       \item Preferred for model comparison
+#'       \item Accounts for model complexity
+#'     }
+#'   \item \strong{F-statistic}: Tests null hypothesis that all coefficients = 0
+#'     \itemize{
+#'       \item Degrees of freedom: df1 = # predictors, df2 = # observations - # predictors - 1
+#'       \item Significant p-value indicates model explains variance better than intercept-only
+#'     }
+#'   \item \strong{AIC}: For model comparison (lower is better)
+#' }
+#' 
+#' \strong{Assumptions:}
+#' 
+#' Linear regression assumes:
+#' \enumerate{
+#'   \item Linearity of relationships
+#'   \item Independence of observations
+#'   \item Homoscedasticity (constant variance)
+#'   \item Normality of residuals
+#'   \item No multicollinearity
+#' }
+#' 
+#' Check assumptions using:
+#' \itemize{
+#'   \item \code{plot(model)} for diagnostic plots
+#'   \item \code{car::vif(model)} for multicollinearity
+#'   \item \code{lmtest::bptest(model)} for heteroscedasticity
+#'   \item \code{shapiro.test(residuals(model))} for normality
+#' }
+#' 
+#' \strong{Reference Categories:}
+#' 
+#' For factor variables:
+#' \itemize{
+#'   \item First level is the reference (coefficient = 0)
+#'   \item Other levels show difference from reference
+#'   \item Reference displayed with \code{ref_label}
+#'   \item Relevel factors before modeling if needed: 
+#'     \code{factor(x, levels = c("desired_ref", ...))}
+#' }
+#' 
+#' \strong{Sample Size Reporting:}
+#' 
+#' The "n" column shows:
+#' \itemize{
+#'   \item For continuous variables: Total observations with non-missing data
+#'   \item For factor variables: Number of observations in each category
+#'   \item Footer shows total observations analyzed and percentage of original 
+#'     data (accounting for missing values)
+#' }
 #'
 #' @seealso 
+#' \code{\link{glmforest}} for logistic/GLM forest plots,
+#' \code{\link{coxforest}} for Cox model forest plots,
 #' \code{\link[stats]{lm}} for fitting linear models,
-#' \code{\link[ggplot2]{ggplot}} for the underlying plotting system
+#' \code{\link{fit}} for fastfit regression modeling,
+#' \code{\link[stats]{plot.lm}} for diagnostic plots
 #'
+#' @examples
+#' # Load example data
+#' data(clintrial)
+#' data(clintrial_labels)
+#' 
+#' # Example 1: Basic linear model forest plot
+#' model1 <- lm(bmi ~ age + sex + smoking,
+#'              data = clintrial)
+#' 
+#' plot1 <- lmforest(model1, data = clintrial)
+#' print(plot1)
+#' 
+#' # Example 2: With custom labels and title
+#' plot2 <- lmforest(
+#'     model = model1,
+#'     data = clintrial,
+#'     title = "Predictors of Body Mass Index",
+#'     effect_label = "Change in BMI (kg/m²)",
+#'     var_labels = clintrial_labels
+#' )
+#' print(plot2)
+#' 
+#' # Example 3: More comprehensive model
+#' model3 <- lm(
+#'     bmi ~ age + sex + smoking + hypertension + diabetes + creatinine,
+#'     data = clintrial
+#' )
+#' 
+#' plot3 <- lmforest(
+#'     model = model3,
+#'     data = clintrial,
+#'     var_labels = clintrial_labels,
+#'     indent_groups = TRUE
+#' )
+#' print(plot3)
+#' 
+#' # Example 4: Check model diagnostics
+#' summary(model3)
+#' plot(model3)  # Diagnostic plots
+#' 
+#' # Example 5: Condensed layout
+#' model5 <- lm(
+#'     bmi ~ age + sex + smoking + hypertension + diabetes,
+#'     data = clintrial
+#' )
+#' 
+#' plot5 <- lmforest(
+#'     model = model5,
+#'     data = clintrial,
+#'     condense_table = TRUE,
+#'     var_labels = clintrial_labels
+#' )
+#' print(plot5)
+#' 
+#' # Example 6: Custom color
+#' plot6 <- lmforest(
+#'     model = model1,
+#'     data = clintrial,
+#'     color = "#2ECC71",  # Bright green
+#'     var_labels = clintrial_labels
+#' )
+#' print(plot6)
+#' 
+#' # Example 7: Hide sample sizes
+#' plot7 <- lmforest(
+#'     model = model1,
+#'     data = clintrial,
+#'     show_n = FALSE,
+#'     var_labels = clintrial_labels
+#' )
+#' print(plot7)
+#' 
+#' # Example 8: Adjust table width
+#' plot8 <- lmforest(
+#'     model = model3,
+#'     data = clintrial,
+#'     tbl_width = 0.55,
+#'     var_labels = clintrial_labels
+#' )
+#' print(plot8)
+#' 
+#' # Example 9: Get recommended dimensions
+#' plot9 <- lmforest(model1, data = clintrial)
+#' dims <- attr(plot9, "recommended_dims")
+#' cat("Recommended:", dims$width, "x", dims$height, dims$units, "\n")
+#' 
+#' # Example 10: Specify exact dimensions
+#' plot10 <- lmforest(
+#'     model = model1,
+#'     data = clintrial,
+#'     plot_width = 12,
+#'     plot_height = 7,
+#'     var_labels = clintrial_labels
+#' )
+#' 
+#' # Example 11: Different units
+#' plot11 <- lmforest(
+#'     model = model1,
+#'     data = clintrial,
+#'     plot_width = 30,
+#'     plot_height = 20,
+#'     units = "cm",
+#'     var_labels = clintrial_labels
+#' )
+#' 
+#' # Example 12: No zebra stripes
+#' plot12 <- lmforest(
+#'     model = model1,
+#'     data = clintrial,
+#'     zebra_stripes = FALSE,
+#'     var_labels = clintrial_labels
+#' )
+#' print(plot12)
+#' 
+#' # Example 13: Custom reference label
+#' plot13 <- lmforest(
+#'     model = model1,
+#'     data = clintrial,
+#'     ref_label = "0.00 (ref)",
+#'     var_labels = clintrial_labels
+#' )
+#' print(plot13)
+#' 
+#' # Example 14: Larger fonts for presentation
+#' plot14 <- lmforest(
+#'     model = model1,
+#'     data = clintrial,
+#'     font_size = 1.3,
+#'     title_size = 26,
+#'     var_labels = clintrial_labels
+#' )
+#' print(plot14)
+#' 
+#' # Example 15: More decimal places
+#' plot15 <- lmforest(
+#'     model = model1,
+#'     data = clintrial,
+#'     digits = 3,
+#'     var_labels = clintrial_labels
+#' )
+#' print(plot15)
+#' 
+#' # Example 16: Hemoglobin as outcome
+#' model16 <- lm(
+#'     hemoglobin ~ age + sex + bmi + smoking + creatinine,
+#'     data = clintrial
+#' )
+#' 
+#' plot16 <- lmforest(
+#'     model = model16,
+#'     data = clintrial,
+#'     title = "Predictors of Baseline Hemoglobin",
+#'     effect_label = "Change in Hemoglobin (g/dL)",
+#'     var_labels = clintrial_labels
+#' )
+#' print(plot16)
+#' 
+#' # Check assumptions
+#' par(mfrow = c(2, 2))
+#' plot(model16)
+#' par(mfrow = c(1, 1))
+#' 
+#' # Example 17: Publication-ready final plot
+#' final_model <- lm(
+#'     bmi ~ age + sex + race + smoking + hypertension + 
+#'         diabetes + creatinine + hemoglobin,
+#'     data = clintrial
+#' )
+#' 
+#' # Check model fit
+#' summary(final_model)
+#' 
+#' final_plot <- lmforest(
+#'     model = final_model,
+#'     data = clintrial,
+#'     title = "Multivariable Linear Regression: Predictors of Body Mass Index",
+#'     effect_label = "Change in BMI (kg/m²)",
+#'     var_labels = clintrial_labels,
+#'     indent_groups = TRUE,
+#'     zebra_stripes = TRUE,
+#'     show_n = TRUE,
+#'     color = "#5A8F5A",
+#'     digits = 2
+#' )
+#' 
+#' # Save for publication
+#' dims <- attr(final_plot, "recommended_dims")
+#' # ggsave("figure3_linear.pdf", final_plot,
+#' #        width = dims$width, height = dims$height)
+#' # ggsave("figure3_linear.png", final_plot,
+#' #        width = dims$width, height = dims$height, dpi = 300)
+#'
+#' @export
 lmforest <- function(model, data = NULL,
                      title = "Linear Model",
                      effect_label = "Coefficient",
