@@ -196,120 +196,130 @@
 #' }
 #'
 #' @seealso 
-#' \code{\link{setlabels}} for setting variable labels,
-#' \code{\link{m2dt}} for regression model tables,
-#' \code{\link[survival]{Surv}} for survival object specification
+#' \code{\link{fit}} for regression modeling, 
+#' \code{\link{tbl2pdf}} for exporting to PDF
 #'
 #' @examples
-#' # Load example data
+#' \dontrun{
+#' # Load example clinical trial data
 #' data(clintrial)
-#' data(clintrial_labels)
-#' library(data.table)
 #' 
 #' # Example 1: Basic descriptive table without grouping
-#' desctbl(clintrial, 
+#' desctbl(clintrial,
 #'         variables = c("age", "sex", "bmi"))
 #' 
-#' # Example 2: Grouped comparison by treatment
-#' desctbl(clintrial, 
-#'         by = "treatment",
-#'         variables = c("age", "sex", "bmi", "smoking"))
-#' 
-#' # Example 3: Using custom variable labels
-#' desctbl(clintrial,
-#'         by = "treatment", 
-#'         variables = c("age", "bmi", "sex"),
-#'         var_labels = clintrial_labels)
-#' 
-#' # Example 4: Including missing values as a category
+#' # Example 2: Grouped comparison with default tests
 #' desctbl(clintrial,
 #'         by = "treatment",
-#'         variables = c("age", "sex", "smoking"),
-#'         na_include = TRUE,
-#'         na_label = "Missing")
+#'         variables = c("age", "sex", "race", "bmi"))
 #' 
-#' # Example 5: Customizing continuous statistics
-#' # Show only median with IQR
+#' # Example 3: Customize continuous statistics
 #' desctbl(clintrial,
-#'         by = "sex",
+#'         by = "treatment",
 #'         variables = c("age", "bmi", "creatinine"),
-#'         stats_continuous = "median_iqr")
+#'         stats_continuous = c("median_iqr", "range"))
 #' 
-#' # Example 6: Show multiple continuous statistics
-#' desctbl(clintrial,
-#'         by = "treatment",
-#'         variables = c("age", "bmi"),
-#'         stats_continuous = c("mean_sd", "median_iqr", "range"))
-#' 
-#' # Example 7: Survival analysis with log-rank test
-#' desctbl(clintrial,
-#'         by = "treatment",
-#'         variables = c("age", "sex", "Surv(os_months, os_status)"),
-#'         var_labels = clintrial_labels)
-#' 
-#' # Example 8: Controlling test selection
-#' # Use only non-parametric tests
-#' desctbl(clintrial,
-#'         by = "treatment",
-#'         variables = c("age", "bmi", "hemoglobin"),
-#'         test_continuous = "kwt")  # Kruskal-Wallis for all
-#' 
-#' # Example 9: Chi-squared test only for categorical variables
-#' desctbl(clintrial,
-#'         by = "treatment",
-#'         variables = c("sex", "smoking", "hypertension"),
-#'         test_categorical = "chisq")
-#' 
-#' # Example 10: Customize p-value precision
-#' desctbl(clintrial,
-#'         by = "sex",
-#'         variables = c("age", "bmi", "treatment"),
-#'         digits_p = 4)  # Show p-values to 4 decimal places
-#' 
-#' # Example 11: Position total column last
-#' desctbl(clintrial,
-#'         by = "treatment",
-#'         variables = c("age", "sex", "bmi"),
-#'         total = "last")
-#' 
-#' # Example 12: Exclude total column
-#' desctbl(clintrial,
-#'         by = "treatment",
-#'         variables = c("age", "sex", "bmi"),
-#'         total = FALSE)
-#' 
-#' # Example 13: Categorical statistics - counts only
+#' # Example 4: Change categorical display format
 #' desctbl(clintrial,
 #'         by = "treatment",
 #'         variables = c("sex", "race", "smoking"),
-#'         stats_categorical = "n")
+#'         stats_categorical = "n")  # Show counts only
 #' 
-#' # Example 14: Categorical statistics - percentages only
+#' # Example 5: Include missing values
 #' desctbl(clintrial,
 #'         by = "treatment",
-#'         variables = c("sex", "smoking"),
-#'         stats_categorical = "percent")
+#'         variables = c("age", "smoking", "hypertension"),
+#'         na_include = TRUE,
+#'         na_label = "Missing")
 #' 
-#' # Example 15: Different decimal precision
-#' desctbl(clintrial,
-#'         by = "sex",
-#'         variables = c("age", "bmi", "creatinine"),
-#'         digits = 2)  # 2 decimal places for continuous vars
-#' 
-#' # Example 16: Complex table with multiple variable types
+#' # Example 6: Disable statistical testing
 #' desctbl(clintrial,
 #'         by = "treatment",
-#'         variables = c("age", "sex", "bmi", "smoking", 
-#'                      "hypertension", "diabetes",
-#'                      "Surv(os_months, os_status)"),
-#'         var_labels = clintrial_labels,
-#'         stats_continuous = c("mean_sd", "median_iqr"),
-#'         na_include = TRUE)
+#'         variables = c("age", "sex", "bmi"),
+#'         test = FALSE)
 #' 
-#' # Example 17: Access raw numeric data for further analysis
+#' # Example 7: Force specific tests
+#' desctbl(clintrial,
+#'         by = "treatment",
+#'         variables = c("age", "sex"),
+#'         test_continuous = "t",      # t-test instead of auto
+#'         test_categorical = "fisher") # Fisher's test instead of auto
+#' 
+#' # Example 8: Adjust decimal places
+#' desctbl(clintrial,
+#'         by = "treatment",
+#'         variables = c("age", "bmi"),
+#'         digits = 2,    # 2 decimals for continuous
+#'         digits_p = 4)  # 4 decimals for p-values
+#' 
+#' # Example 9: Custom variable labels
+#' labels <- c(
+#'     age = "Age (years)",
+#'     sex = "Sex",
+#'     bmi = "Body Mass Index (kg/m²)",
+#'     treatment = "Treatment Arm"
+#' )
+#' 
+#' desctbl(clintrial,
+#'         by = "treatment",
+#'         variables = c("age", "sex", "bmi"),
+#'         var_labels = labels)
+#' 
+#' # Example 10: Position total column last
+#' desctbl(clintrial,
+#'         by = "treatment",
+#'         variables = c("age", "sex"),
+#'         total = "last")
+#' 
+#' # Example 11: Exclude total column
+#' desctbl(clintrial,
+#'         by = "treatment",
+#'         variables = c("age", "sex"),
+#'         total = FALSE)
+#' 
+#' # Example 12: Survival analysis
+#' desctbl(clintrial,
+#'         by = "treatment",
+#'         variables = "Surv(os_months, os_status)")
+#' 
+#' # Example 13: Multiple survival endpoints
+#' desctbl(clintrial,
+#'         by = "treatment",
+#'         variables = c(
+#'             "Surv(os_months, os_status)",
+#'             "Surv(pfs_months, pfs_status)"
+#'         ),
+#'         var_labels = c(
+#'             "Surv(os_months, os_status)" = "Overall Survival",
+#'             "Surv(pfs_months, pfs_status)" = "Progression-Free Survival"
+#'         ))
+#' 
+#' # Example 14: Mixed variable types
+#' desctbl(clintrial,
+#'         by = "treatment",
+#'         variables = c(
+#'             "age", "sex", "race",           # Demographics
+#'             "bmi", "creatinine",            # Labs
+#'             "smoking", "hypertension",      # Risk factors
+#'             "Surv(os_months, os_status)"    # Survival
+#'         ))
+#' 
+#' # Example 15: Export to PDF
+#' table1 <- desctbl(clintrial,
+#'                   by = "treatment",
+#'                   variables = c("age", "sex", "bmi"))
+#' tbl2pdf(table1, "table1.pdf")
+#' 
+#' # Example 16: Three or more groups
+#' desctbl(clintrial,
+#'         by = "stage",  # Assuming stage has 3+ levels
+#'         variables = c("age", "sex", "bmi"))
+#' # Automatically uses ANOVA/Kruskal-Wallis and chi-squared
+#' 
+#' # Example 17: Access raw unformatted data
 #' result <- desctbl(clintrial,
 #'                   by = "treatment",
-#'                   variables = c("age", "bmi", "sex"))
+#'                   variables = c("age", "bmi"))
 #' raw_data <- attr(result, "raw_data")
 #' print(raw_data)
 #' # Raw data includes unformatted numbers, SDs, quartiles, etc.
@@ -389,7 +399,7 @@ desctbl <- function(data,
     group_var_label <- NULL
     
     ## Apply label to group variable if provided
-    if (!is.null(group_var) && !is.null(var_labels) && group_var %in% names(var_labels)) {
+    if (!is.null(group_var) && !is.null(var_labels) && group_var %chin% names(var_labels)) {
         group_var_label <- var_labels[group_var]
     } else if (!is.null(group_var)) {
         group_var_label <- group_var
@@ -398,15 +408,16 @@ desctbl <- function(data,
     ## Variables are already provided as a vector
     vars <- variables
     
-    ## Initialize both result tables
-    result <- data.table::data.table()
-    raw_result <- data.table::data.table()
+    ## Pre-allocate lists for results (much faster than rbind in loop)
+    n_vars <- length(vars)
+    result_list <- vector("list", n_vars)
+    raw_result_list <- vector("list", n_vars)
     
     ## Process each variable
-    for (var in vars) {
+    for (i in seq_along(vars)) {
         var_data <- process_variable(
             data = data,
-            var = var,
+            var = vars[i],
             group_var = group_var,
             stats_continuous = stats_continuous,
             stats_categorical = stats_categorical,
@@ -423,18 +434,21 @@ desctbl <- function(data,
             ...
         )
         
-        result <- rbind(result, var_data$formatted, fill = TRUE)
-        raw_result <- rbind(raw_result, var_data$raw, fill = TRUE)
+        result_list[[i]] <- var_data$formatted
+        raw_result_list[[i]] <- var_data$raw
     }
+    
+    ## Combine all results at once using rbindlist (10-100x faster than repeated rbind)
+    result <- data.table::rbindlist(result_list, fill = TRUE)
+    raw_result <- data.table::rbindlist(raw_result_list, fill = TRUE)
 
-    ## Standardize column names
-    if ("variable" %in% names(result)) {
-        data.table::setnames(result, "variable", "Variable")
-        data.table::setnames(raw_result, "variable", "Variable")
-    }
-    if ("level" %in% names(result)) {
-        data.table::setnames(result, "level", "Group")
-        data.table::setnames(raw_result, "level", "Group")
+    ## Standardize column names using single setnames call
+    old_names <- c("variable", "level")
+    new_names <- c("Variable", "Group")
+    
+    if ("variable" %chin% names(result)) {
+        setnames(result, old_names, new_names, skip_absent = TRUE)
+        setnames(raw_result, old_names, new_names, skip_absent = TRUE)
     }
 
     ## Add p-value column if tests requested (after standardization)
@@ -461,7 +475,7 @@ desctbl <- function(data,
                              )
         
         ## Calculate and add total if present
-        if (total_label %in% names(result)) {
+        if (total_label %chin% names(result)) {
             n_total <- nrow(data)
             n_row[[total_label]] <- format(n_total, big.mark = ",")
         }
@@ -469,21 +483,21 @@ desctbl <- function(data,
         ## Calculate for each group in the correct order
         for (grp in groups) {
             grp_col <- as.character(grp)
-            if (grp_col %in% names(result)) {
+            if (grp_col %chin% names(result)) {
                 n_group <- sum(data[[group_var]] == grp, na.rm = TRUE)
                 n_row[[grp_col]] <- format(n_group, big.mark = ",")
             }
         }
         
         ## Add empty p-value column if it exists
-        if ("p-value" %in% names(result)) {
+        if ("p-value" %chin% names(result)) {
             n_row[["p-value"]] <- ""
         }
         
         ## Prepend N row
         result <- rbind(n_row, result, fill = TRUE)
         
-    } else if (total && total_label %in% names(result)) {
+    } else if (total && total_label %chin% names(result)) {
         ## Add N row for ungrouped tables with Total column
         n_total <- nrow(data)
         n_row <- data.table::data.table(

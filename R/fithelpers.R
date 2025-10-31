@@ -82,11 +82,16 @@ format_model_table <- function(data,
         }
     }
     
-    ## Apply variable labels if provided
-    if (!is.null(var_labels) && "Variable" %in% names(result)) {
-        for (var_name in names(var_labels)) {
-            result[Variable == var_name, Variable := var_labels[var_name]]
-        }
+    ## Apply variable labels if provided - OPTIMIZED
+    if (!is.null(var_labels) && "Variable" %in% names(result) && length(var_labels) > 0) {
+                                        # Vectorized lookup using data.table join
+        label_dt <- data.table::data.table(
+                                    var_orig = names(var_labels),
+                                    var_new = unname(unlist(var_labels))
+                                )
+        
+                                        # Update using merge (more efficient for many labels)
+        result[label_dt, Variable := i.var_new, on = .(Variable = var_orig)]
     }
     
     ## Clean up Group display (handle empty groups for continuous vars)
@@ -94,43 +99,43 @@ format_model_table <- function(data,
         result[Group == "", Group := "-"]
     }
 
-    ## Format sample size BEFORE eliminating repeated variable names
-    ## This preserves the group-specific counts
+    ## Format sample size BEFORE eliminating repeated variable names - OPTIMIZED
     if ("n" %in% names(result)) {
+                                        # Use n_group where available, otherwise use n
         if ("n_group" %in% names(result)) {
-            ## Use group-specific n where available
-            result[, n := ifelse(!is.na(n_group), 
-                                 as.character(n_group),
-                                 as.character(n))]
+            result[!is.na(n_group), n := n_group]
         }
-        ## Format with commas
-        result[, n := ifelse(!is.na(n) & as.numeric(n) >= 1000,
-                             format(as.numeric(n), big.mark = ","),
-                             as.character(n))]
+        
+                                        # Convert to character and format with commas in one step
+        result[, n := data.table::fcase(
+                                      is.na(n), NA_character_,
+                                      n >= 1000, format(n, big.mark = ","),
+                                      default = as.character(n)
+                                  )]
     }
 
-    ## Similar for events
+    ## Similar optimization for events
     if ("events" %in% names(result)) {
         if ("events_group" %in% names(result)) {
-            result[, events := ifelse(!is.na(events_group),
-                                      as.character(events_group),
-                                      as.character(events))]
+            result[!is.na(events_group), events := events_group]
         }
-        result[, events := ifelse(!is.na(events) & as.numeric(events) >= 1000,
-                                  format(as.numeric(events), big.mark = ","),
-                                  as.character(events))]
+        
+        result[, events := data.table::fcase(
+                                           is.na(events), NA_character_,
+                                           events >= 1000, format(events, big.mark = ","),
+                                           default = as.character(events)
+                                       )]
     }
     
-    ## NOW eliminate repeated variable names (AFTER processing n and events)
-    if ("Variable" %in% names(result)) {
-        current_var <- ""
-        for (i in seq_len(nrow(result))) {
-            if (result$Variable[i] == current_var) {
-                result[i, Variable := ""]
-            } else {
-                current_var <- result$Variable[i]
-            }
-        }
+    ## Eliminate repeated variable names - OPTIMIZED VECTORIZED VERSION
+    if ("Variable" %in% names(result) && nrow(result) > 1) {
+                                        # Create a logical vector indicating where variable changes
+                                        # TRUE for first occurrence, FALSE for repeats
+        n_rows <- nrow(result)
+        is_new_var <- c(TRUE, result$Variable[-1] != result$Variable[-n_rows])
+        
+                                        # Set non-first occurrences to empty string
+        result[!is_new_var, Variable := ""]
     }
     
     ## Create effect column label based on model scope
@@ -161,27 +166,23 @@ format_model_table <- function(data,
         }
         
         if (effect_col %in% c("OR", "HR", "RR")) {
-            result[, (effect_label) := ifelse(
-                         is_reference,
-                         paste0(reference_label),
-                                       ifelse(!is.na(get(effect_col)),
-                                              sprintf("%.*f (%.*f-%.*f)",
-                                                      digits, get(effect_col),
-                                                      digits, CI_lower,
-                                                      digits, CI_upper),
-                                              "")
-                     )]
+            result[, (effect_label) := data.table::fcase(
+                                                       is_reference, reference_label,
+                                                       !is.na(get(effect_col)), sprintf("%.*f (%.*f-%.*f)",
+                                                                                        digits, get(effect_col),
+                                                                                        digits, CI_lower,
+                                                                                        digits, CI_upper),
+                                                       default = ""
+                                                   )]
         } else {
-            result[, (effect_label) := ifelse(
-                         is_reference,
-                         paste0(reference_label),
-                                       ifelse(!is.na(get(effect_col)),
-                                              sprintf("%.*f (%.*f, %.*f)",
-                                                      digits, get(effect_col),
-                                                      digits, CI_lower,
-                                                      digits, CI_upper),
-                                              "")
-                     )]
+            result[, (effect_label) := data.table::fcase(
+                                                       is_reference, reference_label,
+                                                       !is.na(get(effect_col)), sprintf("%.*f (%.*f, %.*f)",
+                                                                                        digits, get(effect_col),
+                                                                                        digits, CI_lower,
+                                                                                        digits, CI_upper),
+                                                       default = ""
+                                                   )]
         }
     }
     
@@ -220,10 +221,12 @@ format_model_table <- function(data,
     return(formatted)
 }
 
-#' Format p-values for display
+#' Format p-values for display - OPTIMIZED
 #' @keywords internal
 format_pvalues_fit <- function(p, digits = 3) {
-    ifelse(is.na(p), "-",
-    ifelse(p < 0.001, "< 0.001",
-           sprintf(paste0("%.", digits, "f"), p)))
+    data.table::fcase(
+                    is.na(p), "-",
+                    p < 0.001, "< 0.001",
+                    default = sprintf(paste0("%.", digits, "f"), p)
+                )
 }

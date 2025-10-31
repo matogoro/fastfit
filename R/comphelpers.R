@@ -36,10 +36,10 @@ extract_model_metrics <- function(model, raw_data, model_type) {
     
     metrics <- list(
         n = raw_data$n[1],
-        events = if ("events" %in% names(raw_data)) raw_data$events[1] else NA_integer_,
+        events = if ("events" %chin% names(raw_data)) raw_data$events[1] else NA_integer_,
         predictors = length(coef(model)),
-        aic = if ("AIC" %in% names(raw_data)) raw_data$AIC[1] else AIC(model),
-        bic = if ("BIC" %in% names(raw_data)) raw_data$BIC[1] else BIC(model),
+        aic = if ("AIC" %chin% names(raw_data)) raw_data$AIC[1] else AIC(model),
+        bic = if ("BIC" %chin% names(raw_data)) raw_data$BIC[1] else BIC(model),
         ## Initialize all possible metrics as NA to avoid missing list elements
         pseudo_r2 = NA_real_,
         concordance = NA_real_,
@@ -118,18 +118,20 @@ extract_model_metrics <- function(model, raw_data, model_type) {
         metrics$rsq <- NA_real_
         metrics$lr_test_p <- NA_real_
         
+        ## Cache summary to avoid repeated calls
+        summ <- summary(model)
+        
         ## Concordance
         if (!is.null(model$concordance)) {
             metrics$c_index <- model$concordance["concordance"]
             metrics$concordance <- metrics$c_index
             
-        } else if (!is.null(summary(model)$concordance)) {
-            metrics$c_index <- summary(model)$concordance["C"]
+        } else if (!is.null(summ$concordance)) {
+            metrics$c_index <- summ$concordance["C"]
             metrics$concordance <- metrics$c_index
         }
         
         ## R-squared (different location in Cox models)
-        summ <- summary(model)
         if (!is.null(summ$rsq)) {
             metrics$rsq <- summ$rsq[1]
             metrics$pseudo_r2 <- metrics$rsq
@@ -160,33 +162,30 @@ build_comparison_table <- function(comparison, model_type) {
                       "McFadden R2", "Nagelkerke R2", 
                       "Hoslem p", "Global p")
         
-        ## Rename for display
-        setnames(comparison, 
-                 c("c_statistic", "brier_score", "mcfadden_r2", 
-                   "nagelkerke_r2", "hoslem_p", "global_p"),
-                 c("C-statistic", "Brier Score", "McFadden R2", 
-                   "Nagelkerke R2", "Hoslem p", "Global p"),
-                 skip_absent = TRUE)
+        ## Rename for display - single call is more efficient
+        old_names <- c("c_statistic", "brier_score", "mcfadden_r2", 
+                       "nagelkerke_r2", "hoslem_p", "global_p")
+        new_names <- c("C-statistic", "Brier Score", "McFadden R2", 
+                       "Nagelkerke R2", "Hoslem p", "Global p")
+        setnames(comparison, old_names, new_names, skip_absent = TRUE)
         
     } else if (model_type == "coxph") {
         key_cols <- c("Model", "N", "Events", "Predictors", "Converged",
                       "AIC", "BIC", "C-index", "R2", "R2 max",
                       "PH test p", "Global p")
         
-        setnames(comparison,
-                 c("c_index", "rsq", "rsq_max", "ph_global_p", "lr_test_p"),
-                 c("C-index", "R2", "R2 max", "PH test p", "Global p"),
-                 skip_absent = TRUE)
+        old_names <- c("c_index", "rsq", "rsq_max", "ph_global_p", "lr_test_p")
+        new_names <- c("C-index", "R2", "R2 max", "PH test p", "Global p")
+        setnames(comparison, old_names, new_names, skip_absent = TRUE)
         
     } else if (model_type == "lm") {
         key_cols <- c("Model", "N", "Predictors", "Converged",
                       "AIC", "BIC", "R2", "Adj R2", "RMSE",
                       "F-stat", "Global p")
         
-        setnames(comparison,
-                 c("r_squared", "adj_r_squared", "rmse", "f_statistic", "global_p"),
-                 c("R2", "Adj R2", "RMSE", "F-stat", "Global p"),
-                 skip_absent = TRUE)
+        old_names <- c("r_squared", "adj_r_squared", "rmse", "f_statistic", "global_p")
+        new_names <- c("R2", "Adj R2", "RMSE", "F-stat", "Global p")
+        setnames(comparison, old_names, new_names, skip_absent = TRUE)
     }
     
     ## Keep only relevant columns that exist
@@ -199,160 +198,139 @@ build_comparison_table <- function(comparison, model_type) {
     return(comparison)
 }
 
-#' Format comparison table for display
-#' @keywords internal  
-format_model_comparison <- function(dt) {
-    ## Round appropriately based on metric type
+#' Format model comparison table
+#' @keywords internal
+format_model_comparison <- function(comparison) {
     
-    ## 3 decimal places for proportions/probabilities
-    for (col in c("C-statistic", "C-index", "Brier Score", "R2", "Adj R2", 
-                  "McFadden R2", "Nagelkerke R2", "Tjur R2", "R2 max")) {
-        if (col %in% names(dt)) {
-            dt[[col]] <- round(dt[[col]], 3)
+    ## Round numeric columns to appropriate precision
+    numeric_cols <- names(comparison)[sapply(comparison, is.numeric)]
+    
+    for (col in numeric_cols) {
+        if (col %chin% c("AIC", "BIC")) {
+            comparison[, (col) := round(get(col), 1)]
+        } else if (col %chin% c("C-statistic", "C-index", "Concordance", 
+                                "McFadden R2", "Nagelkerke R2", "R2", "Adj R2",
+                                "Brier Score", "RMSE")) {
+            comparison[, (col) := round(get(col), 3)]
         }
     }
     
-    ## 1 decimal for information criteria
-    for (col in c("AIC", "BIC", "AICc")) {
-        if (col %in% names(dt)) {
-            dt[[col]] <- round(dt[[col]], 1)
-        }
-    }
-    
-    ## Format p-values
-    for (col in grep("\\sp$|^Global p$|^Hoslem p$|^PH test p$", names(dt), value = TRUE)) {
-        dt[[col]] <- format_pvalue(dt[[col]], 3)
-    }
-    
-    return(dt)
+    return(comparison)
 }
 
-#' Calculate model selection scores based on multiple criteria
+#' Calculate FastFit scores for model comparison
 #' @keywords internal
-calculate_model_scores <- function(comparison, model_type, custom_weights = NULL) {
-    
-    ## Initialize scoring data.table
-    scores <- data.table::data.table(Model = comparison$Model)
+calculate_model_scores <- function(comparison, model_type, scoring_weights = NULL) {
     
     ## Define default weights based on model type
     default_weights <- list(
-        glm = list(
-            convergence = 0.15,
-            aic = 0.25,
-            concordance = 0.30,
-            pseudo_r2 = 0.20,
-            brier = 0.10
-        ),
-        coxph = list(
-            convergence = 0.20,
-            aic = 0.30,
-            concordance = 0.30,
-            global_p = 0.20
-        ),
-        lm = list(
-            convergence = 0.15,
-            aic = 0.25,
-            pseudo_r2 = 0.35,
-            rmse = 0.25
-        ),
-        generic = list(
-            convergence = 0.25,
-            aic = 0.50,
-            bic = 0.25
-        )
+        glm = list(convergence = 0.15, aic = 0.25, concordance = 0.40, 
+                   pseudo_r2 = 0.15, brier = 0.05),
+        coxph = list(convergence = 0.15, aic = 0.30, concordance = 0.40, 
+                     global_p = 0.15),
+        lm = list(convergence = 0.15, aic = 0.25, pseudo_r2 = 0.45, 
+                  rmse = 0.15)
     )
     
-    ## Use custom weights if provided, otherwise use defaults
-    if (!is.null(custom_weights)) {
-        
-        ## Validate custom weights
-        if (!is.list(custom_weights)) {
-            stop("scoring_weights must be a named list")
+    ## Use provided weights or defaults
+    if (is.null(scoring_weights)) {
+        weights <- default_weights[[model_type]]
+        if (is.null(weights)) {
+            weights <- list(convergence = 0.20, aic = 0.40, bic = 0.40)
         }
-        
-        ## Check that weights sum to approximately 1
-        weight_sum <- sum(unlist(custom_weights))
-        if (abs(weight_sum - 1) > 0.01) {
-            warning(sprintf("Scoring weights sum to %.2f, not 1.0. Normalizing...", weight_sum))
-            custom_weights <- lapply(custom_weights, function(x) x / weight_sum)
-        }
-        
-        ## Use custom weights, filling in any missing with defaults
-        base_weights <- default_weights[[model_type]] %||% default_weights$generic
-        weights <- modifyList(base_weights, custom_weights)
     } else {
-        weights <- default_weights[[model_type]] %||% default_weights$generic
+        weights <- scoring_weights
     }
     
-    ## Score 1: Convergence (0-100)
-    scores$conv_score <- ifelse(comparison$Converged == "Yes", 100,
-                         ifelse(comparison$Converged == "Suspect", 50, 0))
+    ## Validate weights sum to 1
+    weight_sum <- sum(unlist(weights))
+    if (abs(weight_sum - 1) > 0.01) {
+        warning("Scoring weights do not sum to 1, normalizing...")
+        weights <- lapply(weights, function(x) x / weight_sum)
+    }
     
-    ## Score 2: AIC - lower is better
+    ## Initialize scores with pre-allocation
+    n_models <- nrow(comparison)
+    scores <- list(
+        conv_score = numeric(n_models),
+        aic_score = numeric(n_models),
+        concordance_score = numeric(n_models),
+        pseudo_r2_score = numeric(n_models),
+        brier_score = numeric(n_models),
+        global_score = numeric(n_models),
+        rmse_score = numeric(n_models),
+        bic_score = numeric(n_models),
+        total = numeric(n_models)
+    )
+    
+    ## Convergence score (universal)
+    scores$conv_score <- data.table::fcase(
+                                         comparison$Converged == "Yes", 100,
+                                         comparison$Converged == "Suspect", 70,
+                                         comparison$Converged == "No", 30,
+                                         default = 0
+                                     )
+    
+    ## AIC score (universal, lower is better)
     if (!all(is.na(comparison$AIC))) {
         aic_values <- comparison$AIC[!is.na(comparison$AIC)]
         if (length(aic_values) > 1) {
-            ## Use relative scoring - best model gets 100, others proportionally less
             aic_best <- min(aic_values)
             aic_worst <- max(aic_values)
-            ## Avoid division by zero
             if (aic_worst - aic_best > 0) {
-                scores$aic_score <- 100 * (1 - (comparison$AIC - aic_best)/(aic_worst - aic_best))
+                scores$aic_score <- data.table::fifelse(
+                                                    is.na(comparison$AIC), 0,
+                                                    100 * (1 - (comparison$AIC - aic_best)/(aic_worst - aic_best))
+                )
             } else {
-                scores$aic_score <- 100  ## All models have same AIC
+                scores$aic_score <- rep(100, n_models)
             }
         } else {
-            scores$aic_score <- 100  ## Single model
+            scores$aic_score <- data.table::fifelse(is.na(comparison$AIC), 0, 100)
         }
         scores$aic_score[is.na(scores$aic_score)] <- 0
     } else {
-        scores$aic_score <- 50
+        scores$aic_score <- rep(50, n_models)
     }
     
     ## Model-specific scores
     if (model_type == "glm") {
-        ## Concordance/C-statistic
-        ## 0.5 = no discrimination (0 points)
-        ## 0.6 = poor (40 points)
-        ## 0.7 = acceptable (60 points)
-        ## 0.8 = good (80 points)
-        ## 0.9+ = excellent (90-100 points)
-        if ("Concordance" %in% names(comparison) && !all(is.na(comparison$Concordance))) {
-            scores$concordance_score <- ifelse(
-                is.na(comparison$Concordance), 0,
-                                        ifelse(comparison$Concordance <= 0.5, 0,
-                                        ifelse(comparison$Concordance <= 0.6, 40 * (comparison$Concordance - 0.5)/0.1,
-                                        ifelse(comparison$Concordance <= 0.7, 40 + 20 * (comparison$Concordance - 0.6)/0.1,
-                                        ifelse(comparison$Concordance <= 0.8, 60 + 20 * (comparison$Concordance - 0.7)/0.1,
-                                        ifelse(comparison$Concordance <= 0.9, 80 + 10 * (comparison$Concordance - 0.8)/0.1,
-                                               90 + 10 * (comparison$Concordance - 0.9)/0.1)))))
-            )
-            scores$concordance_score <- pmin(100, scores$concordance_score)  # Cap at 100
+        ## Concordance/C-statistic using fcase for better performance
+        if ("Concordance" %chin% names(comparison) && !all(is.na(comparison$Concordance))) {
+            scores$concordance_score <- data.table::fcase(
+                                                        is.na(comparison$Concordance), 0,
+                                                        comparison$Concordance <= 0.5, 0,
+                                                        comparison$Concordance <= 0.6, 40 * (comparison$Concordance - 0.5)/0.1,
+                                                        comparison$Concordance <= 0.7, 40 + 20 * (comparison$Concordance - 0.6)/0.1,
+                                                        comparison$Concordance <= 0.8, 60 + 20 * (comparison$Concordance - 0.7)/0.1,
+                                                        comparison$Concordance <= 0.9, 80 + 10 * (comparison$Concordance - 0.8)/0.1,
+                                                        default = 90 + 10 * (comparison$Concordance - 0.9)/0.1
+                                                    )
+            scores$concordance_score <- pmin(100, scores$concordance_score)
         } else {
-            scores$concordance_score <- 50
+            scores$concordance_score <- rep(50, n_models)
         }
         
         ## Pseudo-R^2
-        ## 0 to 0.5 is typical range
-        if ("Pseudo-R^2" %in% names(comparison) && !all(is.na(comparison$`Pseudo-R^2`))) {
+        if ("Pseudo-R^2" %chin% names(comparison) && !all(is.na(comparison$`Pseudo-R^2`))) {
             ## McFadden's R2 rarely exceeds 0.4 for good models
-            scores$pseudo_r2_score <- ifelse(
+            scores$pseudo_r2_score <- data.table::fifelse(
                 is.na(comparison$`Pseudo-R^2`), 0,
                 pmin(100, comparison$`Pseudo-R^2` * 250)  # 0.4 -> 100 points
             )
         } else {
-            scores$pseudo_r2_score <- 50
+            scores$pseudo_r2_score <- rep(50, n_models)
         }
 
         ## Brier score - only if column exists and weight is non-zero
-        if ("Brier Score" %in% names(comparison) && "brier" %in% names(weights) && weights$brier > 0) {
+        if ("Brier Score" %chin% names(comparison) && "brier" %chin% names(weights) && weights$brier > 0) {
             ## Lower is better (0 = perfect, 0.25 = no skill)
-            scores$brier_score <- ifelse(
+            scores$brier_score <- data.table::fifelse(
                 is.na(comparison$`Brier Score`), 50,
                 100 * (1 - comparison$`Brier Score`/0.25)
             )
         } else {
-            scores$brier_score <- 50
+            scores$brier_score <- rep(50, n_models)
             weights$brier <- 0  # Set weight to 0 if not using
         }
         
@@ -360,9 +338,8 @@ calculate_model_scores <- function(comparison, model_type, custom_weights = NULL
         if (weights$brier == 0) {
             remaining_weights <- weights[names(weights) != "brier"]
             weight_sum <- sum(unlist(remaining_weights))
-            for (w in names(remaining_weights)) {
-                weights[[w]] <- weights[[w]] / weight_sum
-            }
+            remaining_weights <- lapply(remaining_weights, function(x) x / weight_sum)
+            weights[names(remaining_weights)] <- remaining_weights
         }
         
         ## Calculate weighted total
@@ -373,26 +350,26 @@ calculate_model_scores <- function(comparison, model_type, custom_weights = NULL
         
     } else if (model_type == "coxph") {
         ## Similar adjustments for Cox models
-        if ("Concordance" %in% names(comparison) && !all(is.na(comparison$Concordance))) {
-            scores$concordance_score <- ifelse(
-                is.na(comparison$Concordance), 0,
-                                        ifelse(comparison$Concordance <= 0.5, 0,
-                                               pmin(100, 200 * (comparison$Concordance - 0.5)))
-            )
+        if ("Concordance" %chin% names(comparison) && !all(is.na(comparison$Concordance))) {
+            scores$concordance_score <- data.table::fcase(
+                                                        is.na(comparison$Concordance), 0,
+                                                        comparison$Concordance <= 0.5, 0,
+                                                        default = pmin(100, 200 * (comparison$Concordance - 0.5))
+                                                    )
         } else {
-            scores$concordance_score <- 50
+            scores$concordance_score <- rep(50, n_models)
         }
         
         ## Global p-value score
-        if ("Global p" %in% names(comparison)) {
+        if ("Global p" %chin% names(comparison)) {
             global_numeric <- suppressWarnings(as.numeric(gsub("< ", "", comparison$`Global p`)))
-            scores$global_score <- ifelse(
-                is.na(global_numeric), 50,
-                                   ifelse(global_numeric > 0.05, 50,  # Not significant
-                                          50 + 50 * (0.05 - global_numeric)/0.05)  # More significant = higher score
-            )
+            scores$global_score <- data.table::fcase(
+                                                   is.na(global_numeric), 50,
+                                                   global_numeric > 0.05, 50,
+                                                   default = 50 + 50 * (0.05 - global_numeric)/0.05
+                                               )
         } else {
-            scores$global_score <- 50
+            scores$global_score <- rep(50, n_models)
         }
         
         scores$total <- scores$conv_score * weights$convergence +
@@ -402,15 +379,15 @@ calculate_model_scores <- function(comparison, model_type, custom_weights = NULL
         
     } else if (model_type == "lm") {
         ## R^2 scoring
-        if ("Pseudo-R^2" %in% names(comparison) && !all(is.na(comparison$`Pseudo-R^2`))) {
+        if ("Pseudo-R^2" %chin% names(comparison) && !all(is.na(comparison$`Pseudo-R^2`))) {
             scores$pseudo_r2_score <- comparison$`Pseudo-R^2` * 100
             scores$pseudo_r2_score[is.na(scores$pseudo_r2_score)] <- 0
         } else {
-            scores$pseudo_r2_score <- 50
+            scores$pseudo_r2_score <- rep(50, n_models)
         }
         
         ## RMSE scoring would go here if column exists
-        scores$rmse_score <- 50  # Placeholder
+        scores$rmse_score <- rep(50, n_models)  # Placeholder
         
         scores$total <- scores$conv_score * weights$convergence +
             scores$aic_score * weights$aic +
@@ -419,7 +396,7 @@ calculate_model_scores <- function(comparison, model_type, custom_weights = NULL
         
     } else {
         ## Generic fallback
-        scores$bic_score <- 50
+        scores$bic_score <- rep(50, n_models)
         if (!all(is.na(comparison$BIC))) {
             bic_values <- comparison$BIC[!is.na(comparison$BIC)]
             if (length(bic_values) > 1) {
@@ -428,10 +405,10 @@ calculate_model_scores <- function(comparison, model_type, custom_weights = NULL
                 if (bic_worst - bic_best > 0) {
                     scores$bic_score <- 100 * (1 - (comparison$BIC - bic_best)/(bic_worst - bic_best))
                 } else {
-                    scores$bic_score <- 100
+                    scores$bic_score <- rep(100, n_models)
                 }
             } else {
-                scores$bic_score <- 100
+                scores$bic_score <- rep(100, n_models)
             }
             scores$bic_score[is.na(scores$bic_score)] <- 0
         }
@@ -441,8 +418,8 @@ calculate_model_scores <- function(comparison, model_type, custom_weights = NULL
             scores$bic_score * weights$bic
     }
     
-    ## Add final score to comparison table
-    comparison$`FastFit Score` <- round(scores$total, 1)
+    ## Add final score to comparison table using := for efficiency
+    comparison[, `FastFit Score` := round(scores$total, 1)]
     
     ## Sort by score (highest first)
     setorder(comparison, -`FastFit Score`)
@@ -464,7 +441,6 @@ print.compfit_result <- function(x, ...) {
     
     ## Show scoring weights
     weights <- attr(x, "weights")
-    ## In print.compfit_result function:
     if (!is.null(weights)) {
         cat("\nFastFit Score Weights:\n")
         for (metric in names(weights)) {

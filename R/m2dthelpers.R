@@ -1,39 +1,41 @@
 #' Detect if model is univariable or multivariable
 #' @keywords internal
 detect_model_type <- function(model) {
-    ## Get number of non-intercept terms
-    n_terms <- length(stats::coef(model))
+    ## Get coefficient names once
+    coef_names <- names(stats::coef(model))
     
-    ## Account for intercept
-    if ("(Intercept)" %in% names(stats::coef(model))) {
-        n_terms <- n_terms - 1
+    ## Remove intercept from count
+    if ("(Intercept)" %in% coef_names) {
+        term_names <- coef_names[coef_names != "(Intercept)"]
+    } else {
+        term_names <- coef_names
     }
     
-    ## For Cox models, no intercept to worry about
-    if (inherits(model, c("coxph", "coxme", "clogit"))) {
-        n_terms <- length(stats::coef(model))
+    ## For models without factor variables, just count terms
+    if (is.null(model$xlevels) || length(model$xlevels) == 0) {
+        n_terms <- length(term_names)
+        return(data.table::fifelse(n_terms == 1, "Univariable", "Multivariable"))
     }
     
-    ## Check for factor expansions - if model has xlevels, count base variables
-    if (!is.null(model$xlevels)) {
-        n_vars <- length(model$xlevels)
-        ## Add any continuous variables (those not in xlevels)
-        term_names <- names(stats::coef(model))
-        term_names <- term_names[term_names != "(Intercept)"]
-        for (term in term_names) {
-            is_factor_term <- FALSE
-            for (var in names(model$xlevels)) {
-                if (grepl(paste0("^", var), term)) {
-                    is_factor_term <- TRUE
-                    break
-                }
-            }
-            if (!is_factor_term) n_vars <- n_vars + 1
-        }
-        n_terms <- n_vars
-    }
+    ## For models with factor variables, count unique base variables
+    ## Start with number of factor variables
+    n_vars <- length(model$xlevels)
     
-    return(ifelse(n_terms == 1, "Univariable", "Multivariable"))
+    ## Create regex pattern to match all factor variable terms
+    factor_pattern <- paste0("^(", paste(names(model$xlevels), collapse = "|"), ")")
+    
+    ## Find which terms are NOT factor terms (i.e., continuous variables)
+    is_factor_term <- grepl(factor_pattern, term_names)
+    
+    ## Count unique continuous variables
+    ## Each continuous term that's not a factor level is a separate variable
+    continuous_terms <- term_names[!is_factor_term]
+    n_continuous <- length(unique(continuous_terms))
+    
+    ## Total unique variables
+    n_terms <- n_vars + n_continuous
+    
+    return(data.table::fifelse(n_terms == 1, "Univariable", "Multivariable"))
 }
 
 #' Get readable model type name
@@ -46,74 +48,72 @@ get_model_type_name <- function(model) {
         model_class <- class(model)[2]
     }
     
-    ## Map to readable names
-    type_map <- c(
-        "glm" = "Logistic",  # Will be refined based on family
-        "lm" = "Linear",
-        "coxph" = "Cox PH",
-        "clogit" = "Conditional Logistic",
-        "coxme" = "Mixed Effects Cox",
-        "glmer" = "Mixed Effects GLM",
-        "lmer" = "Mixed Effects Linear"
-    )
-    
     ## For GLM, be more specific based on family
     if (model_class == "glm") {
         family <- model$family$family
-        link <- model$family$link
         
-        if (family == "binomial") {
-            return("Logistic")
-        } else if (family == "poisson") {
-            return("Poisson")
-        } else if (family == "gaussian") {
-            return("Linear (GLM)")
-        } else if (family == "Gamma") {
-            return("Gamma")
-        } else if (family == "quasibinomial") {
-            return("Quasi-Binomial")
-        } else if (family == "quasipoisson") {
-            return("Quasi-Poisson")
-        } else {
-            return(paste0(stringr::str_to_title(family), " GLM"))
-        }
+        ## OPTIMIZED: Use switch instead of multiple if-else
+        return(switch(family,
+                      binomial = "Logistic",
+                      poisson = "Poisson",
+                      gaussian = "Linear (GLM)",
+                      Gamma = "Gamma",
+                      quasibinomial = "Quasi-Binomial",
+                      quasipoisson = "Quasi-Poisson",
+                      paste0(stringr::str_to_title(family), " GLM")
+                      ))
     }
     
-    return(type_map[model_class] %||% model_class)
+    ## Map to readable names for other model types
+    ## OPTIMIZED: Use switch instead of named vector lookup
+    return(switch(model_class,
+                  lm = "Linear",
+                  coxph = "Cox PH",
+                  clogit = "Conditional Logistic",
+                  coxme = "Mixed Effects Cox",
+                  glmer = "Mixed Effects GLM",
+                  lmer = "Mixed Effects Linear",
+                  model_class  # default
+                  ))
 }
 
 #' Parse term into variable and group
 #' @keywords internal
 parse_term <- function(terms, xlevels = NULL) {
-    result <- data.table::data.table(
-                              variable = character(length(terms)),
-                              group = character(length(terms))
-                          )
+    n_terms <- length(terms)
     
-    for (i in seq_along(terms)) {
-        term <- terms[i]
+    ## Initialize result vectors
+    variable <- character(n_terms)
+    group <- character(n_terms)
+    
+    if (!is.null(xlevels) && length(xlevels) > 0) {
+        ## OPTIMIZED: Vectorized approach
+        xlevel_names <- names(xlevels)
         
-        ## Check if it's a factor term
-        matched <- FALSE
-        if (!is.null(xlevels)) {
-            for (var in names(xlevels)) {
-                if (grepl(paste0("^", var), term)) {
-                    ## Extract the level
-                    level <- sub(paste0("^", var), "", term)
-                    result$variable[i] <- var  ## lowercase
-                    result$group[i] <- level    ## lowercase
-                    matched <- TRUE
-                    break
-                }
+        ## For each factor variable, find all matching terms at once
+        for (var in xlevel_names) {
+            ## Find which terms start with this variable name
+            pattern <- paste0("^", var)
+            matches <- grepl(pattern, terms)
+            
+            if (any(matches)) {
+                ## Extract levels for all matching terms at once
+                variable[matches] <- var
+                group[matches] <- sub(pattern, "", terms[matches])
             }
         }
         
-        ## If not matched as factor, it's continuous or interaction
-        if (!matched) {
-            result$variable[i] <- term
-            result$group[i] <- ""
+        ## Any remaining unmatched terms are continuous variables
+        unmatched <- variable == ""
+        if (any(unmatched)) {
+            variable[unmatched] <- terms[unmatched]
+            ## group already initialized to "" for these
         }
+    } else {
+        ## No factor variables - all continuous
+        variable <- terms
+        ## group already initialized to ""
     }
     
-    return(result)
+    return(data.table::data.table(variable = variable, group = group))
 }

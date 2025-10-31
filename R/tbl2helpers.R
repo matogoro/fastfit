@@ -8,9 +8,9 @@ add_header_padding <- function (col_names) {
 #' Add padding to exported table variables
 #' @keywords internal
 add_variable_padding <- function (df) {
-    var_col <- if ("Variable" %in% names(df)) 
+    var_col <- if ("Variable" %chin% names(df)) 
                    "Variable"
-               else if ("variable" %in% names(df)) 
+               else if ("variable" %chin% names(df)) 
                    "variable"
                else NULL
     if (is.null(var_col)) 
@@ -19,7 +19,7 @@ add_variable_padding <- function (df) {
                                                      df[[var_col]]) & !grepl("^\\s+", df[[var_col]]))
     if (length(var_starts) == 0) 
         return(df)
-    new_df <- data.frame()
+    new_df <- data.table()
     padding_row <- df[1, ]
     padding_row[1, ] <- ""
     new_df <- rbind(new_df, padding_row)
@@ -55,7 +55,7 @@ check_latex <- function () {
 determine_alignment <- function(df) {
     align <- "r"  # Start with row numbers column (if any)
     for (col in names(df)) {
-        if (col %in% c("Variable", "Group")) {
+        if (col %chin% c("Variable", "Group")) {
             align <- paste0(align, "l")
         } else {
             align <- paste0(align, "c")
@@ -94,7 +94,7 @@ format_column_headers_html <- function (col_names) {
 #' Apply formatting to indented groups
 #' @keywords internal
 format_indented_groups <- function (df, indent_string = "    ") {
-    if (!("Variable" %in% names(df) && "Group" %in% names(df))) {
+    if (!("Variable" %chin% names(df) && "Group" %chin% names(df))) {
         return(df)
     }
     
@@ -105,9 +105,9 @@ format_indented_groups <- function (df, indent_string = "    ") {
                      "Univariable HR (95% CI)", "Multivariable aHR (95% CI)",
                      "Univariable RR (95% CI)", "Multivariable aRR (95% CI)",
                      "Univariable Estimate (95% CI)", "Multivariable Estimate (95% CI)")
-    is_regression_table <- any(effect_cols %in% names(df))
-    is_fastfit_table <- any(c("Uni p", "Multi p") %in% names(df))
-    new_df <- data.frame()
+    is_regression_table <- any(effect_cols %chin% names(df))
+    is_fastfit_table <- any(c("Uni p", "Multi p") %chin% names(df))
+    new_df <- data.table()
     
     for (i in seq_along(var_rows)) {
         current <- var_rows[i]
@@ -136,16 +136,16 @@ format_indented_groups <- function (df, indent_string = "    ") {
                                                  df$Group[j])
                     if (is_fastfit_table) {
                         for (ec in effect_cols) {
-                            if (ec %in% names(group_row)) {
+                            if (ec %chin% names(group_row)) {
                                 val <- group_row[[ec]]
                                 if (!is.na(val) && (val == "-" || grepl("Reference", 
                                                                         val))) {
-                                    if (grepl("Univariable", ec) && "Uni p" %in% 
+                                    if (grepl("Univariable", ec) && "Uni p" %chin% 
                                         names(group_row)) {
                                         group_row[["Uni p"]] <- "-"
                                     }
                                     else if (grepl("Multivariable", ec) && 
-                                             "Multi p" %in% names(group_row)) {
+                                             "Multi p" %chin% names(group_row)) {
                                         group_row[["Multi p"]] <- "-"
                                     }
                                 }
@@ -155,7 +155,7 @@ format_indented_groups <- function (df, indent_string = "    ") {
                     else {
                         is_reference <- FALSE
                         for (ec in effect_cols) {
-                            if (ec %in% names(group_row)) {
+                            if (ec %chin% names(group_row)) {
                                 val <- group_row[[ec]]
                                 if (!is.na(val) && (val == "-" || grepl("Reference", 
                                                                         val))) {
@@ -166,7 +166,7 @@ format_indented_groups <- function (df, indent_string = "    ") {
                         }
                         if (is_reference) {
                             for (p_col in p_cols) {
-                                if (p_col %in% names(group_row)) {
+                                if (p_col %chin% names(group_row)) {
                                     group_row[[p_col]] <- ""
                                 }
                             }
@@ -190,7 +190,7 @@ format_indented_groups <- function (df, indent_string = "    ") {
                     group_row$Variable <- paste0(indent_string, 
                                                  df$Group[j])
                     for (p_col in p_cols) {
-                        if (p_col %in% names(group_row)) {
+                        if (p_col %chin% names(group_row)) {
                             group_row[[p_col]] <- ""
                         }
                     }
@@ -346,14 +346,14 @@ format_column_headers_with_n_tex <- function(col_names, n_row_data) {
                                         # Sanitize the column name FIRST
         col_sanitized <- sanitize_for_latex(col)
         
-        has_n <- col %in% names(n_row_data) && 
+        has_n <- col %chin% names(n_row_data) && 
             !is.na(n_row_data[[col]]) && 
             n_row_data[[col]] != "" && 
             n_row_data[[col]] != "0"
         
-        if (col %in% c("Variable", "Group")) {
+        if (col %chin% c("Variable", "Group")) {
             new_names[i] <- format_column_headers(col_sanitized)
-        } else if (col %in% c("p-value", "p value")) {
+        } else if (col %chin% c("p-value", "p value")) {
             new_names[i] <- format_column_headers(col_sanitized)
         } else if (has_n) {
             n_value <- n_row_data[[col]]
@@ -379,13 +379,13 @@ format_column_headers_with_n_html <- function(col_names, n_row_data) {
         col <- col_names[i]
         
         ## Skip Variable, Group, and p-value columns
-        if (col %in% c("Variable", "Group", "p-value", "p value")) {
+        if (col %chin% c("Variable", "Group", "p-value", "p value")) {
             new_names[i] <- format_column_headers_html(col)
             next
         }
         
         ## Get n value from the N row
-        if (col %in% names(n_row_data)) {
+        if (col %chin% names(n_row_data)) {
             n_value <- n_row_data[[col]]
             if (!is.na(n_value) && n_value != "" && n_value != "0") {
                 ## Format header with only n italicized
@@ -431,7 +431,7 @@ condense_table_rows <- function(df, indent_groups = TRUE) {
         var_rows <- result[var_start:var_end]
         n_rows <- nrow(var_rows)
         
-        if ("Group" %in% names(var_rows)) {
+        if ("Group" %chin% names(var_rows)) {
             groups <- var_rows$Group
             
             ## Check for continuous variable
@@ -475,7 +475,7 @@ condense_table_rows <- function(df, indent_groups = TRUE) {
                 
                 if (length(data_cols) > 0) {
                     first_data_col <- data_cols[1]
-                    non_ref_idx <- which(!var_rows[[first_data_col]] %in% c("-", "reference", "Reference", ""))
+                    non_ref_idx <- which(!var_rows[[first_data_col]] %chin% c("-", "reference", "Reference", ""))
                     
                     if (length(non_ref_idx) > 1) {
                         non_ref_idx <- non_ref_idx[2]
@@ -488,7 +488,7 @@ condense_table_rows <- function(df, indent_groups = TRUE) {
                         category_name <- result$Group[non_ref_row]
                         
                         if (!is.na(category_name) && category_name != "") {
-                            if (category_name %in% c("1", "Yes", "yes")) {
+                            if (category_name %chin% c("1", "Yes", "yes")) {
                                 result[var_start, Variable := paste0(var_name)]
                             } else {
                                 result[var_start, Variable := paste0(var_name, " (", category_name, ")")]                                
@@ -497,13 +497,13 @@ condense_table_rows <- function(df, indent_groups = TRUE) {
                         
                         ## Copy statistics
                         for (col in data_cols) {
-                            if (col %in% names(result)) {
+                            if (col %chin% names(result)) {
                                 result[var_start, (col) := result[non_ref_row, get(col)]]
                             }
                         }
                         
                         ## Copy p-value
-                        if ("p-value" %in% names(result)) {
+                        if ("p-value" %chin% names(result)) {
                             pval <- result[var_start:var_end, `p-value`]
                             pval <- pval[!is.na(pval) & pval != ""]
                             if (length(pval) > 0) {
@@ -545,7 +545,7 @@ process_variable_block <- function(data, start_row, end_row, rows_to_keep, is_de
     is_continuous <- FALSE
     if (n_rows == 1) {
         is_continuous <- TRUE
-    } else if ("Group" %in% names(data)) {
+    } else if ("Group" %chin% names(data)) {
         ## Check for continuous variable indicators
         groups <- data$Group[start_row:end_row]
         is_continuous <- any(grepl("(Mean|Median|Range|SD|IQR)", groups, ignore.case = TRUE))
@@ -585,7 +585,7 @@ process_variable_block <- function(data, start_row, end_row, rows_to_keep, is_de
 condense_continuous <- function(data, start_row, end_row, rows_to_keep, is_descriptive) {
     
     ## For continuous, keep only first row and update its label
-    if (is_descriptive && "Group" %in% names(data)) {
+    if (is_descriptive && "Group" %chin% names(data)) {
         ## Extract the statistic type and append to variable name
         stat_type <- data$Group[start_row]
         if (!is.na(stat_type) && stat_type != "" && stat_type != "-") {
@@ -623,7 +623,7 @@ condense_binary <- function(data, start_row, end_row, rows_to_keep, is_descripti
         ## Copy statistics from non-reference row
         stat_cols <- setdiff(names(data), c("Variable", "Group"))
         for (col in stat_cols) {
-            if (col %in% names(data)) {
+            if (col %chin% names(data)) {
                 data[[col]][start_row] <- data[[col]][non_ref_row]
             }
         }
@@ -662,13 +662,13 @@ process_table_for_flextable <- function(table,
                                         width = NULL,
                                         align = NULL) {
     
-    ## Convert to data frame
-    df <- as.data.frame(table)
+    ## Convert to data.table
+    df <- as.data.table(table)
     
     ## Handle N row if present
     has_n_row <- FALSE
     n_row_data <- NULL
-    if (nrow(df) > 0 && "Variable" %in% names(df) && 
+    if (nrow(df) > 0 && "Variable" %chin% names(df) && 
         !is.na(df$Variable[1]) && df$Variable[1] == "N") {
         has_n_row <- TRUE
         n_row_data <- df[1, ]
@@ -677,7 +677,7 @@ process_table_for_flextable <- function(table,
     
     ## Track variable groups BEFORE any transformation
     var_groups <- NULL
-    if (zebra_stripes && "Variable" %in% names(df)) {
+    if (zebra_stripes && "Variable" %chin% names(df)) {
         var_groups <- identify_variable_groups(df)
     }
     
@@ -726,7 +726,7 @@ process_table_for_flextable <- function(table,
     ## Set alignment
     if (is.null(align)) {
         for (col in names(df)) {
-            if (col %in% c("Variable", "Group")) {
+            if (col %chin% c("Variable", "Group")) {
                 ft <- flextable::align(ft, j = col, align = "left", part = "all")
             } else {
                 ft <- flextable::align(ft, j = col, align = "center", part = "all")
@@ -776,17 +776,11 @@ identify_variable_groups <- function(df) {
     if (!"Variable" %in% names(df)) return(NULL)
     
     var_starts <- which(df$Variable != "" & !is.na(df$Variable))
-    groups <- list()
+    if (length(var_starts) == 0) return(NULL)
     
-    for (i in seq_along(var_starts)) {
-        start_row <- var_starts[i]
-        end_row <- if (i < length(var_starts)) {
-                       var_starts[i + 1] - 1
-                   } else {
-                       nrow(df)
-                   }
-        groups[[i]] <- start_row:end_row
-    }
+                                        # Vectorized group creation
+    var_ends <- c(var_starts[-1] - 1, nrow(df))
+    groups <- mapply(seq, var_starts, var_ends, SIMPLIFY = FALSE)
     
     return(groups)
 }
@@ -794,12 +788,18 @@ identify_variable_groups <- function(df) {
 #' Replace empty cells with "-"
 #' @keywords internal
 replace_empty_cells <- function(df) {
-    for (col in names(df)) {
-        if (col != "Variable") {
-            df[[col]][df[[col]] == "" | is.na(df[[col]])] <- "-"
-        }
+                                        # Convert to data.table for efficient in-place modification
+    dt <- data.table::as.data.table(df)
+    
+                                        # Get columns to process (excluding Variable)
+    cols_to_process <- setdiff(names(dt), "Variable")
+    
+                                        # Vectorized replacement using data.table
+    for (col in cols_to_process) {
+        dt[is.na(get(col)) | get(col) == "", (col) := "-"]
     }
-    return(df)
+    
+    return(as.data.table(dt))
 }
 
 #' Apply zebra stripes with proper variable group detection for indented tables
@@ -855,7 +855,7 @@ calculate_table_width <- function(paper, orientation) {
         legal = c(width = 8.5, height = 14)
     )
     
-    if (!paper %in% names(paper_sizes)) {
+    if (!paper %chin% names(paper_sizes)) {
         paper <- "letter"
     }
     
@@ -892,7 +892,7 @@ format_headers_ft <- function(ft, has_n_row, n_row_data) {
         }
         
         ## Add n counts for data columns only (not Variable)
-        if (has_n_row && col %in% names(n_row_data) && col != "Variable") {
+        if (has_n_row && col %chin% names(n_row_data) && col != "Variable") {
             n_val <- n_row_data[[col]]
             if (!is.na(n_val) && n_val != "" && n_val != "0") {
                 new_label <- paste0(col, "\n(n = ", n_val, ")")
@@ -914,137 +914,26 @@ bold_pvalues_ft <- function(ft, df, sig_threshold = 0.05) {
     p_cols <- grep("p-value|p value|Uni p|Multi p|pvalue", names(df), 
                    ignore.case = TRUE, value = TRUE)
     
+    if (length(p_cols) == 0) return(ft)
+    
     for (p_col in p_cols) {
         if (p_col %in% names(df)) {
-            for (i in seq_len(nrow(df))) {
-                val <- df[[p_col]][i]
-                if (!is.na(val) && val != "") {
-                    is_sig <- FALSE
-                    
-                    if (grepl("^<\\s*0\\.001", val)) {
-                        is_sig <- TRUE
-                    } else {
-                        p_numeric <- suppressWarnings(as.numeric(
-                            gsub("[^0-9.]", "", val)))
-                        if (!is.na(p_numeric) && p_numeric < sig_threshold) {
-                            is_sig <- TRUE
-                        }
-                    }
-                    
-                    if (is_sig) {
-                        ft <- flextable::bold(ft, i = i, j = p_col, part = "body")
-                    }
-                }
+            vals <- df[[p_col]]
+            
+                                        # Vectorized significance check
+            is_very_small <- grepl("^<\\s*0\\.001", vals)
+            p_numeric <- suppressWarnings(as.numeric(gsub("[^0-9.]", "", vals)))
+            is_small_numeric <- !is.na(p_numeric) & p_numeric < sig_threshold
+            
+            sig_rows <- which((is_very_small | is_small_numeric) & 
+                              vals != "" & !is.na(vals))
+            
+                                        # Bulk bold operation
+            if (length(sig_rows) > 0) {
+                ft <- flextable::bold(ft, i = sig_rows, j = p_col, part = "body")
             }
         }
     }
     
     return(ft)
-}
-
-#' Apply zebra striping to alternating variables
-#' @keywords internal
-apply_zebra_stripes <- function(x, stripe_color = "gray!10") {
-    
-    if (!is.data.frame(x) && !is.data.table(x)) {
-        return(list())
-    }
-    
-                                        # Convert to data frame if needed
-    if (is.data.table(x)) {
-        x <- as.data.frame(x)
-    }
-    
-                                        # Detect table type and extract variable groups
-    var_groups <- NULL
-    
-                                        # Check for model output table (has "Variable" column)
-    if ("Variable" %in% names(x)) {
-                                        # Model output table - use Variable column pattern
-        var_col <- as.character(x$Variable)
-        var_starts <- which(var_col != "" & !is.na(var_col))
-        
-        if (length(var_starts) > 0) {
-            var_groups <- integer(nrow(x))
-            for (i in seq_along(var_starts)) {
-                start_idx <- var_starts[i]
-                end_idx <- if (i < length(var_starts)) {
-                               var_starts[i + 1] - 1
-                           } else {
-                               nrow(x)
-                           }
-                var_groups[start_idx:end_idx] <- i
-            }
-        }
-        
-    } else if (ncol(x) > 0) {
-                                        # Descriptive table - use first column indentation pattern
-        first_col <- as.character(x[[1]])
-        
-                                        # Skip if first column is all NA or empty
-        if (all(is.na(first_col) | first_col == "")) {
-            return(list())
-        }
-        
-                                        # Detect indentation levels
-        indent_levels <- nchar(first_col) - nchar(trimws(first_col, "left"))
-        
-                                        # Find main variable rows (minimum indentation, excluding special rows)
-        min_indent <- min(indent_levels, na.rm = TRUE)
-        main_var_rows <- which(indent_levels == min_indent)
-        
-                                        # Exclude total/summary rows
-        exclude_patterns <- c("^[[:space:]]*Total", "^[[:space:]]*Overall", 
-                              "^[[:space:]]*Missing", "^[[:space:]]*N[[:space:]]*=",
-                              "^[[:space:]]*N[[:space:]]*\\(", "^[[:space:]]*Mean")
-        
-        for (pattern in exclude_patterns) {
-            exclude_rows <- grep(pattern, first_col[main_var_rows], ignore.case = TRUE)
-            if (length(exclude_rows) > 0) {
-                main_var_rows <- main_var_rows[-exclude_rows]
-            }
-        }
-        
-                                        # Build groups if we have valid main variables
-        if (length(main_var_rows) > 0) {
-            var_groups <- integer(nrow(x))
-            for (i in seq_along(main_var_rows)) {
-                start_idx <- main_var_rows[i]
-                end_idx <- if (i < length(main_var_rows)) {
-                               main_var_rows[i + 1] - 1
-                           } else {
-                               nrow(x)
-                           }
-                var_groups[start_idx:end_idx] <- i
-            }
-        }
-    }
-    
-                                        # If no groups detected, return empty
-    if (is.null(var_groups) || all(var_groups == 0)) {
-        return(list())
-    }
-    
-                                        # Build LaTeX commands for alternating stripes
-    commands <- character()
-    positions <- numeric()
-    
-    unique_groups <- unique(var_groups[var_groups > 0])
-    for (group_id in unique_groups) {
-                                        # Apply stripes to even-numbered groups
-        if (group_id %% 2 == 0) {
-            group_rows <- which(var_groups == group_id)
-            for (row in group_rows) {
-                commands <- c(commands, paste0("\\rowcolor{", stripe_color, "}"))
-                positions <- c(positions, row - 1)  # xtable uses 0-based indexing
-            }
-        }
-    }
-    
-                                        # Return formatted for xtable's add.to.row
-    if (length(commands) > 0) {
-        return(list(pos = as.list(positions), command = commands))
-    } else {
-        return(list())
-    }
 }

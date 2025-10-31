@@ -576,12 +576,7 @@ glmforest <- function(model, data = NULL,
                                              )
                 
                 ## Update with actual counts
-                for(lev in factor_levels) {
-                    if(lev %in% level_counts$level) {
-                        all_levels_dt[level == lev, Freq := level_counts[level == lev, Freq]]
-                    }
-                }
-                
+                all_levels_dt[level_counts, Freq := i.Freq, on = "level"]
                 all_levels_dt[, var := var]
                 all_levels_dt[, pos := .I]
                 all_levels_dt[, var_order := i]
@@ -648,7 +643,7 @@ glmforest <- function(model, data = NULL,
             indent_groups <- TRUE
         }
         
-        all_terms_df[, inds := ifelse(level == "-", var, paste0(var, level))]
+        all_terms_df[, inds := data.table::fifelse(level == "-", var, paste0(var, level))]
         orig_inds_map <- data.table::copy(all_terms_df[, .(var, level, inds, N, Events)])
         
         processed_rows <- list()
@@ -744,7 +739,7 @@ glmforest <- function(model, data = NULL,
             }
         }
     } else {
-        all_terms_df[, inds := ifelse(level == "-", var, paste0(var, level))]
+        all_terms_df[, inds := data.table::fifelse(level == "-", var, paste0(var, level))]
     }
     
     ## Process coefficients
@@ -774,46 +769,46 @@ glmforest <- function(model, data = NULL,
     
     ## Create formatted columns for display
     if(exponentiate) {
-        to_show_exp_clean[, effect := ifelse(is.na(estimate), 
-                                             NA_real_,
-                                             exp(estimate))]
-        to_show_exp_clean[, effect_formatted := ifelse(is.na(N) & is.na(estimate),
-                                                       "",
-                                                ifelse(is.na(estimate), 
-                                                       ref_label,
+        to_show_exp_clean[, effect := data.table::fifelse(is.na(estimate), 
+                                                          NA_real_,
+                                                          exp(estimate))]
+        to_show_exp_clean[, effect_formatted := data.table::fifelse(is.na(N) & is.na(estimate),
+                                                                    "",
+                                                                    data.table::fifelse(is.na(estimate), 
+                                                                                        ref_label,
                                                        format(round(exp(estimate), digits), nsmall = digits)))]
-        to_show_exp_clean[, conf_low_formatted := ifelse(is.na(conf_low), 
+        to_show_exp_clean[, conf_low_formatted := data.table::fifelse(is.na(conf_low), 
                                                          NA_character_,
                                                          format(round(exp(conf_low), digits), nsmall = digits))]
-        to_show_exp_clean[, conf_high_formatted := ifelse(is.na(conf_high), 
+        to_show_exp_clean[, conf_high_formatted := data.table::fifelse(is.na(conf_high), 
                                                           NA_character_,
                                                           format(round(exp(conf_high), digits), nsmall = digits))]
     } else {
         to_show_exp_clean[, effect := estimate]
-        to_show_exp_clean[, effect_formatted := ifelse(is.na(N) & is.na(estimate),
+        to_show_exp_clean[, effect_formatted := data.table::fifelse(is.na(N) & is.na(estimate),
                                                        "",
-                                                ifelse(is.na(estimate), 
+                                                data.table::fifelse(is.na(estimate), 
                                                        ref_label,
                                                        format(round(estimate, digits), nsmall = digits)))]
-        to_show_exp_clean[, conf_low_formatted := ifelse(is.na(conf_low), 
+        to_show_exp_clean[, conf_low_formatted := data.table::fifelse(is.na(conf_low), 
                                                          NA_character_,
                                                          format(round(conf_low, digits), nsmall = digits))]
-        to_show_exp_clean[, conf_high_formatted := ifelse(is.na(conf_high), 
+        to_show_exp_clean[, conf_high_formatted := data.table::fifelse(is.na(conf_high), 
                                                           NA_character_,
                                                           format(round(conf_high, digits), nsmall = digits))]
     }
     
     ## Format p-values
-    to_show_exp_clean[, p_formatted := ifelse(is.na(p_value), 
+    to_show_exp_clean[, p_formatted := data.table::fifelse(is.na(p_value), 
                                               NA_character_,
-                                       ifelse(p_value < 0.001, 
+                                       data.table::fifelse(p_value < 0.001, 
                                               "< 0.001",
                                               format(round(p_value, 3), nsmall = 3)))]
     
     ## Create the combined effect string with expression for italic p
     effect_abbrev <- if(effect_label == "Odds Ratio") "aOR" else if(effect_label == "Risk Ratio") "aRR" else "Coef"
 
-    to_show_exp_clean[, effect_string_expr := ifelse(
+    to_show_exp_clean[, effect_string_expr := data.table::fifelse(
                             is.na(N) & is.na(estimate),
                             "''",
                             fcase(
@@ -837,8 +832,8 @@ glmforest <- function(model, data = NULL,
                         )]
     
     ## Format N and events with thousands separator
-    to_show_exp_clean[, n_formatted := ifelse(is.na(N), "", format(N, big.mark = ",", scientific = FALSE))]
-    to_show_exp_clean[, events_formatted := ifelse(is.na(Events), "", format(Events, big.mark = ",", scientific = FALSE))]
+    to_show_exp_clean[, n_formatted := data.table::fifelse(is.na(N), "", format(N, big.mark = ",", scientific = FALSE))]
+    to_show_exp_clean[, events_formatted := data.table::fifelse(is.na(Events), "", format(Events, big.mark = ",", scientific = FALSE))]
     
     ## Clean up variable names for display
     to_show_exp_clean[, var_display := as.character(var)]
@@ -986,7 +981,7 @@ glmforest <- function(model, data = NULL,
         effect_label = effect_label,
         ref_label = ref_label,
         font_size = font_size,
-        tbl_width = ifelse(is.null(tbl_width), 0.6, tbl_width),
+        tbl_width = data.table::fifelse(is.null(tbl_width), 0.6, tbl_width),
         rangeb = rangeb,
         center_padding = center_padding
     )
@@ -1109,7 +1104,7 @@ glmforest <- function(model, data = NULL,
             {if (indent_groups || condense_table) {
                  ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = exp(y_variable),
                                    label = to_show_exp_clean$var_display, 
-                                   fontface = ifelse(grepl("^    ", to_show_exp_clean$var_display), "plain", "bold"), 
+                                   fontface = data.table::fifelse(grepl("^    ", to_show_exp_clean$var_display), "plain", "bold"), 
                                    hjust = 0,
                                    size = annot_font)
              } else {
@@ -1245,7 +1240,7 @@ glmforest <- function(model, data = NULL,
             {if (indent_groups || condense_table) {
                  ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_variable,
                                    label = to_show_exp_clean$var_display, 
-                                   fontface = ifelse(grepl("^    ", to_show_exp_clean$var_display), "plain", "bold"), 
+                                   fontface = data.table::fifelse(grepl("^    ", to_show_exp_clean$var_display), "plain", "bold"), 
                                    hjust = 0,
                                    size = annot_font)
              } else {
