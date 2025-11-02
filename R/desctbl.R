@@ -200,7 +200,6 @@
 #' \code{\link{tbl2pdf}} for exporting to PDF
 #'
 #' @examples
-#' \dontrun{
 #' # Load example clinical trial data
 #' data(clintrial)
 #' 
@@ -370,7 +369,6 @@
 #'     na_include = FALSE
 #' )
 #' print(table1)
-#' 
 #' @export
 desctbl <- function(data,
                     by = NULL,

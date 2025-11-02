@@ -2,11 +2,11 @@
 % Please edit documentation in R/fithelpers.R
 \name{format_pvalues_fit}
 \alias{format_pvalues_fit}
-\title{Format p-values for display}
+\title{Format p-values for display - OPTIMIZED}
 \usage{
 format_pvalues_fit(p, digits = 3)
 }
 \description{
-Format p-values for display
+Format p-values for display - OPTIMIZED
 }
 \keyword{internal}

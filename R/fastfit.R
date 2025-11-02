@@ -878,3 +878,21 @@ determine_effect_type <- function(uni_raw, multi_raw, exponentiate, adjusted = F
         return("Estimate")
     }
 }
+
+#' Print method for fastfit results
+#' @keywords internal
+#' @export
+print.fastfit_result <- function(x, ...) {
+    cat("\nFastfit Analysis Results\n")
+    cat("Outcome: ", attr(x, "outcome"), "\n", sep = "")
+    cat("Model Type: ", attr(x, "model_type"), "\n", sep = "")
+    cat("Method: ", attr(x, "method"), "\n", sep = "")
+    
+    if (!is.null(attr(x, "n_multi"))) {
+        cat("Multivariable predictors: ", attr(x, "n_multi"), "\n", sep = "")
+    }
+    
+    cat("\n")
+    NextMethod("print", x)
+    invisible(x)
+}

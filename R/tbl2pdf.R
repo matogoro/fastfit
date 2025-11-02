@@ -159,8 +159,6 @@
 #' caption = "Results for \\$1000 increase in income (\\%)"
 #' ```
 #' 
-#' LaTeX special characters that need escaping: \code{& % $ # _ { } ~ ^ \\}
-#' 
 #' \strong{Auto-Sizing (paper = "auto"):}
 #' 
 #' When \code{paper = "auto"}, the function attempts to create a minimal PDF 

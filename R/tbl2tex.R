@@ -107,18 +107,18 @@
 #' Add these to your LaTeX document preamble:
 #' 
 #' \emph{Always required:}
-#' ```latex
-#' \usepackage[T1]{fontenc}
-#' \usepackage[utf8]{inputenc}
-#' \usepackage{array}
-#' \usepackage{graphicx}  % If using resizebox
-#' ```
+#' \preformatted{
+#' \\usepackage[T1]{fontenc}
+#' \\usepackage[utf8]{inputenc}
+#' \\usepackage{array}
+#' \\usepackage{graphicx}  % If using resizebox
+#' }
 #' 
 #' \emph{Optional (based on parameters):}
-#' ```latex
-#' \usepackage{booktabs}  % For booktabs = TRUE
-#' \usepackage[table]{xcolor}  % For zebra_stripes or dark_header
-#' ```
+#' \preformatted{
+#' \\usepackage{booktabs}  % For booktabs = TRUE
+#' \\usepackage[table]{xcolor}  % For zebra_stripes or dark_header
+#' }
 #' 
 #' \strong{Booktabs Style:}
 #' 
@@ -137,51 +137,51 @@
 #' 
 #' \emph{Zebra Stripes:}
 #' Creates alternating background colors for visual grouping:
-#' ```r
+#' \preformatted{
 #' zebra_stripes = TRUE
-#' stripe_color = "gray!20"  # 20% gray
-#' stripe_color = "blue!10"  # 10% blue  
-#' ```
+#' stripe_color = "gray!20"  # 20\% gray
+#' stripe_color = "blue!10"  # 10\% blue  
+#' }
 #' 
 #' \emph{Dark Header:}
 #' Creates high-contrast header row:
-#' ```r
+#' \preformatted{
 #' dark_header = TRUE  # Black background, white text
-#' ```
+#' }
 #' 
-#' Both require \code{\\usepackage[table]\{xcolor\}} in your document.
+#' Both require \code{\\usepackage[table]{xcolor}} in your document.
 #' 
 #' \strong{Integration with LaTeX Documents:}
 #' 
 #' \emph{Basic inclusion:}
-#' ```latex
-#' \begin{table}[htbp]
-#'   \centering
-#'   \caption{Regression Results}
-#'   \label{tab:regression}
-#'   \input{results.tex}
-#' \end{table}
-#' ```
+#' \preformatted{
+#' \\begin{table}[htbp]
+#'   \\centering
+#'   \\caption{Regression Results}
+#'   \\label{tab:regression}
+#'   \\input{results.tex}
+#' \\end{table}
+#' }
 #' 
 #' \emph{With resizing:}
-#' ```latex
-#' \begin{table}[htbp]
-#'   \centering
-#'   \caption{Results}
-#'   \resizebox{\textwidth}{!}{\input{results.tex}}
-#' \end{table}
-#' ```
+#' \preformatted{
+#' \\begin{table}[htbp]
+#'   \\centering
+#'   \\caption{Results}
+#'   \\resizebox{\\textwidth}{!}{\\input{results.tex}}
+#' \\end{table}
+#' }
 #' 
 #' \emph{Landscape orientation:}
-#' ```latex
-#' \usepackage{pdflscape}
-#' \begin{landscape}
-#'   \begin{table}[htbp]
-#'     \centering
-#'     \input{wide_results.tex}
-#'   \end{table}
-#' \end{landscape}
-#' ```
+#' \preformatted{
+#' \\usepackage{pdflscape}
+#' \\begin{landscape}
+#'   \\begin{table}[htbp]
+#'     \\centering
+#'     \\input{wide_results.tex}
+#'   \\end{table}
+#' \\end{landscape}
+#' }
 #' 
 #' \strong{Caption Formatting:}
 #' 
@@ -193,15 +193,15 @@
 #' 
 #' The function automatically escapes LaTeX special characters in your data:
 #' \itemize{
-#'   \item \code{&} → \code{\\&}
-#'   \item \code{%} → \code{\\%}
-#'   \item \code{$} → \code{\\$}
-#'   \item \code{#} → \code{\\#}
-#'   \item \code{_} → \code{\\_}
-#'   \item \code{\{} → \code{\\{}
-#'   \item \code{\}} → \code{\\}}
-#'   \item \code{~} → \code{\\textasciitilde\{\}}
-#'   \item \code{^} → \code{\\textasciicircum\{\}}
+#'   \item Ampersand becomes \\&
+#'   \item Percent becomes \\%
+#'   \item Dollar becomes \\$
+#'   \item Hash becomes \\#
+#'   \item Underscore becomes \\_
+#'   \item Left brace becomes \\{
+#'   \item Right brace becomes \\}
+#'   \item Tilde becomes \\textasciitilde{}
+#'   \item Caret becomes \\textasciicircum{}
 #' }
 #' 
 #' Variable names and labels should not include these characters unless 
@@ -224,7 +224,7 @@
 #' \enumerate{
 #'   \item Use landscape orientation in LaTeX document
 #'   \item Use \code{\\resizebox} to scale table
-#'   \item Reduce font size in LaTeX: \code{\{\\small \\input\{table.tex\}\}}
+#'   \item Reduce font size in LaTeX: \code{\\small \\input{table.tex}}
 #'   \item Use \code{condense_table = TRUE} to reduce columns
 #'   \item Consider breaking across multiple tables
 #' }
@@ -235,7 +235,7 @@
 #' \enumerate{
 #'   \item Generate table: \code{tbl2tex(results, "table1.tex")}
 #'   \item Create LaTeX document with proper preamble
-#'   \item Include table: \code{\\input\{table1.tex\}}
+#'   \item Include table: \code{\\input{table1.tex}}
 #'   \item Compile with pdflatex or other LaTeX engine
 #'   \item Adjust formatting parameters as needed
 #'   \item Regenerate and recompile

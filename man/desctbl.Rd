@@ -223,115 +223,125 @@ Missing values are handled differently by variable type:
 }
 }
 \examples{
-# Load example data
+# Load example clinical trial data
 data(clintrial)
-data(clintrial_labels)
-library(data.table)
 
 # Example 1: Basic descriptive table without grouping
-desctbl(clintrial, 
+desctbl(clintrial,
         variables = c("age", "sex", "bmi"))
 
-# Example 2: Grouped comparison by treatment
-desctbl(clintrial, 
-        by = "treatment",
-        variables = c("age", "sex", "bmi", "smoking"))
-
-# Example 3: Using custom variable labels
-desctbl(clintrial,
-        by = "treatment", 
-        variables = c("age", "bmi", "sex"),
-        var_labels = clintrial_labels)
-
-# Example 4: Including missing values as a category
+# Example 2: Grouped comparison with default tests
 desctbl(clintrial,
         by = "treatment",
-        variables = c("age", "sex", "smoking"),
-        na_include = TRUE,
-        na_label = "Missing")
+        variables = c("age", "sex", "race", "bmi"))
 
-# Example 5: Customizing continuous statistics
-# Show only median with IQR
+# Example 3: Customize continuous statistics
 desctbl(clintrial,
-        by = "sex",
+        by = "treatment",
         variables = c("age", "bmi", "creatinine"),
-        stats_continuous = "median_iqr")
+        stats_continuous = c("median_iqr", "range"))
 
-# Example 6: Show multiple continuous statistics
-desctbl(clintrial,
-        by = "treatment",
-        variables = c("age", "bmi"),
-        stats_continuous = c("mean_sd", "median_iqr", "range"))
-
-# Example 7: Survival analysis with log-rank test
-desctbl(clintrial,
-        by = "treatment",
-        variables = c("age", "sex", "Surv(os_months, os_status)"),
-        var_labels = clintrial_labels)
-
-# Example 8: Controlling test selection
-# Use only non-parametric tests
-desctbl(clintrial,
-        by = "treatment",
-        variables = c("age", "bmi", "hemoglobin"),
-        test_continuous = "kwt")  # Kruskal-Wallis for all
-
-# Example 9: Chi-squared test only for categorical variables
-desctbl(clintrial,
-        by = "treatment",
-        variables = c("sex", "smoking", "hypertension"),
-        test_categorical = "chisq")
-
-# Example 10: Customize p-value precision
-desctbl(clintrial,
-        by = "sex",
-        variables = c("age", "bmi", "treatment"),
-        digits_p = 4)  # Show p-values to 4 decimal places
-
-# Example 11: Position total column last
-desctbl(clintrial,
-        by = "treatment",
-        variables = c("age", "sex", "bmi"),
-        total = "last")
-
-# Example 12: Exclude total column
-desctbl(clintrial,
-        by = "treatment",
-        variables = c("age", "sex", "bmi"),
-        total = FALSE)
-
-# Example 13: Categorical statistics - counts only
+# Example 4: Change categorical display format
 desctbl(clintrial,
         by = "treatment",
         variables = c("sex", "race", "smoking"),
-        stats_categorical = "n")
+        stats_categorical = "n")  # Show counts only
 
-# Example 14: Categorical statistics - percentages only
+# Example 5: Include missing values
 desctbl(clintrial,
         by = "treatment",
-        variables = c("sex", "smoking"),
-        stats_categorical = "percent")
+        variables = c("age", "smoking", "hypertension"),
+        na_include = TRUE,
+        na_label = "Missing")
 
-# Example 15: Different decimal precision
-desctbl(clintrial,
-        by = "sex",
-        variables = c("age", "bmi", "creatinine"),
-        digits = 2)  # 2 decimal places for continuous vars
-
-# Example 16: Complex table with multiple variable types
+# Example 6: Disable statistical testing
 desctbl(clintrial,
         by = "treatment",
-        variables = c("age", "sex", "bmi", "smoking", 
-                     "hypertension", "diabetes",
-                     "Surv(os_months, os_status)"),
-        var_labels = clintrial_labels,
-        stats_continuous = c("mean_sd", "median_iqr"),
-        na_include = TRUE)
+        variables = c("age", "sex", "bmi"),
+        test = FALSE)
 
-# Example 17: Access raw numeric data for further analysis
+# Example 7: Force specific tests
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "sex"),
+        test_continuous = "t",      # t-test instead of auto
+        test_categorical = "fisher") # Fisher's test instead of auto
+
+# Example 8: Adjust decimal places
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "bmi"),
+        digits = 2,    # 2 decimals for continuous
+        digits_p = 4)  # 4 decimals for p-values
+
+# Example 9: Custom variable labels
+labels <- c(
+    age = "Age (years)",
+    sex = "Sex",
+    bmi = "Body Mass Index (kg/m²)",
+    treatment = "Treatment Arm"
+)
+
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "sex", "bmi"),
+        var_labels = labels)
+
+# Example 10: Position total column last
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "sex"),
+        total = "last")
+
+# Example 11: Exclude total column
+desctbl(clintrial,
+        by = "treatment",
+        variables = c("age", "sex"),
+        total = FALSE)
+
+# Example 12: Survival analysis
+desctbl(clintrial,
+        by = "treatment",
+        variables = "Surv(os_months, os_status)")
+
+# Example 13: Multiple survival endpoints
+desctbl(clintrial,
+        by = "treatment",
+        variables = c(
+            "Surv(os_months, os_status)",
+            "Surv(pfs_months, pfs_status)"
+        ),
+        var_labels = c(
+            "Surv(os_months, os_status)" = "Overall Survival",
+            "Surv(pfs_months, pfs_status)" = "Progression-Free Survival"
+        ))
+
+# Example 14: Mixed variable types
+desctbl(clintrial,
+        by = "treatment",
+        variables = c(
+            "age", "sex", "race",           # Demographics
+            "bmi", "creatinine",            # Labs
+            "smoking", "hypertension",      # Risk factors
+            "Surv(os_months, os_status)"    # Survival
+        ))
+
+# Example 15: Export to PDF
+table1 <- desctbl(clintrial,
+                  by = "treatment",
+                  variables = c("age", "sex", "bmi"))
+tbl2pdf(table1, "table1.pdf")
+
+# Example 16: Three or more groups
+desctbl(clintrial,
+        by = "stage",  # Assuming stage has 3+ levels
+        variables = c("age", "sex", "bmi"))
+# Automatically uses ANOVA/Kruskal-Wallis and chi-squared
+
+# Example 17: Access raw unformatted data
 result <- desctbl(clintrial,
                   by = "treatment",
-                  variables = c("age", "bmi", "sex"))
+                  variables = c("age", "bmi"))
 raw_data <- attr(result, "raw_data")
 print(raw_data)
 # Raw data includes unformatted numbers, SDs, quartiles, etc.
@@ -382,10 +392,8 @@ table1 <- desctbl(
     na_include = FALSE
 )
 print(table1)
-
 }
 \seealso{
-\code{\link{setlabels}} for setting variable labels,
-\code{\link{m2dt}} for regression model tables,
-\code{\link[survival]{Surv}} for survival object specification
+\code{\link{fit}} for regression modeling, 
+\code{\link{tbl2pdf}} for exporting to PDF
 }

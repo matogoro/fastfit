@@ -2,11 +2,11 @@
 % Please edit documentation in R/comphelpers.R
 \name{format_model_comparison}
 \alias{format_model_comparison}
-\title{Format comparison table for display}
+\title{Format model comparison table}
 \usage{
-format_model_comparison(dt)
+format_model_comparison(comparison)
 }
 \description{
-Format comparison table for display
+Format model comparison table
 }
 \keyword{internal}

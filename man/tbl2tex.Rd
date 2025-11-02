@@ -111,7 +111,162 @@ hierarchical displays. Output can be directly \code{\\input{}} or \code{\\includ
 into LaTeX manuscripts.
 }
 \details{
+\strong{Output Format:}
 
+The function generates a standalone LaTeX tabular environment that can be:
+\enumerate{
+  \item Included in documents: \code{\\input\{results.tex\}}
+  \item Embedded in table/figure environments
+  \item Used in manuscript classes (article, report, etc.)
+}
+
+The output includes:
+\itemize{
+  \item Complete tabular environment with proper alignment
+  \item Horizontal rules (\code{\\hline} or booktabs rules)
+  \item Column headers with optional formatting
+  \item Data rows with automatic escaping of special characters
+  \item Optional caption and label commands
+}
+
+\strong{Required LaTeX Packages:}
+
+Add these to your LaTeX document preamble:
+
+\emph{Always required:}
+\preformatted{
+\\usepackage[T1]{fontenc}
+\\usepackage[utf8]{inputenc}
+\\usepackage{array}
+\\usepackage{graphicx}  % If using resizebox
+}
+
+\emph{Optional (based on parameters):}
+\preformatted{
+\\usepackage{booktabs}  % For booktabs = TRUE
+\\usepackage[table]{xcolor}  % For zebra_stripes or dark_header
+}
+
+\strong{Booktabs Style:}
+
+When \code{booktabs = TRUE}, the table uses publication-quality rules:
+\itemize{
+  \item \code{\\toprule} - Heavy rule at top
+  \item \code{\\midrule} - Medium rule below headers
+  \item \code{\\bottomrule} - Heavy rule at bottom
+  \item No vertical rules (booktabs philosophy)
+  \item Better spacing around rules
+}
+
+This is the preferred style for most academic journals.
+
+\strong{Color Features:}
+
+\emph{Zebra Stripes:}
+Creates alternating background colors for visual grouping:
+\preformatted{
+zebra_stripes = TRUE
+stripe_color = "gray!20"  # 20\% gray
+stripe_color = "blue!10"  # 10\% blue  
+}
+
+\emph{Dark Header:}
+Creates high-contrast header row:
+\preformatted{
+dark_header = TRUE  # Black background, white text
+}
+
+Both require \code{\\usepackage[table]{xcolor}} in your document.
+
+\strong{Integration with LaTeX Documents:}
+
+\emph{Basic inclusion:}
+\preformatted{
+\\begin{table}[htbp]
+  \\centering
+  \\caption{Regression Results}
+  \\label{tab:regression}
+  \\input{results.tex}
+\\end{table}
+}
+
+\emph{With resizing:}
+\preformatted{
+\\begin{table}[htbp]
+  \\centering
+  \\caption{Results}
+  \\resizebox{\\textwidth}{!}{\\input{results.tex}}
+\\end{table}
+}
+
+\emph{Landscape orientation:}
+\preformatted{
+\\usepackage{pdflscape}
+\\begin{landscape}
+  \\begin{table}[htbp]
+    \\centering
+    \\input{wide_results.tex}
+  \\end{table}
+\\end{landscape}
+}
+
+\strong{Caption Formatting:}
+
+Captions in the \code{caption} parameter are written as LaTeX comments in 
+the output file for reference. For actual LaTeX captions, wrap the table 
+in a table environment (see examples above).
+
+\strong{Special Characters:}
+
+The function automatically escapes LaTeX special characters in your data:
+\itemize{
+  \item Ampersand becomes \\&
+  \item Percent becomes \\%
+  \item Dollar becomes \\$
+  \item Hash becomes \\#
+  \item Underscore becomes \\_
+  \item Left brace becomes \\{
+  \item Right brace becomes \\}
+  \item Tilde becomes \\textasciitilde{}
+  \item Caret becomes \\textasciicircum{}
+}
+
+Variable names and labels should not include these characters unless 
+intentionally using LaTeX commands.
+
+\strong{Hierarchical Display:}
+
+The \code{indent_groups} option is particularly useful for regression tables 
+with categorical variables:
+\itemize{
+  \item Variable names appear unindented and bold
+  \item Category levels appear indented beneath
+  \item Reference categories clearly identified
+  \item Creates professional hierarchical structure
+}
+
+\strong{Table Width Management:}
+
+For tables wider than \code{\\textwidth}:
+\enumerate{
+  \item Use landscape orientation in LaTeX document
+  \item Use \code{\\resizebox} to scale table
+  \item Reduce font size in LaTeX: \code{\\small \\input{table.tex}}
+  \item Use \code{condense_table = TRUE} to reduce columns
+  \item Consider breaking across multiple tables
+}
+
+\strong{Workflow:}
+
+Typical workflow for journal submission:
+\enumerate{
+  \item Generate table: \code{tbl2tex(results, "table1.tex")}
+  \item Create LaTeX document with proper preamble
+  \item Include table: \code{\\input{table1.tex}}
+  \item Compile with pdflatex or other LaTeX engine
+  \item Adjust formatting parameters as needed
+  \item Regenerate and recompile
+}
 }
 \examples{
 # Load data and create regression table

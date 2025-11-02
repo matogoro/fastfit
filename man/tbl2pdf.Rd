@@ -146,7 +146,111 @@ well-suited for tables from regression analyses, descriptive statistics, and
 model comparisons.
 }
 \details{
+\strong{LaTeX Requirements:}
 
+This function requires a working LaTeX installation. The function checks for 
+LaTeX availability and provides installation guidance if missing.
+
+\emph{Recommended LaTeX distributions:}
+\itemize{
+  \item \strong{TinyTeX} (lightweight, R-integrated): Install via 
+    \code{tinytex::install_tinytex()}
+  \item \strong{TeX Live} (comprehensive, cross-platform)
+  \item \strong{MiKTeX} (Windows)
+  \item \strong{MacTeX} (macOS)
+}
+
+\emph{Required LaTeX packages} (auto-installed with most distributions):
+\itemize{
+  \item fontenc, inputenc - Character encoding
+  \item array, booktabs, longtable - Table formatting
+  \item graphicx - Scaling tables
+  \item geometry - Page layout
+  \item pdflscape, lscape - Landscape orientation
+  \item helvet - Sans-serif fonts
+  \item standalone, varwidth - Auto-sizing (for \code{paper = "auto"})
+  \item float, caption - Floats and captions
+  \item xcolor, colortbl - Colors (for \code{zebra_stripes} or \code{dark_header})
+}
+
+\strong{Caption Formatting:}
+
+Captions support LaTeX commands for rich formatting:
+```r
+# Multi-line caption with line breaks
+caption = "Table 1: Multivariable Analysis\\\\
+          OR = odds ratio; CI = confidence interval"
+
+# With superscripts and italics
+caption = "Table 1: Results\\\\
+          \\textsuperscript{a}Adjusted for age\\\\
+          \\textit{p}-values from Wald tests"
+
+# With special characters (must escape)
+caption = "Results for \\$1000 increase in income (\\%)"
+```
+
+\strong{Auto-Sizing (paper = "auto"):}
+
+When \code{paper = "auto"}, the function attempts to create a minimal PDF 
+sized exactly to the table content:
+\enumerate{
+  \item Tries to use the \code{standalone} LaTeX class (cleanest output)
+  \item Falls back to \code{pdfcrop} utility if standalone unavailable
+  \item Falls back to minimal margins if neither available
+}
+
+Auto-sized PDFs are ideal for:
+\itemize{
+  \item Including in other documents
+  \item Flexible embedding in presentations
+  \item Maximum space efficiency
+}
+
+\strong{Table Width Management:}
+
+For wide tables that don't fit on the page:
+\enumerate{
+  \item Use \code{orientation = "landscape"}
+  \item Use \code{fit_to_page = TRUE} (default) to auto-scale
+  \item Reduce \code{font_size} (e.g., 7 or 6)
+  \item Use \code{condense_table = TRUE} to reduce columns/rows
+  \item Consider \code{paper = "auto"} for maximum flexibility
+}
+
+\strong{Optimized for FastFit Tables:}
+
+This function is specifically designed for tables produced by:
+\itemize{
+  \item \code{\link{desctbl}} - Descriptive statistics tables
+  \item \code{\link{fit}} - Single model regression tables
+  \item \code{\link{uscreen}} - Univariable screening tables
+  \item \code{\link{fastfit}} - Combined univariable/multivariable tables
+  \item \code{\link{compfit}} - Model comparison tables
+}
+
+The function automatically detects and formats these table types, including:
+\itemize{
+  \item Sample size rows (N = X)
+  \item Variable grouping
+  \item P-value highlighting
+  \item Proper alignment of estimates and CIs
+}
+
+\strong{Troubleshooting:}
+
+If PDF compilation fails:
+\enumerate{
+  \item Check that LaTeX is installed: Run \code{Sys.which("pdflatex")}
+  \item Set \code{show_logs = TRUE} and examine the .log file
+  \item Common issues:
+    \itemize{
+      \item Missing LaTeX packages: Install via package manager
+      \item Special characters in text: Escape properly
+      \item Very wide tables: Use landscape or reduce font size
+      \item Caption formatting: Check LaTeX syntax
+    }
+}
 }
 \examples{
 # Load example data and create a regression table

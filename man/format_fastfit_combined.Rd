@@ -2,7 +2,7 @@
 % Please edit documentation in R/fastfit.R
 \name{format_fastfit_combined}
 \alias{format_fastfit_combined}
-\title{Format combined fastfit output from formatted tables}
+\title{Format combined fastfit output from formatted tables - OPTIMIZED}
 \usage{
 format_fastfit_combined(
   uni_formatted,
@@ -19,6 +19,6 @@ format_fastfit_combined(
 )
 }
 \description{
-Format combined fastfit output from formatted tables
+Format combined fastfit output from formatted tables - OPTIMIZED
 }
 \keyword{internal}

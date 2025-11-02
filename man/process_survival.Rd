@@ -10,11 +10,11 @@ process_survival(
   var_label,
   group_var,
   digits,
+  na_include,
+  na_label,
   test,
   total,
   total_label,
-  na_include = FALSE,
-  na_label = "Unknown",
   ...
 )
 }

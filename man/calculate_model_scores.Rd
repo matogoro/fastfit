@@ -2,11 +2,11 @@
 % Please edit documentation in R/comphelpers.R
 \name{calculate_model_scores}
 \alias{calculate_model_scores}
-\title{Calculate model selection scores based on multiple criteria}
+\title{Calculate FastFit scores for model comparison}
 \usage{
-calculate_model_scores(comparison, model_type, custom_weights = NULL)
+calculate_model_scores(comparison, model_type, scoring_weights = NULL)
 }
 \description{
-Calculate model selection scores based on multiple criteria
+Calculate FastFit scores for model comparison
 }
 \keyword{internal}

@@ -185,7 +185,7 @@ tbl2html(results, "table.html", include_css = FALSE)
 
 # Include in document
 ```{r results='asis'}
-cat(readLines("table.html"), sep = "\n")
+cat(readLines("table.html"), sep = "\\n")
 ```
 ```
 
