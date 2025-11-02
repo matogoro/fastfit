@@ -59,14 +59,14 @@ calculate_forest_layout <- function(to_show_exp_clean, show_n, show_events,
     effect_header <- paste0(effect_abbrev, " (95% CI); p-value")
     
     ## Calculate max effect string length (without expression parsing)
-    effect_lengths <- nchar(ifelse(
-        is.na(to_show_exp_clean$estimate),
-        ref_label,
-        paste0(to_show_exp_clean$effect_formatted, " (",
-               to_show_exp_clean$conf_low_formatted, "-",
-               to_show_exp_clean$conf_high_formatted, "); p = ",
-               to_show_exp_clean$p_formatted)
-    )) + center_padding
+    effect_lengths <- nchar(data.table::fifelse(
+                                            is.na(to_show_exp_clean$estimate),
+                                            ref_label,
+                                            paste0(to_show_exp_clean$effect_formatted, " (",
+                                                   to_show_exp_clean$conf_low_formatted, "-",
+                                                   to_show_exp_clean$conf_high_formatted, "); p = ",
+                                                   to_show_exp_clean$p_formatted)
+                                        )) + center_padding
     
     effect_width_chars <- max(effect_lengths, nchar(effect_header), na.rm = TRUE)
     columns$effect <- effect_width_chars * char_to_inch
