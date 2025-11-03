@@ -518,6 +518,7 @@ tbl2docx <- function(table,
 }
 
 #' Print method for tbl2docx results
+#' @keywords internal
 #' @export
 print.tbl2docx_result <- function(x, ...) {
     cat("Table exported to:", x$file, "\n")

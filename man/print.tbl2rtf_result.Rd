@@ -9,3 +9,4 @@
 \description{
 Print method for tbl2rtf results
 }
+\keyword{internal}

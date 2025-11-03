@@ -543,6 +543,7 @@ tbl2pptx <- function(table,
 }
 
 #' Print method for tbl2pptx results
+#' @keywords internal
 #' @export
 print.tbl2pptx_result <- function(x, ...) {
     cat("Table exported to:", x$file, "\n")

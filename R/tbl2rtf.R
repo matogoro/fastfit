@@ -586,6 +586,7 @@ tbl2rtf <- function(table,
 }
 
 #' Print method for tbl2rtf results
+#' @keywords internal
 #' @export
 print.tbl2rtf_result <- function(x, ...) {
     cat("Table exported to:", x$file, "\n")

@@ -9,3 +9,4 @@
 \description{
 Print method for tbl2pptx results
 }
+\keyword{internal}
