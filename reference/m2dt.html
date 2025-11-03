@@ -20,7 +20,7 @@ function in the fastfit package for working with regression results."><!-- mathj
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastfit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
       </span>
     </div>
 
@@ -242,7 +242,7 @@ categories of factor variables with:</p><ul><li><p>Effect estimate = 1 (for OR/H
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></code>, <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></code>, <code><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></code>,
-<code><a href="https://rdrr.io/pkg/survival/man/clogit.html" class="external-link">clogit</a></code>, <code>glmer</code></p></div>
+<code><a href="https://rdrr.io/pkg/survival/man/clogit.html" class="external-link">clogit</a></code>, <code><a href="https://rdrr.io/pkg/lme4/man/glmer.html" class="external-link">glmer</a></code></p></div>
     </div>
 
     <div id="ref-examples">
@@ -274,18 +274,18 @@ categories of factor variables with:</p><ul><li><p>Effect estimate = 1 (for OR/H
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1.0296646 1.0165269 1.0429721 1.0296646 1.0165269 1.0429721  4.4618403</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3: 0.3618153 0.1660533 0.7883631 1.0000000        NA        NA         NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4: 0.8890557 0.6667088 1.1855551 0.8890557 0.6667088 1.1855551 -0.8008255</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         p_value      AIC      BIC deviance null_deviance df_residual reference</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;    &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 1.051567e-02 1076.897 1091.132 1070.897      1092.393         847          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 8.125878e-06 1076.897 1091.132 1070.897      1092.393         847          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           NA 1076.897 1091.132 1070.897      1092.393         847 reference</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 4.232327e-01 1076.897 1091.132 1070.897      1092.393         847          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:      *       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         p_value      AIC      BIC deviance null_deviance df_residual</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 1.051567e-02 1076.897 1091.132 1070.897      1092.393         847</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 8.125878e-06 1076.897 1091.132 1070.897      1092.393         847</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           NA 1076.897 1091.132 1070.897      1092.393         847</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 4.232327e-01 1076.897 1091.132 1070.897      1092.393         847</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    c_statistic hoslem_chi2  hoslem_p reference    sig sig_binary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;num&gt;       &lt;num&gt;     &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   0.5973818    12.45399 0.1320681                *       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.5973818    12.45399 0.1320681              ***       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.5973818    12.45399 0.1320681 reference             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:   0.5973818    12.45399 0.1320681                       FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 2: Remove intercept from output</span></span></span>
 <span class="r-in"><span><span class="va">result2</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model1</span>, include_intercept <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
@@ -305,16 +305,16 @@ categories of factor variables with:</p><ul><li><p>Effect estimate = 1 (for OR/H
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: 1.0165269  1.042972 1.0296646 1.0165269 1.042972  4.4618403 8.125878e-06</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1.0165269  1.042972 1.0000000        NA       NA         NA           NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3: 0.6667088  1.185555 0.8890557 0.6667088 1.185555 -0.8008255 4.232327e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         AIC      BIC deviance null_deviance df_residual reference    sig</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;    &lt;char&gt; &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 1076.897 1091.132 1070.897      1092.393         847              ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1076.897 1091.132 1070.897      1092.393         847 reference       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 1076.897 1091.132 1070.897      1092.393         847                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:      FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         AIC      BIC deviance null_deviance df_residual c_statistic hoslem_chi2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;       &lt;num&gt;       &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 1076.897 1091.132 1070.897      1092.393         847   0.5973818    12.45399</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1076.897 1091.132 1070.897      1092.393         847   0.5973818    12.45399</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 1076.897 1091.132 1070.897      1092.393         847   0.5973818    12.45399</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     hoslem_p reference    sig sig_binary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 0.1320681              ***       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 0.1320681 reference             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 0.1320681                       FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 3: Logistic regression with factor variable</span></span></span>
 <span class="r-in"><span><span class="va">model3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">os_status</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">treatment</span>, </span></span>
@@ -344,20 +344,20 @@ categories of factor variables with:</p><ul><li><p>Effect estimate = 1 (for OR/H
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3: 0.4163927 0.1858126 0.9331059 1.0000000        NA        NA         NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4: 0.5351875 0.3604586 0.7946147 0.5351875 0.3604586 0.7946147 -3.1000093</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5: 1.0648959 0.7192715 1.5765998 1.0648959 0.7192715 1.5765998  0.3140643</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         p_value      AIC      BIC deviance null_deviance df_residual reference</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;    &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 3.332531e-02 1060.212 1079.192 1052.212      1092.393         846          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 9.723996e-06 1060.212 1079.192 1052.212      1092.393         846          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           NA 1060.212 1079.192 1052.212      1092.393         846 reference</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 1.935146e-03 1060.212 1079.192 1052.212      1092.393         846          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 7.534722e-01 1060.212 1079.192 1052.212      1092.393         846          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:      *       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:     **       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         p_value      AIC      BIC deviance null_deviance df_residual</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 3.332531e-02 1060.212 1079.192 1052.212      1092.393         846</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 9.723996e-06 1060.212 1079.192 1052.212      1092.393         846</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           NA 1060.212 1079.192 1052.212      1092.393         846</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 1.935146e-03 1060.212 1079.192 1052.212      1092.393         846</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 7.534722e-01 1060.212 1079.192 1052.212      1092.393         846</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    c_statistic hoslem_chi2  hoslem_p reference    sig sig_binary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;num&gt;       &lt;num&gt;     &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   0.6310791    4.205572 0.8381159                *       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.6310791    4.205572 0.8381159              ***       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.6310791    4.205572 0.8381159 reference             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:   0.6310791    4.205572 0.8381159               **       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:   0.6310791    4.205572 0.8381159                       FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 4: Custom confidence level and reference label</span></span></span>
 <span class="r-in"><span><span class="va">result4</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model3</span>, </span></span>
@@ -386,20 +386,20 @@ categories of factor variables with:</p><ul><li><p>Effect estimate = 1 (for OR/H
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3: 0.4163927 0.2115508 0.8195801 1.0000000        NA        NA         NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4: 0.5351875 0.3841070 0.7456924 0.5351875 0.3841070 0.7456924 -3.1000093</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5: 1.0648959 0.7661097 1.4802101 1.0648959 0.7661097 1.4802101  0.3140643</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         p_value      AIC      BIC deviance null_deviance df_residual reference</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;    &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 3.332531e-02 1060.212 1079.192 1052.212      1092.393         846          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 9.723996e-06 1060.212 1079.192 1052.212      1092.393         846          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           NA 1060.212 1079.192 1052.212      1092.393         846       ref</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 1.935146e-03 1060.212 1079.192 1052.212      1092.393         846          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 7.534722e-01 1060.212 1079.192 1052.212      1092.393         846          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:      *       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:     **       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         p_value      AIC      BIC deviance null_deviance df_residual</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 3.332531e-02 1060.212 1079.192 1052.212      1092.393         846</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 9.723996e-06 1060.212 1079.192 1052.212      1092.393         846</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           NA 1060.212 1079.192 1052.212      1092.393         846</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 1.935146e-03 1060.212 1079.192 1052.212      1092.393         846</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 7.534722e-01 1060.212 1079.192 1052.212      1092.393         846</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    c_statistic hoslem_chi2  hoslem_p reference    sig sig_binary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;num&gt;       &lt;num&gt;     &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   0.6310791    4.205572 0.8381159                *       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.6310791    4.205572 0.8381159              ***       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.6310791    4.205572 0.8381159       ref             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:   0.6310791    4.205572 0.8381159               **       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:   0.6310791    4.205572 0.8381159                       FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 5: Cox proportional hazards model</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -570,42 +570,42 @@ categories of factor variables with:</p><ul><li><p>Effect estimate = 1 (for OR/H
 <span class="r-out co"><span class="r-pr">#&gt;</span> 14: 1.4341391 0.7256022 2.8345490 1.4341391 0.7256022 2.8345490  1.0372451</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15: 1.3431208 0.6911212 2.6102129 1.3431208 0.6911212 2.6102129  0.8701836</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16: 1.2019825 0.6263702 2.3065625 1.2019825 0.6263702 2.3065625  0.5532170</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          p_value      AIC      BIC deviance null_deviance df_residual reference</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;    &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1: 7.122518e-06 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:           NA 1072.994 1139.428 1044.994      1092.393         836 reference</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 4.144572e-01 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:           NA 1072.994 1139.428 1044.994      1092.393         836 reference</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5: 1.475647e-03 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6: 8.692154e-01 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:           NA 1072.994 1139.428 1044.994      1092.393         836 reference</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8: 1.386854e-01 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9: 4.417139e-01 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10: 8.896791e-01 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11: 8.812397e-01 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12: 8.557544e-01 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13: 1.453959e-01 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14: 2.996217e-01 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15: 3.842001e-01 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16: 5.801148e-01 1072.994 1139.428 1044.994      1092.393         836          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:    ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:     **       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          p_value      AIC      BIC deviance null_deviance df_residual</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1: 7.122518e-06 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:           NA 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 4.144572e-01 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:           NA 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5: 1.475647e-03 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6: 8.692154e-01 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:           NA 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8: 1.386854e-01 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9: 4.417139e-01 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10: 8.896791e-01 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11: 8.812397e-01 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12: 8.557544e-01 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13: 1.453959e-01 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14: 2.996217e-01 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15: 3.842001e-01 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16: 5.801148e-01 1072.994 1139.428 1044.994      1092.393         836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     c_statistic hoslem_chi2  hoslem_p reference    sig sig_binary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;       &lt;num&gt;     &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:   0.6382593    5.297864 0.7253171              ***       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:   0.6382593    5.297864 0.7253171 reference             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:   0.6382593    5.297864 0.7253171                       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:   0.6382593    5.297864 0.7253171 reference             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:   0.6382593    5.297864 0.7253171               **       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:   0.6382593    5.297864 0.7253171                       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:   0.6382593    5.297864 0.7253171 reference             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:   0.6382593    5.297864 0.7253171                       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:   0.6382593    5.297864 0.7253171                       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:   0.6382593    5.297864 0.7253171                       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:   0.6382593    5.297864 0.7253171                       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:   0.6382593    5.297864 0.7253171                       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:   0.6382593    5.297864 0.7253171                       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:   0.6382593    5.297864 0.7253171                       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15:   0.6382593    5.297864 0.7253171                       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16:   0.6382593    5.297864 0.7253171                       FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 8: Access model attributes</span></span></span>
 <span class="r-in"><span><span class="va">result8</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model1</span><span class="op">)</span></span></span>

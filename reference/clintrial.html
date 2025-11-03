@@ -19,7 +19,7 @@ the full capabilities of descriptive and regression analysis functions."><!-- ma
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastfit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
       </span>
     </div>
 
@@ -151,7 +151,40 @@ the full capabilities of descriptive and regression analysis functions.</p>
 <span class="r-in"><span>        variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"stage"</span>, <span class="st">"ecog"</span>, </span></span>
 <span class="r-in"><span>                     <span class="st">"biomarker_a"</span>, <span class="st">"Surv(os_months, os_status)"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        var_labels <span class="op">=</span> <span class="va">clintrial_labels</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in table(data[[var]], data[[group_var]], useNA = "no"):</span> all arguments must have the same length</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    Variable           Group            Total          Control</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                      &lt;char&gt;          &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:                       N                              850              183</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:             Age (years)       Mean ± SD      59.5 ± 11.4      58.4 ± 11.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:                            Median [IQR] 59.0 [52.0-68.0] 59.0 [50.5-66.5]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:                                   Range        25.0-90.0        29.0-90.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:                     Sex          Female      463 (54.5%)       94 (51.4%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                                    Male      387 (45.5%)       89 (48.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:           Disease Stage               I      229 (27.0%)       50 (27.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:                                      II      265 (31.3%)       68 (37.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:                                     III      238 (28.1%)       44 (24.3%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                                      IV      115 (13.6%)       19 (10.5%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11: ECOG Performance Status               0      248 (29.5%)       59 (32.4%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:                                       1      341 (40.5%)       69 (37.9%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:                                       2      212 (25.2%)       45 (24.7%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:                                       3        41 (4.9%)         9 (4.9%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15:        Overall Survival Median (95% CI) 28.2 (25.1-32.2) 22.0 (18.6-32.4)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Drug A           Drug B p-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;char&gt;           &lt;char&gt;  &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:              294              373        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:      59.2 ± 11.1      60.4 ± 11.5   0.137</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 59.0 [52.0-66.0] 60.0 [52.0-69.0]   0.131</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:        31.0-90.0        25.0-90.0        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:      160 (54.4%)      209 (56.0%)   0.583</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:      134 (45.6%)      164 (44.0%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:       74 (25.2%)      105 (28.2%)   0.202</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:       94 (32.0%)      103 (27.7%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:       80 (27.2%)      114 (30.6%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:       46 (15.6%)       50 (13.4%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:       87 (29.6%)      102 (27.9%)   0.813</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:      126 (42.9%)      146 (39.9%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:       69 (23.5%)       98 (26.8%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        12 (4.1%)        20 (5.5%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15: 44.6 (35.8-57.7) 22.2 (19.3-26.7) &lt; 0.001</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Univariable screening</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="uscreen.html">uscreen</a></span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
