@@ -795,8 +795,11 @@ perform_continuous_test <- function(data, var, group_var, test_type, stat_type =
 #' @keywords internal
 perform_categorical_test <- function(data, var, group_var, test_type, ...) {
     
-    ## Create contingency table
-    tab <- table(data[[var]], data[[group_var]], useNA = "no")
+    ## Ensure we only use complete cases for both variables
+    valid_idx <- !is.na(data[[var]]) & !is.na(data[[group_var]])
+    
+    ## Create contingency table with matched vectors
+    tab <- table(data[[var]][valid_idx], data[[group_var]][valid_idx], useNA = "no")
     
     if (any(dim(tab) < 2)) return(NA_real_)
     
