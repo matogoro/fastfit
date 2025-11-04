@@ -7,13 +7,22 @@
 #' @keywords internal
 #' @noRd
 utils::globalVariables(c(
+           
            ## data.table special symbols
+           ".",
+           "..",
            ".BY",
            ".GRP",
            ".I",
            ".N",
            ".NGRP",
            ".SD",
+
+           ## data.table column selection with .. prefix
+           "..cols",
+           "..display_cols",
+           "..key_cols",
+           "..new_order",
            
            ## Column names used in statistical models and summaries
            "Estimate",
@@ -26,7 +35,7 @@ utils::globalVariables(c(
            "RR",
            "N",
            "Variable",
-           "Fastfit Score",
+           "FastFit Score",
            "p-value",
            
            ## Variables created/used in data.table operations
@@ -77,6 +86,7 @@ utils::globalVariables(c(
            "i.var_new",
            "i.events_group",
            "i.n_group",
+           "i.Freq",
            "level",
            "level_row",
            "level_term",
@@ -100,6 +110,7 @@ utils::globalVariables(c(
            "ref_level",
            "reference",
            "reference_label",
+           "result",
            "rows",
            "rows_to_delete",
            "se",

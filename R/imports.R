@@ -13,8 +13,8 @@
 #' @importFrom stats formula terms model.frame model.matrix
 #' @importFrom stats na.omit complete.cases
 #' @importFrom stats cor pnorm qnorm
-#' @importFrom stats nobs
+#' @importFrom stats nobs pchisq pf setNames
 #' @importFrom grDevices axisTicks
-#' @importFrom utils head tail str
+#' @importFrom utils head tail str capture.output
 #' @keywords internal
 NULL

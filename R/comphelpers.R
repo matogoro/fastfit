@@ -431,6 +431,31 @@ calculate_model_scores <- function(comparison, model_type, scoring_weights = NUL
     return(comparison)
 }
 
+#' Combine coefficient tables from multiple models
+#' @keywords internal
+combine_coefficient_tables <- function(coef_list, model_names) {
+    if (length(coef_list) == 0) return(NULL)
+    
+    ## Add model identifier to each table
+    for (i in seq_along(coef_list)) {
+        if (!is.null(coef_list[[i]])) {
+            coef_list[[i]]$Model <- model_names[i]
+        }
+    }
+    
+    ## Combine all tables
+    combined <- data.table::rbindlist(coef_list, fill = TRUE)
+    
+    ## Reorder columns to put Model first
+    if ("Model" %in% names(combined)) {
+        cols <- names(combined)
+        new_order <- c("Model", setdiff(cols, "Model"))
+        combined <- combined[, ..new_order]
+    }
+    
+    return(combined)
+}
+
 #' Print method showing scoring methodology
 #' @keywords internal
 #' @export

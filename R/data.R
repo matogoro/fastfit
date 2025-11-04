@@ -18,8 +18,8 @@
 #'   \item{stage}{Disease stage at diagnosis (factor: I, II, III, IV)}
 #'   \item{grade}{Tumor grade (factor: Well/Moderately/Poorly differentiated)}
 #'   \item{ecog}{ECOG performance status (factor: 0, 1, 2, 3)}
-#'   \item{biomarker_a}{Serum biomarker A in ng/mL (numeric)}
-#'   \item{biomarker_b}{Serum biomarker B in U/L (numeric)}
+#'   \item{biomarker_x}{Serum biomarker A in ng/mL (numeric)}
+#'   \item{biomarker_y}{Serum biomarker B in U/L (numeric)}
 #'   \item{hemoglobin}{Baseline hemoglobin in g/dL (numeric)}
 #'   \item{creatinine}{Baseline creatinine in mg/dL (numeric)}
 #'   \item{treatment}{Randomized treatment (factor: Control, Drug A, Drug B)}
@@ -32,7 +32,7 @@
 #' 
 #' @details
 #' This dataset includes realistic correlations between variables:
-#' - Survival is worse with higher stage, ECOG, age, and biomarker_a
+#' - Survival is worse with higher stage, ECOG, age, and biomarker_x
 #' - Treatment effects show Drug B > Drug A > Control
 #' - Approximately 2\% of values are missing at random
 #' - Median follow-up is approximately 30 months
@@ -47,21 +47,21 @@
 #' desctbl(clintrial,
 #'         by = "treatment", 
 #'         variables = c("age", "sex", "stage", "ecog", 
-#'                      "biomarker_a", "Surv(os_months, os_status)"),
+#'                      "biomarker_x", "Surv(os_months, os_status)"),
 #'         var_labels = clintrial_labels)
 #' 
 #' # Univariable screening
 #' uscreen(clintrial,
 #'         outcome = "Surv(os_months, os_status)",
 #'         predictors = c("age", "sex", "stage", "grade", "ecog",
-#'                       "biomarker_a", "treatment"),
+#'                       "biomarker_x", "treatment"),
 #'         model_type = "coxph",
 #'         var_labels = clintrial_labels)
 #' 
 #' # Multivariable model
 #' fit(clintrial,
 #'     outcome = "Surv(os_months, os_status)",
-#'     predictors = c("age", "stage", "ecog", "biomarker_a", "treatment"),
+#'     predictors = c("age", "stage", "ecog", "biomarker_x", "treatment"),
 #'     model_type = "coxph",
 #'     var_labels = clintrial_labels)
 #' 
@@ -69,7 +69,7 @@
 #' fastfit(clintrial,
 #'         outcome = "Surv(os_months, os_status)",
 #'         predictors = c("age", "sex", "stage", "grade", "ecog",
-#'                       "smoking", "biomarker_a", "biomarker_b", "treatment"),
+#'                       "smoking", "biomarker_x", "biomarker_y", "treatment"),
 #'         method = "screen",
 #'         p_threshold = 0.20,
 #'         model_type = "coxph",
