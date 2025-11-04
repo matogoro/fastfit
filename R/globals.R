@@ -27,7 +27,7 @@ utils::globalVariables(c(
            "N",
            "Variable",
            "Fastfit Score",
-           "p-value"
+           "p-value",
            
            ## Variables created/used in data.table operations
            "age",
