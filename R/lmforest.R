@@ -450,7 +450,7 @@ lmforest <- function(model, data = NULL,
 
     ## Internally work in inches
     if (!is.null(plot_width) && units != "in") {
-        plot_width <- convert_units(plot_width, from = units, to = "inches")
+        plot_width <- convert_units(plot_width, from = units, to = "in")
     }
     
     
@@ -1055,8 +1055,8 @@ lmforest <- function(model, data = NULL,
 
     ## Convert units back for output if needed
     if (units != "in") {
-        rec_width <- convert_units(rec_width, from = "inches", to = units)
-        rec_height <- convert_units(rec_height, from = "inches", to = units)
+        rec_width <- convert_units(rec_width, from = "in", to = units)
+        rec_height <- convert_units(rec_height, from = "in", to = units)
     }
 
     ## Provide dimension recommendations
