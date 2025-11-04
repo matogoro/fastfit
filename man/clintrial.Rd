@@ -19,8 +19,8 @@ A data frame with 800 observations and 20 variables:
   \item{stage}{Disease stage at diagnosis (factor: I, II, III, IV)}
   \item{grade}{Tumor grade (factor: Well/Moderately/Poorly differentiated)}
   \item{ecog}{ECOG performance status (factor: 0, 1, 2, 3)}
-  \item{biomarker_x}{Serum biomarker X in ng/mL (numeric)}
-  \item{biomarker_y}{Serum biomarker Y in U/L (numeric)}
+  \item{biomarker_a}{Serum biomarker A in ng/mL (numeric)}
+  \item{biomarker_b}{Serum biomarker B in U/L (numeric)}
   \item{hemoglobin}{Baseline hemoglobin in g/dL (numeric)}
   \item{creatinine}{Baseline creatinine in mg/dL (numeric)}
   \item{treatment}{Randomized treatment (factor: Control, Drug A, Drug B)}
@@ -57,21 +57,21 @@ data(clintrial_labels)
 desctbl(clintrial,
         by = "treatment", 
         variables = c("age", "sex", "stage", "ecog", 
-                     "biomarker_x", "Surv(os_months, os_status)"),
+                     "biomarker_a", "Surv(os_months, os_status)"),
         var_labels = clintrial_labels)
 
 # Univariable screening
 uscreen(clintrial,
         outcome = "Surv(os_months, os_status)",
         predictors = c("age", "sex", "stage", "grade", "ecog",
-                      "biomarker_x", "treatment"),
+                      "biomarker_a", "treatment"),
         model_type = "coxph",
         var_labels = clintrial_labels)
 
 # Multivariable model
 fit(clintrial,
     outcome = "Surv(os_months, os_status)",
-    predictors = c("age", "stage", "ecog", "biomarker_x", "treatment"),
+    predictors = c("age", "stage", "ecog", "biomarker_a", "treatment"),
     model_type = "coxph",
     var_labels = clintrial_labels)
 
@@ -79,7 +79,7 @@ fit(clintrial,
 fastfit(clintrial,
         outcome = "Surv(os_months, os_status)",
         predictors = c("age", "sex", "stage", "grade", "ecog",
-                      "smoking", "biomarker_x", "biomarker_y", "treatment"),
+                      "smoking", "biomarker_a", "biomarker_b", "treatment"),
         method = "screen",
         p_threshold = 0.20,
         model_type = "coxph",

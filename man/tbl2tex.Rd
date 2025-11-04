@@ -50,7 +50,7 @@ Default is \code{TRUE}.}
 }}
 
 \item{bold_significant}{Logical. If \code{TRUE}, wraps significant p-values 
-in \code{\\textbf\{\}} commands for bold display. Default is \code{TRUE}.}
+in textbf commands for bold display. Default is \code{TRUE}.}
 
 \item{sig_threshold}{Numeric. P-value threshold for bolding. Default is 0.05.}
 
@@ -59,12 +59,12 @@ in \code{\\textbf\{\}} commands for bold display. Default is \code{TRUE}.}
   \item \code{"l"} - Left
   \item \code{"c"} - Center  
   \item \code{"r"} - Right
-  \item \code{"p\{width\}"} - Paragraph column with specified width
+  \item Paragraph column with specified width (p-type)
 }
 If \code{NULL}, automatically determines based on content. Can specify 
 per-column as vector. Default is \code{NULL}.}
 
-\item{indent_groups}{Logical. If \code{TRUE}, uses \code{\\hspace\{\}} to 
+\item{indent_groups}{Logical. If \code{TRUE}, uses hspace to 
 indent grouped rows, creating hierarchical display. Useful for factor 
 variables in regression tables. Default is \code{FALSE}.}
 
@@ -73,29 +73,27 @@ only essential rows (single row for continuous, non-reference for binary).
 Automatically sets \code{indent_groups = TRUE}. Default is \code{FALSE}.}
 
 \item{booktabs}{Logical. If \code{TRUE}, uses booktabs package commands 
-(\code{\\toprule}, \code{\\midrule}, \code{\\bottomrule}) for professional 
-table rules. Requires \code{\\usepackage\{booktabs\}} in LaTeX preamble. 
+(toprule, midrule, bottomrule) for professional 
+table rules. Requires booktabs package in LaTeX preamble. 
 Default is \code{FALSE}.}
 
 \item{zebra_stripes}{Logical. If \code{TRUE}, adds alternating row colors 
-for variable groups using \code{\\rowcolor\{\}}. Requires 
-\code{\\usepackage[table]\{xcolor\}} in preamble. Default is \code{FALSE}.}
+for variable groups using rowcolor command. Requires 
+xcolor package with table option in preamble. Default is \code{FALSE}.}
 
 \item{stripe_color}{Character string. LaTeX color specification for zebra 
 stripes (e.g., \code{"gray!20"}, \code{"blue!10"}). Only used when 
 \code{zebra_stripes = TRUE}. Default is \code{"gray!20"}.}
 
 \item{dark_header}{Logical. If \code{TRUE}, creates white text on black 
-background for header row using \code{\\rowcolor\{black\}} and 
-\code{\\color\{white\}}. Requires \code{\\usepackage[table]\{xcolor\}}. 
+background for header row. Requires xcolor package with table option. 
 Default is \code{FALSE}.}
 
-\item{caption}{Character string. Table caption for \code{\\caption\{\}} command. 
-Supports multi-line captions using \code{\\\\}. Default is \code{NULL}.}
+\item{caption}{Character string. Table caption for LaTeX caption command. 
+Supports multi-line captions using double backslash. Default is \code{NULL}.}
 
-\item{label}{Character string. LaTeX label for cross-references using 
-\code{\\label\{\}} and \code{\\ref\{\}}. Example: \code{"tab:regression"}. 
-Default is \code{NULL}.}
+\item{label}{Character string. LaTeX label for cross-references. 
+Example: \code{"tab:regression"}. Default is \code{NULL}.}
 
 \item{...}{Additional arguments passed to \code{\link[xtable]{xtable}}.}
 }
@@ -115,7 +113,7 @@ into LaTeX manuscripts.
 
 The function generates a standalone LaTeX tabular environment that can be:
 \enumerate{
-  \item Included in documents: \code{\\input\{results.tex\}}
+  \item Included in documents with \\input command
   \item Embedded in table/figure environments
   \item Used in manuscript classes (article, report, etc.)
 }
@@ -176,7 +174,7 @@ Creates high-contrast header row:
 dark_header = TRUE  # Black background, white text
 }
 
-Both require \code{\\usepackage[table]{xcolor}} in your document.
+Both require the xcolor package with table option in your document.
 
 \strong{Integration with LaTeX Documents:}
 
@@ -220,15 +218,9 @@ in a table environment (see examples above).
 
 The function automatically escapes LaTeX special characters in your data:
 \itemize{
-  \item Ampersand becomes \\&
-  \item Percent becomes \\%
-  \item Dollar becomes \\$
-  \item Hash becomes \\#
-  \item Underscore becomes \\_
-  \item Left brace becomes \\{
-  \item Right brace becomes \\}
-  \item Tilde becomes \\textasciitilde{}
-  \item Caret becomes \\textasciicircum{}
+  \item Ampersand, percent, dollar sign, hash, underscore
+  \item Left and right braces
+  \item Tilde and caret (using textasciitilde and textasciicircum)
 }
 
 Variable names and labels should not include these characters unless 

@@ -3,6 +3,7 @@
 #' This file declares imports from base R and stats packages to avoid
 #' "no visible global function definition" warnings in R CMD check.
 #'
+#' @name fastfit-imports
 #' @importFrom stats sd var median quantile IQR
 #' @importFrom stats logLik AIC BIC coef confint vcov
 #' @importFrom stats chisq.test fisher.test t.test wilcox.test kruskal.test

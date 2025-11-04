@@ -13,8 +13,8 @@
 #' @param file Character string specifying the output .tex filename. Must have 
 #'   \code{.tex} extension. Example: \code{"results.tex"}, \code{"table1.tex"}.
 #'   
-#' @param caption Character string. Table caption for \code{\\caption\{\}} command. 
-#'   Supports multi-line captions using \code{\\\\}. Default is \code{NULL}.
+#' @param caption Character string. Table caption for LaTeX caption command. 
+#'   Supports multi-line captions using double backslash. Default is \code{NULL}.
 #'   
 #' @param format_headers Logical. If \code{TRUE}, formats column headers by 
 #'   converting underscores to spaces, italicizing statistical notation (\emph{n}, 
@@ -34,7 +34,7 @@
 #'   }
 #'   
 #' @param bold_significant Logical. If \code{TRUE}, wraps significant p-values 
-#'   in \code{\\textbf\{\}} commands for bold display. Default is \code{TRUE}.
+#'   in textbf commands for bold display. Default is \code{TRUE}.
 #'   
 #' @param sig_threshold Numeric. P-value threshold for bolding. Default is 0.05.
 #'   
@@ -43,12 +43,12 @@
 #'     \item \code{"l"} - Left
 #'     \item \code{"c"} - Center  
 #'     \item \code{"r"} - Right
-#'     \item \code{"p\{width\}"} - Paragraph column with specified width
+#'     \item Paragraph column with specified width (p-type)
 #'   }
 #'   If \code{NULL}, automatically determines based on content. Can specify 
 #'   per-column as vector. Default is \code{NULL}.
 #'   
-#' @param indent_groups Logical. If \code{TRUE}, uses \code{\\hspace\{\}} to 
+#' @param indent_groups Logical. If \code{TRUE}, uses hspace to 
 #'   indent grouped rows, creating hierarchical display. Useful for factor 
 #'   variables in regression tables. Default is \code{FALSE}.
 #'   
@@ -57,26 +57,24 @@
 #'   Automatically sets \code{indent_groups = TRUE}. Default is \code{FALSE}.
 #'   
 #' @param booktabs Logical. If \code{TRUE}, uses booktabs package commands 
-#'   (\code{\\toprule}, \code{\\midrule}, \code{\\bottomrule}) for professional 
-#'   table rules. Requires \code{\\usepackage\{booktabs\}} in LaTeX preamble. 
+#'   (toprule, midrule, bottomrule) for professional 
+#'   table rules. Requires booktabs package in LaTeX preamble. 
 #'   Default is \code{FALSE}.
 #'   
 #' @param zebra_stripes Logical. If \code{TRUE}, adds alternating row colors 
-#'   for variable groups using \code{\\rowcolor\{\}}. Requires 
-#'   \code{\\usepackage[table]\{xcolor\}} in preamble. Default is \code{FALSE}.
+#'   for variable groups using rowcolor command. Requires 
+#'   xcolor package with table option in preamble. Default is \code{FALSE}.
 #'   
 #' @param stripe_color Character string. LaTeX color specification for zebra 
 #'   stripes (e.g., \code{"gray!20"}, \code{"blue!10"}). Only used when 
 #'   \code{zebra_stripes = TRUE}. Default is \code{"gray!20"}.
 #'   
 #' @param dark_header Logical. If \code{TRUE}, creates white text on black 
-#'   background for header row using \code{\\rowcolor\{black\}} and 
-#'   \code{\\color\{white\}}. Requires \code{\\usepackage[table]\{xcolor\}}. 
+#'   background for header row. Requires xcolor package with table option. 
 #'   Default is \code{FALSE}.
 #'   
-#' @param label Character string. LaTeX label for cross-references using 
-#'   \code{\\label\{\}} and \code{\\ref\{\}}. Example: \code{"tab:regression"}. 
-#'   Default is \code{NULL}.
+#' @param label Character string. LaTeX label for cross-references. 
+#'   Example: \code{"tab:regression"}. Default is \code{NULL}.
 #'   
 #' @param ... Additional arguments passed to \code{\link[xtable]{xtable}}.
 #'
@@ -88,7 +86,7 @@
 #' 
 #' The function generates a standalone LaTeX tabular environment that can be:
 #' \enumerate{
-#'   \item Included in documents: \code{\\input\{results.tex\}}
+#'   \item Included in documents with \\input command
 #'   \item Embedded in table/figure environments
 #'   \item Used in manuscript classes (article, report, etc.)
 #' }
@@ -149,7 +147,7 @@
 #' dark_header = TRUE  # Black background, white text
 #' }
 #' 
-#' Both require \code{\\usepackage[table]{xcolor}} in your document.
+#' Both require the xcolor package with table option in your document.
 #' 
 #' \strong{Integration with LaTeX Documents:}
 #' 
@@ -193,15 +191,9 @@
 #' 
 #' The function automatically escapes LaTeX special characters in your data:
 #' \itemize{
-#'   \item Ampersand becomes \\verb{\\&}
-#'   \item Percent becomes \\verb{\\%}
-#'   \item Dollar becomes \\verb{\\$}
-#'   \item Hash becomes \\verb{\\#}
-#'   \item Underscore becomes \\verb{\\_}
-#'   \item Left brace becomes \\verb{\\{}
-#'   \item Right brace becomes \\verb{\\}}
-#'   \item Tilde becomes \\verb{\\textasciitilde{}}
-#'   \item Caret becomes \\verb{\\textasciicircum{}}
+#'   \item Ampersand, percent, dollar sign, hash, underscore
+#'   \item Left and right braces
+#'   \item Tilde and caret (using textasciitilde and textasciicircum)
 #' }
 #' 
 #' Variable names and labels should not include these characters unless 

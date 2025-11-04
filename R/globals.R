@@ -75,7 +75,7 @@ utils::globalVariables(c(
            "hr_string_expr",
            "inds",
            "i.var_new",
-           "i.events_group"
+           "i.events_group",
            "i.n_group",
            "level",
            "level_row",

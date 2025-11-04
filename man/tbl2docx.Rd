@@ -288,11 +288,10 @@ ft  # Renders in Word output
 ```
 
 Or use flextable directly in chunks:
-````markdown
-```{r}
-flextable::flextable(results)
-```
-````
+
+\preformatted{
+  flextable::flextable(results)
+}
 
 \strong{Optimized for FastFit Tables:}
 

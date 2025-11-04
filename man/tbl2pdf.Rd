@@ -183,11 +183,11 @@ caption = "Table 1: Multivariable Analysis\\\\
 
 # With superscripts and italics
 caption = "Table 1: Results\\\\
-          \\textsuperscript{a}Adjusted for age\\\\
-          \\textit{p}-values from Wald tests"
+          \textsuperscript\{a\}Adjusted for age\\
+          \textit\{p\}-values from Wald tests\"
 
 # With special characters (must escape)
-caption = "Results for \\$1000 increase in income (\\%)"
+caption = \"Results for \$1000 increase in income (\\%)"
 ```
 
 \strong{Auto-Sizing (paper = "auto"):}
