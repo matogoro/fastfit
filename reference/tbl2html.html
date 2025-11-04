@@ -20,7 +20,7 @@ including responsive design support, color schemes, and interactive features."><
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastfit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.2</span>
       </span>
     </div>
 
@@ -219,11 +219,9 @@ non-breaking spaces:
 “`r
 # Generate HTML fragment (no CSS)
 tbl2html(results, "table.html", include_css = FALSE)</p>
-<p># Include in document
-“`r results='asis'
-cat(readLines("table.html"), sep = "\n")
-“`
-“`</p>
+<p># Include in document with results='asis'</p><div class="sourceCode"><pre><code><span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="st">"table.html"</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+
 <p>Or directly render without file:
 “`r
 # For inline display
@@ -237,14 +235,14 @@ htmltools::HTML(
 <p>For Shiny applications:
 “`r
 # In server function
-output$results_table &lt;- renderUI(
+output$results_table &lt;- renderUI({
   tbl2html(results_data(), "temp.html", include_css = FALSE)
   HTML(readLines("temp.html"))
-)</p>
+})</p>
 <p># Or use directly with DT package for interactive tables
-output$interactive_table &lt;- DT::renderDT(
+output$interactive_table &lt;- DT::renderDT({
   results_data()
-)
+})
 “`</p>
 <p><strong>Customizing Appearance:</strong></p>
 <p>To customize beyond built-in options:</p>

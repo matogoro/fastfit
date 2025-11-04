@@ -21,7 +21,7 @@ into LaTeX manuscripts."><!-- mathjax --><script src="https://cdnjs.cloudflare.c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastfit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.2</span>
       </span>
     </div>
 
@@ -117,7 +117,7 @@ Default is <code>TRUE</code>.</p></dd>
 
 <dt id="arg-bold-significant">bold_significant<a class="anchor" aria-label="anchor" href="#arg-bold-significant"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, wraps significant p-values
-in <code>\textbf{}</code> commands for bold display. Default is <code>TRUE</code>.</p></dd>
+in textbf commands for bold display. Default is <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-sig-threshold">sig_threshold<a class="anchor" aria-label="anchor" href="#arg-sig-threshold"></a></dt>
@@ -128,13 +128,13 @@ in <code>\textbf{}</code> commands for bold display. Default is <code>TRUE</code
 <dd><p>Character string or vector specifying column alignment:</p><ul><li><p><code>"l"</code> - Left</p></li>
 <li><p><code>"c"</code> - Center</p></li>
 <li><p><code>"r"</code> - Right</p></li>
-<li><p><code>"p\{width\}"</code> - Paragraph column with specified width</p></li>
+<li><p>Paragraph column with specified width (p-type)</p></li>
 </ul><p>If <code>NULL</code>, automatically determines based on content. Can specify
 per-column as vector. Default is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-indent-groups">indent_groups<a class="anchor" aria-label="anchor" href="#arg-indent-groups"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, uses <code>\hspace{}</code> to
+<dd><p>Logical. If <code>TRUE</code>, uses hspace to
 indent grouped rows, creating hierarchical display. Useful for factor
 variables in regression tables. Default is <code>FALSE</code>.</p></dd>
 
@@ -147,15 +147,15 @@ Automatically sets <code>indent_groups = TRUE</code>. Default is <code>FALSE</co
 
 <dt id="arg-booktabs">booktabs<a class="anchor" aria-label="anchor" href="#arg-booktabs"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, uses booktabs package commands
-(<code>\toprule</code>, <code>\midrule</code>, <code>\bottomrule</code>) for professional
-table rules. Requires <code>\usepackage{booktabs}</code> in LaTeX preamble.
+(toprule, midrule, bottomrule) for professional
+table rules. Requires booktabs package in LaTeX preamble.
 Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-zebra-stripes">zebra_stripes<a class="anchor" aria-label="anchor" href="#arg-zebra-stripes"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, adds alternating row colors
-for variable groups using <code>\rowcolor{}</code>. Requires
-<code>\usepackage[table]{xcolor}</code> in preamble. Default is <code>FALSE</code>.</p></dd>
+for variable groups using rowcolor command. Requires
+xcolor package with table option in preamble. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-stripe-color">stripe_color<a class="anchor" aria-label="anchor" href="#arg-stripe-color"></a></dt>
@@ -166,20 +166,18 @@ stripes (e.g., <code>"gray!20"</code>, <code>"blue!10"</code>). Only used when
 
 <dt id="arg-dark-header">dark_header<a class="anchor" aria-label="anchor" href="#arg-dark-header"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, creates white text on black
-background for header row using <code>\rowcolor{black}</code> and
-<code>\color{white}</code>. Requires <code>\usepackage[table]{xcolor}</code>.
+background for header row. Requires xcolor package with table option.
 Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-caption">caption<a class="anchor" aria-label="anchor" href="#arg-caption"></a></dt>
-<dd><p>Character string. Table caption for <code>\caption{}</code> command.
-Supports multi-line captions using <code>\\</code>. Default is <code>NULL</code>.</p></dd>
+<dd><p>Character string. Table caption for LaTeX caption command.
+Supports multi-line captions using double backslash. Default is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-label">label<a class="anchor" aria-label="anchor" href="#arg-label"></a></dt>
-<dd><p>Character string. LaTeX label for cross-references using
-<code>\label{}</code> and <code>\ref{}</code>. Example: <code>"tab:regression"</code>.
-Default is <code>NULL</code>.</p></dd>
+<dd><p>Character string. LaTeX label for cross-references.
+Example: <code>"tab:regression"</code>. Default is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -194,7 +192,7 @@ Default is <code>NULL</code>.</p></dd>
     <div id="details">
     <h2>Details</h2>
     <p><strong>Output Format:</strong></p>
-<p>The function generates a standalone LaTeX tabular environment that can be:</p><ol><li><p>Included in documents: <code>\input{results.tex}</code></p></li>
+<p>The function generates a standalone LaTeX tabular environment that can be:</p><ol><li><p>Included in documents with \input command</p></li>
 <li><p>Embedded in table/figure environments</p></li>
 <li><p>Used in manuscript classes (article, report, etc.)</p></li>
 </ol><p>The output includes:</p><ul><li><p>Complete tabular environment with proper alignment</p></li>
@@ -234,7 +232,7 @@ Creates alternating background colors for visual grouping:</p><div class="source
 Creates high-contrast header row:</p><div class="sourceCode"><pre><code><span></span>
 <span><span class="va">dark_header</span> <span class="op">=</span> <span class="cn">TRUE</span>  <span class="co"># Black background, white text</span></span></code></pre></div>
 
-<p>Both require <code>\usepackage[table]{xcolor}</code> in your document.</p>
+<p>Both require the xcolor package with table option in your document.</p>
 <p><strong>Integration with LaTeX Documents:</strong></p>
 <p><em>Basic inclusion:</em></p><div class="sourceCode"><pre><code>
 \begin{table}[htbp]
@@ -268,15 +266,9 @@ Creates high-contrast header row:</p><div class="sourceCode"><pre><code><span></
 the output file for reference. For actual LaTeX captions, wrap the table
 in a table environment (see examples above).</p>
 <p><strong>Special Characters:</strong></p>
-<p>The function automatically escapes LaTeX special characters in your data:</p><ul><li><p>Ampersand becomes \&amp;</p></li>
-<li><p>Percent becomes \<!-- % --></p></li>
-<li><p>Dollar becomes \$</p></li>
-<li><p>Hash becomes \#</p></li>
-<li><p>Underscore becomes \_</p></li>
-<li><p>Left brace becomes \
-   Right brace becomes \</p></li>
-<li><p>Tilde becomes \textasciitilde</p></li>
-<li><p>Caret becomes \textasciicircum</p></li>
+<p>The function automatically escapes LaTeX special characters in your data:</p><ul><li><p>Ampersand, percent, dollar sign, hash, underscore</p></li>
+<li><p>Left and right braces</p></li>
+<li><p>Tilde and caret (using textasciitilde and textasciicircum)</p></li>
 </ul><p>Variable names and labels should not include these characters unless
 intentionally using LaTeX commands.</p>
 <p><strong>Hierarchical Display:</strong></p>

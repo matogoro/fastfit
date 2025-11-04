@@ -21,7 +21,7 @@ Word after creation."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastfit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.2</span>
       </span>
     </div>
 
@@ -304,12 +304,10 @@ ft &lt;- tbl2docx(results, "temp.docx", return_ft = TRUE)</p>
 <p># Display in R Markdown chunk
 ft  # Renders in Word output
 “`</p>
-<p>Or use flextable directly in chunks:
-““markdown
-“`r
-flextable::flextable(results)
-“`
-““</p>
+<p>Or use flextable directly in chunks:</p>
+<div class="sourceCode"><pre><code><span></span>
+<span>  <span class="fu">flextable</span><span class="fu">::</span><span class="fu"><a href="https://davidgohel.github.io/flextable/reference/flextable.html" class="external-link">flextable</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
+
 <p><strong>Optimized for FastFit Tables:</strong></p>
 <p>Specifically designed for tables from:</p><ul><li><p><code><a href="desctbl.html">desctbl</a></code> - Descriptive statistics</p></li>
 <li><p><code><a href="fit.html">fit</a></code> - Regression results</p></li>
