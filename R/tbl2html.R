@@ -159,11 +159,10 @@
 #' # Generate HTML fragment (no CSS)
 #' tbl2html(results, "table.html", include_css = FALSE)
 #' 
-#' # Include in document
-#' ```{r results='asis'}
-#' cat(readLines("table.html"), sep = "\\n")
-#' ```
-#' ```
+#' # Include in document with results='asis'
+#' \preformatted{
+#'   cat(readLines("table.html"), sep = "\\n")
+#' }
 #' 
 #' Or directly render without file:
 #' ```r
@@ -180,15 +179,15 @@
 #' For Shiny applications:
 #' ```r
 #' # In server function
-#' output$results_table <- renderUI({
+#' output$results_table <- renderUI(\{
 #'   tbl2html(results_data(), "temp.html", include_css = FALSE)
 #'   HTML(readLines("temp.html"))
-#' })
+#' \})
 #' 
 #' # Or use directly with DT package for interactive tables
-#' output$interactive_table <- DT::renderDT({
+#' output$interactive_table <- DT::renderDT(\{
 #'   results_data()
-#' })
+#' \})
 #' ```
 #' 
 #' \strong{Customizing Appearance:}

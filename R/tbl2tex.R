@@ -193,15 +193,15 @@
 #' 
 #' The function automatically escapes LaTeX special characters in your data:
 #' \itemize{
-#'   \item Ampersand becomes \\&
-#'   \item Percent becomes \\%
-#'   \item Dollar becomes \\$
-#'   \item Hash becomes \\#
-#'   \item Underscore becomes \\_
-#'   \item Left brace becomes \\{
-#'   \item Right brace becomes \\}
-#'   \item Tilde becomes \\textasciitilde{}
-#'   \item Caret becomes \\textasciicircum{}
+#'   \item Ampersand becomes \\verb{\\&}
+#'   \item Percent becomes \\verb{\\%}
+#'   \item Dollar becomes \\verb{\\$}
+#'   \item Hash becomes \\verb{\\#}
+#'   \item Underscore becomes \\verb{\\_}
+#'   \item Left brace becomes \\verb{\\{}
+#'   \item Right brace becomes \\verb{\\}}
+#'   \item Tilde becomes \\verb{\\textasciitilde{}}
+#'   \item Caret becomes \\verb{\\textasciicircum{}}
 #' }
 #' 
 #' Variable names and labels should not include these characters unless 

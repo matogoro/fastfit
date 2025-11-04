@@ -441,7 +441,7 @@ m2dt <- function(model,
         summ <- summary(model)
         
         if (model_class == "coxme") {
-            coef_vec <- stats::fixef(model)
+            coef_vec <- coxme::fixef(model)
             vcov_mat <- as.matrix(stats::vcov(model))
             se_vec <- sqrt(diag(vcov_mat))
             z_vec <- coef_vec / se_vec
