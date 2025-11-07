@@ -21,9 +21,9 @@
 #'   
 #' @param paper Character string specifying paper size:
 #'   \itemize{
-#'     \item \code{"letter"} - US Letter (8.5" × 11") [default]
-#'     \item \code{"a4"} - A4 (210mm × 297mm)
-#'     \item \code{"legal"} - US Legal (8.5" × 14")
+#'     \item \code{"letter"} - US Letter (8.5" x 11") [default]
+#'     \item \code{"a4"} - A4 (210mm x 297mm)
+#'     \item \code{"legal"} - US Legal (8.5" x 14")
 #'     \item \code{"auto"} - Auto-size to content (no margins, crops to fit)
 #'   }
 #'   
@@ -145,19 +145,19 @@
 #' \strong{Caption Formatting:}
 #' 
 #' Captions support LaTeX commands for rich formatting:
-#' ```r
+#' \preformatted{
 #' # Multi-line caption with line breaks
 #' caption = "Table 1: Multivariable Analysis\\\\
 #'           OR = odds ratio; CI = confidence interval"
 #' 
-#' # With superscripts and italics
+#' # With superscripts (using LaTeX syntax)
 #' caption = "Table 1: Results\\\\
-#'           \\textsuperscript{a}Adjusted for age\\\\
-#'           \\textit{p}-values from Wald tests"
+#'           Adjusted for age and sex\\\\
+#'           p-values from Wald tests"
 #' 
-#' # With special characters (must escape)
-#' caption = "Results for $1000 increase in income (\\%)"
-#' ```
+#' # With special characters (must escape percent signs)
+#' caption = "Results for income (in thousands)"
+#' }
 #' 
 #' \strong{Auto-Sizing (paper = "auto"):}
 #' 

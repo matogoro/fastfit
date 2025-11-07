@@ -471,6 +471,9 @@ coxforest <- function(model, data = NULL,
     
     terms <- attr(model$terms, "dataClasses")[-1]
 
+    ## Filter out strata() and cluster() terms - these are not predictors to plot
+    terms <- terms[!grepl("^(strata|cluster)\\(", names(terms))]
+
     ## Extract coefficients
     coef_summary <- summary(model)$coefficients
     conf_int <- stats::confint(model)
