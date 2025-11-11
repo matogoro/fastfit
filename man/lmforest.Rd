@@ -43,7 +43,7 @@ Default is \code{"Linear Model"}. Use descriptive titles for publication.}
 
 \item{effect_label}{Character string for the effect measure label on the 
 forest plot axis. Default is \code{"Coefficient"}. Could be customized to 
-reflect units (e.g., "Change in BMI (kg/m²)").}
+reflect units (e.g., "Change in BMI (kg/m^2)").}
 
 \item{digits}{Integer specifying the number of decimal places for coefficients 
 and confidence intervals. Default is 2.}
@@ -119,7 +119,7 @@ A \code{ggplot} object containing the complete forest plot. The plot
 Generates a publication-ready forest plot that combines a formatted data table 
 with a graphical representation of regression coefficients from a linear model. 
 The plot integrates variable names, group levels, sample sizes, coefficients 
-with confidence intervals, p-values, and model diagnostics (R², F-statistic, 
+with confidence intervals, p-values, and model diagnostics (R^2, F-statistic, 
 AIC) in a single comprehensive visualization designed for manuscripts and 
 presentations.
 }
@@ -132,7 +132,7 @@ The linear model forest plot differs from logistic and Cox plots in several ways
   \item \strong{Reference line}: At coefficient = 0 (not at 1)
   \item \strong{Linear scale}: Forest plot uses linear scale (not log scale)
   \item \strong{No events column}: Only sample sizes shown (no event counts)
-  \item \strong{R² statistics}: Model fit assessed by R² and adjusted R²
+  \item \strong{R^2 statistics}: Model fit assessed by R² and adjusted R²
   \item \strong{F-test}: Overall model significance from F-statistic
 }
 
@@ -157,7 +157,7 @@ The linear model forest plot differs from logistic and Cox plots in several ways
   \item \strong{Model Statistics} (footer):
     \itemize{
       \item Observations analyzed (with percentage of total data)
-      \item R² and adjusted R²
+      \item R^2 and adjusted R^2
       \item F-statistic with degrees of freedom and p-value
       \item AIC
     }
@@ -177,22 +177,22 @@ for a one-unit change in the predictor:
 }
 
 Example: If the coefficient for "age" is 0.50 when predicting BMI, 
-BMI increases by 0.50 kg/m² for each additional year of age.
+BMI increases by 0.50 kg/m^2 for each additional year of age.
 
 \strong{Model Fit Statistics:}
 
 The footer displays key diagnostics:
 \itemize{
-  \item \strong{R²}: Proportion of variance explained (0 to 1)
+  \item \strong{R^2}: Proportion of variance explained (0 to 1)
     \itemize{
       \item 0.0-0.3: Weak explanatory power
       \item 0.3-0.5: Moderate
       \item 0.5-0.7: Good
       \item >0.7: Strong (rare in social/biological sciences)
     }
-  \item \strong{Adjusted R²}: R² penalized for number of predictors
+  \item \strong{Adjusted R^2}: R^2 penalized for number of predictors
     \itemize{
-      \item Always ≤ R²
+      \item Always ≤ R^2
       \item Preferred for model comparison
       \item Accounts for model complexity
     }
@@ -261,7 +261,7 @@ plot2 <- lmforest(
     model = model1,
     data = clintrial,
     title = "Predictors of Body Mass Index",
-    effect_label = "Change in BMI (kg/m²)",
+    effect_label = "Change in BMI (kg/m^2)",
     var_labels = clintrial_labels
 )
 print(plot2)
@@ -420,7 +420,7 @@ final_plot <- lmforest(
     model = final_model,
     data = clintrial,
     title = "Multivariable Linear Regression: Predictors of Body Mass Index",
-    effect_label = "Change in BMI (kg/m²)",
+    effect_label = "Change in BMI (kg/m^2)",
     var_labels = clintrial_labels,
     indent_groups = TRUE,
     zebra_stripes = TRUE,
