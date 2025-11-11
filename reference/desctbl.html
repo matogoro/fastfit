@@ -300,14 +300,14 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Variable        Group            Total</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;       &lt;char&gt;           &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           850</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    59.5 +/- 11.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 59.0 [52.0-68.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    60.8 +/- 11.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 61.0 [53.0-69.0]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        25.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female      463 (54.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male      387 (45.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:      bmi  Mean +/- SD     28.0 +/- 5.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8:          Median [IQR] 28.1 [24.2-31.7]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9:                 Range        15.0-45.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female      474 (55.8%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male      376 (44.2%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:      bmi  Mean +/- SD     28.1 +/- 5.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8:          Median [IQR] 28.1 [24.7-31.3]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9:                 Range        15.0-44.7</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 2: Grouped comparison with default tests</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -315,34 +315,34 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"race"</span>, <span class="st">"bmi"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Variable        Group            Total          Control           Drug A</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;char&gt;       &lt;char&gt;           &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:        N                           850              183              294</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:      age  Mean +/- SD    59.5 +/- 11.4    58.4 +/- 11.8    59.2 +/- 11.1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:          Median [IQR] 59.0 [52.0-68.0] 59.0 [50.5-66.5] 59.0 [52.0-66.0]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:                 Range        25.0-90.0        29.0-90.0        31.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:      sex       Female      463 (54.5%)       94 (51.4%)      160 (54.4%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                  Male      387 (45.5%)       89 (48.6%)      134 (45.6%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:     race        White      584 (68.7%)      124 (67.8%)      197 (67.0%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:                 Black      118 (13.9%)       24 (13.1%)       42 (14.3%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:                 Asian      101 (11.9%)       24 (13.1%)       33 (11.2%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                 Other        47 (5.5%)        11 (6.0%)        22 (7.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:      bmi  Mean +/- SD     28.0 +/- 5.2     28.4 +/- 5.4     28.0 +/- 5.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:          Median [IQR] 28.1 [24.2-31.7] 29.1 [23.9-32.4] 27.8 [24.4-31.7]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:                 Range        15.0-45.8        16.6-41.0        15.0-45.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:        N                           850              209              295</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:      age  Mean +/- SD    60.8 +/- 11.9    61.6 +/- 11.7    60.3 +/- 11.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:          Median [IQR] 61.0 [53.0-69.0] 61.0 [54.0-69.0] 60.0 [52.0-68.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:                 Range        25.0-90.0        28.0-90.0        26.0-90.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:      sex       Female      474 (55.8%)      107 (51.2%)      170 (57.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                  Male      376 (44.2%)      102 (48.8%)      125 (42.4%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:     race        White      572 (67.3%)      133 (63.6%)      205 (69.5%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:                 Black      141 (16.6%)       35 (16.7%)       47 (15.9%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:                 Asian       91 (10.7%)       27 (12.9%)        28 (9.5%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                 Other        46 (5.4%)        14 (6.7%)        15 (5.1%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:      bmi  Mean +/- SD     28.1 +/- 5.1     28.5 +/- 5.0     27.8 +/- 5.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:          Median [IQR] 28.1 [24.7-31.3] 28.1 [24.8-31.9] 27.9 [24.6-30.6]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:                 Range        15.0-44.7        15.1-44.7        15.0-40.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               Drug B p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:              373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:    60.4 +/- 11.5   0.137</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 60.0 [52.0-69.0]   0.131</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:              346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:    60.6 +/- 12.1   0.489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 61.0 [53.0-68.8]   0.706</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  4:        25.0-90.0        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:      209 (56.0%)   0.583</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:      164 (44.0%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:      263 (70.5%)   0.542</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:       52 (13.9%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:       44 (11.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:        14 (3.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:     27.9 +/- 5.1   0.526</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12: 28.1 [24.0-31.5]   0.533</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        15.0-41.6        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:      197 (56.9%)   0.305</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:      149 (43.1%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:      234 (67.6%)   0.808</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:       59 (17.1%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:       36 (10.4%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:        17 (4.9%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:     28.1 +/- 5.1   0.356</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12: 28.2 [24.9-31.6]   0.455</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        15.0-40.1        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 3: Customize continuous statistics</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -351,22 +351,22 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        stats_continuous <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median_iqr"</span>, <span class="st">"range"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      Variable        Group            Total          Control           Drug A</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;char&gt;       &lt;char&gt;           &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:          N                           850              183              294</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:        age Median [IQR] 59.0 [52.0-68.0] 59.0 [50.5-66.5] 59.0 [52.0-66.0]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                   Range        25.0-90.0        29.0-90.0        31.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:        bmi Median [IQR] 28.1 [24.2-31.7] 29.1 [23.9-32.4] 27.8 [24.4-31.7]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:                   Range        15.0-45.8        16.6-41.0        15.0-45.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: creatinine Median [IQR]    1.0 [0.8-1.2]    0.9 [0.8-1.2]    1.0 [0.8-1.2]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:                   Range          0.4-2.8          0.4-2.3          0.4-2.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:          N                           850              209              295</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:        age Median [IQR] 61.0 [53.0-69.0] 61.0 [54.0-69.0] 60.0 [52.0-68.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                   Range        25.0-90.0        28.0-90.0        26.0-90.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:        bmi Median [IQR] 28.1 [24.7-31.3] 28.1 [24.8-31.9] 27.9 [24.6-30.6]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:                   Range        15.0-44.7        15.1-44.7        15.0-40.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6: creatinine Median [IQR]    1.0 [0.8-1.2]    1.0 [0.8-1.2]    1.0 [0.8-1.2]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:                   Range          0.4-2.7          0.5-2.1          0.5-2.7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Drug B p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 60.0 [52.0-69.0]   0.131</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 61.0 [53.0-68.8]   0.706</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3:        25.0-90.0        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 28.1 [24.0-31.5]   0.533</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:        15.0-41.6        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:    1.1 [0.9-1.2]   0.085</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:          0.4-2.8        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 28.2 [24.9-31.6]   0.455</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:        15.0-40.1        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:    1.0 [0.8-1.2]   0.551</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:          0.4-2.0        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 4: Change categorical display format</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -375,16 +375,16 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        stats_categorical <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span>  <span class="co"># Show counts only</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Variable   Group  Total Control Drug A Drug B p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;char&gt;  &lt;char&gt; &lt;char&gt;  &lt;char&gt; &lt;char&gt; &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:        N            850     183    294    373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:      sex  Female    463      94    160    209   0.583</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:             Male    387      89    134    164        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:     race   White    584     124    197    263   0.542</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:            Black    118      24     42     52        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:            Asian    101      24     33     44        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:            Other     47      11     22     14        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:  smoking   Never    374     100    117    157   0.006</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:           Former    289      45    118    126        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:          Current    170      35     57     78        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:        N            850     209    295    346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:      sex  Female    474     107    170    197   0.305</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:             Male    376     102    125    149        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:     race   White    572     133    205    234   0.808</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:            Black    141      35     47     59        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:            Asian     91      27     28     36        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:            Other     46      14     15     17        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:  smoking   Never    382      86    135    161   0.543</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:           Former    263      65     85    113        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:          Current    188      53     65     70        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 5: Include missing values</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -394,30 +394,30 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        na_label <span class="op">=</span> <span class="st">"Missing"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         Variable        Group            Total          Control</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;char&gt;       &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:            N                           850              183</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:          age  Mean +/- SD    59.5 +/- 11.4    58.4 +/- 11.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:              Median [IQR] 59.0 [52.0-68.0] 59.0 [50.5-66.5]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:                     Range        25.0-90.0        29.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:      smoking        Never      374 (44.9%)      100 (55.6%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                    Former      289 (34.7%)       45 (25.0%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:                   Current      170 (20.4%)       35 (19.4%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:                   Missing        17 (2.0%)         3 (1.6%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9: hypertension           No      489 (58.6%)      102 (56.7%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                       Yes      346 (41.4%)       78 (43.3%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:                   Missing        15 (1.8%)         3 (1.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:            N                           850              209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:          age  Mean +/- SD    60.8 +/- 11.9    61.6 +/- 11.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:              Median [IQR] 61.0 [53.0-69.0] 61.0 [54.0-69.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:                     Range        25.0-90.0        28.0-90.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:      smoking        Never      382 (45.9%)       86 (42.2%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                    Former      263 (31.6%)       65 (31.9%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:                   Current      188 (22.6%)       53 (26.0%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:                   Missing        17 (2.0%)         5 (2.4%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9: hypertension           No      505 (60.5%)      126 (61.8%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                       Yes      330 (39.5%)       78 (38.2%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:                   Missing        15 (1.8%)         5 (2.4%)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               Drug A           Drug B p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;char&gt;           &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:              294              373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:    59.2 +/- 11.1    60.4 +/- 11.5   0.137</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 59.0 [52.0-66.0] 60.0 [52.0-69.0]   0.131</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:        31.0-90.0        25.0-90.0        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:      117 (40.1%)      157 (43.5%)   0.006</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:      118 (40.4%)      126 (34.9%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:       57 (19.5%)       78 (21.6%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:         2 (0.7%)        12 (3.2%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:      165 (56.5%)      222 (61.2%)   0.410</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:      127 (43.5%)      141 (38.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:         2 (0.7%)        10 (2.7%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:              295              346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:    60.3 +/- 11.7    60.6 +/- 12.1   0.489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 60.0 [52.0-68.0] 61.0 [53.0-68.8]   0.706</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:        26.0-90.0        25.0-90.0        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:      135 (47.4%)      161 (46.8%)   0.543</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:       85 (29.8%)      113 (32.8%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:       65 (22.8%)       70 (20.3%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:        10 (3.4%)         2 (0.6%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:      176 (61.5%)      203 (58.8%)   0.718</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:      110 (38.5%)      142 (41.2%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:         9 (3.1%)         1 (0.3%)        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 6: Disable statistical testing</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -426,26 +426,26 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        test <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Variable        Group            Total          Control           Drug A</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;       &lt;char&gt;           &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           850              183              294</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    59.5 +/- 11.4    58.4 +/- 11.8    59.2 +/- 11.1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 59.0 [52.0-68.0] 59.0 [50.5-66.5] 59.0 [52.0-66.0]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        25.0-90.0        29.0-90.0        31.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female      463 (54.5%)       94 (51.4%)      160 (54.4%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male      387 (45.5%)       89 (48.6%)      134 (45.6%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:      bmi  Mean +/- SD     28.0 +/- 5.2     28.4 +/- 5.4     28.0 +/- 5.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8:          Median [IQR] 28.1 [24.2-31.7] 29.1 [23.9-32.4] 27.8 [24.4-31.7]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9:                 Range        15.0-45.8        16.6-41.0        15.0-45.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           850              209              295</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    60.8 +/- 11.9    61.6 +/- 11.7    60.3 +/- 11.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 61.0 [53.0-69.0] 61.0 [54.0-69.0] 60.0 [52.0-68.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        25.0-90.0        28.0-90.0        26.0-90.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female      474 (55.8%)      107 (51.2%)      170 (57.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male      376 (44.2%)      102 (48.8%)      125 (42.4%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:      bmi  Mean +/- SD     28.1 +/- 5.1     28.5 +/- 5.0     27.8 +/- 5.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8:          Median [IQR] 28.1 [24.7-31.3] 28.1 [24.8-31.9] 27.9 [24.6-30.6]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9:                 Range        15.0-44.7        15.1-44.7        15.0-40.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Drug B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              373</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    60.4 +/- 11.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 60.0 [52.0-69.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              346</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    60.6 +/- 12.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 61.0 [53.0-68.8]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4:        25.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      209 (56.0%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:      164 (44.0%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:     27.9 +/- 5.1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8: 28.1 [24.0-31.5]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9:        15.0-41.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      197 (56.9%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:      149 (43.1%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:     28.1 +/- 5.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8: 28.2 [24.9-31.6]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9:        15.0-40.1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 7: Force specific tests</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -455,20 +455,20 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        test_categorical <span class="op">=</span> <span class="st">"fisher"</span><span class="op">)</span> <span class="co"># Fisher's test instead of auto</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Variable        Group            Total          Control           Drug A</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;       &lt;char&gt;           &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           850              183              294</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    59.5 +/- 11.4    58.4 +/- 11.8    59.2 +/- 11.1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 59.0 [52.0-68.0] 59.0 [50.5-66.5] 59.0 [52.0-66.0]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        25.0-90.0        29.0-90.0        31.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female      463 (54.5%)       94 (51.4%)      160 (54.4%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male      387 (45.5%)       89 (48.6%)      134 (45.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           850              209              295</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    60.8 +/- 11.9    61.6 +/- 11.7    60.3 +/- 11.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 61.0 [53.0-69.0] 61.0 [54.0-69.0] 60.0 [52.0-68.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        25.0-90.0        28.0-90.0        26.0-90.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female      474 (55.8%)      107 (51.2%)      170 (57.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male      376 (44.2%)      102 (48.8%)      125 (42.4%)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Drug B p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    60.4 +/- 11.5        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 60.0 [52.0-69.0]        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    60.6 +/- 12.1        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 61.0 [53.0-68.8]        </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4:        25.0-90.0        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      209 (56.0%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:      164 (44.0%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      197 (56.9%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:      149 (43.1%)        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 8: Adjust decimal places</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -478,22 +478,22 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        digits_p <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>  <span class="co"># 4 decimals for p-values</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Variable        Group               Total             Control</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;       &lt;char&gt;              &lt;char&gt;              &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                              850                 183</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD     59.55 +/- 11.43     58.44 +/- 11.78</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 59.00 [52.00-68.00] 59.00 [50.50-66.50]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range         25.00-90.00         29.00-90.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      bmi  Mean +/- SD      28.01 +/- 5.19      28.39 +/- 5.35</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:          Median [IQR] 28.10 [24.20-31.70] 29.05 [23.95-32.40]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:                 Range         15.00-45.80         16.60-41.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                              850                 209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD     60.75 +/- 11.87     61.58 +/- 11.74</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 61.00 [53.00-69.00] 61.00 [54.00-69.00]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range         25.00-90.00         28.00-90.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      bmi  Mean +/- SD      28.08 +/- 5.06      28.47 +/- 5.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:          Median [IQR] 28.10 [24.72-31.30] 28.15 [24.83-31.87]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:                 Range         15.00-44.70         15.10-44.70</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 Drug A              Drug B p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 &lt;char&gt;              &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                 294                 373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:     59.19 +/- 11.07     60.38 +/- 11.50  0.1373</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 59.00 [52.00-66.00] 60.00 [52.00-69.00]  0.1307</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:         31.00-90.00         25.00-90.00        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      27.98 +/- 5.18      27.86 +/- 5.13  0.5264</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: 27.75 [24.40-31.72] 28.10 [24.00-31.50]  0.5325</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:         15.00-45.80         15.00-41.60        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                 295                 346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:     60.34 +/- 11.69     60.61 +/- 12.11  0.4887</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 60.00 [52.00-68.00] 61.00 [53.00-68.75]  0.7059</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:         26.00-90.00         25.00-90.00        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      27.81 +/- 5.05      28.08 +/- 5.11  0.3563</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6: 27.90 [24.55-30.65] 28.20 [24.90-31.60]  0.4549</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:         15.00-40.90         15.00-40.10        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 9: Custom variable labels</span></span></span>
 <span class="r-in"><span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
@@ -509,26 +509,26 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        var_labels <span class="op">=</span> <span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   Variable        Group            Total          Control</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     &lt;char&gt;       &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                       N                           850              183</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:             Age (years)  Mean +/- SD    59.5 +/- 11.4    58.4 +/- 11.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                         Median [IQR] 59.0 [52.0-68.0] 59.0 [50.5-66.5]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                                Range        25.0-90.0        29.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:                     Sex       Female      463 (54.5%)       94 (51.4%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                                 Male      387 (45.5%)       89 (48.6%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7: Body Mass Index (kg/m²)  Mean +/- SD     28.0 +/- 5.2     28.4 +/- 5.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8:                         Median [IQR] 28.1 [24.2-31.7] 29.1 [23.9-32.4]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9:                                Range        15.0-45.8        16.6-41.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                       N                           850              209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:             Age (years)  Mean +/- SD    60.8 +/- 11.9    61.6 +/- 11.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                         Median [IQR] 61.0 [53.0-69.0] 61.0 [54.0-69.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                                Range        25.0-90.0        28.0-90.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:                     Sex       Female      474 (55.8%)      107 (51.2%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                                 Male      376 (44.2%)      102 (48.8%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7: Body Mass Index (kg/m²)  Mean +/- SD     28.1 +/- 5.1     28.5 +/- 5.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8:                         Median [IQR] 28.1 [24.7-31.3] 28.1 [24.8-31.9]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9:                                Range        15.0-44.7        15.1-44.7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Drug A           Drug B p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;           &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              294              373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    59.2 +/- 11.1    60.4 +/- 11.5   0.137</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 59.0 [52.0-66.0] 60.0 [52.0-69.0]   0.131</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:        31.0-90.0        25.0-90.0        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      160 (54.4%)      209 (56.0%)   0.583</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:      134 (45.6%)      164 (44.0%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:     28.0 +/- 5.2     27.9 +/- 5.1   0.526</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8: 27.8 [24.4-31.7] 28.1 [24.0-31.5]   0.533</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9:        15.0-45.8        15.0-41.6        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              295              346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    60.3 +/- 11.7    60.6 +/- 12.1   0.489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 60.0 [52.0-68.0] 61.0 [53.0-68.8]   0.706</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:        26.0-90.0        25.0-90.0        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      170 (57.6%)      197 (56.9%)   0.305</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:      125 (42.4%)      149 (43.1%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:     27.8 +/- 5.0     28.1 +/- 5.1   0.356</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8: 27.9 [24.6-30.6] 28.2 [24.9-31.6]   0.455</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9:        15.0-40.9        15.0-40.1        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 10: Position total column last</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -537,20 +537,20 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        total <span class="op">=</span> <span class="st">"last"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Variable        Group          Control           Drug A           Drug B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;       &lt;char&gt;           &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           183              294              373</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    58.4 +/- 11.8    59.2 +/- 11.1    60.4 +/- 11.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 59.0 [50.5-66.5] 59.0 [52.0-66.0] 60.0 [52.0-69.0]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        29.0-90.0        31.0-90.0        25.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female       94 (51.4%)      160 (54.4%)      209 (56.0%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male       89 (48.6%)      134 (45.6%)      164 (44.0%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           209              295              346</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    61.6 +/- 11.7    60.3 +/- 11.7    60.6 +/- 12.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 61.0 [54.0-69.0] 60.0 [52.0-68.0] 61.0 [53.0-68.8]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        28.0-90.0        26.0-90.0        25.0-90.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female      107 (51.2%)      170 (57.6%)      197 (56.9%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male      102 (48.8%)      125 (42.4%)      149 (43.1%)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               Total p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;  &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:              850        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    59.5 +/- 11.4   0.137</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 59.0 [52.0-68.0]   0.131</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    60.8 +/- 11.9   0.489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 61.0 [53.0-69.0]   0.706</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4:        25.0-90.0        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      463 (54.5%)   0.583</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:      387 (45.5%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      474 (55.8%)   0.305</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:      376 (44.2%)        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 11: Exclude total column</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -559,19 +559,19 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        total <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Variable        Group          Control           Drug A           Drug B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;       &lt;char&gt;           &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           183              294              373</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    58.4 +/- 11.8    59.2 +/- 11.1    60.4 +/- 11.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 59.0 [50.5-66.5] 59.0 [52.0-66.0] 60.0 [52.0-69.0]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        29.0-90.0        31.0-90.0        25.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female       94 (51.4%)      160 (54.4%)      209 (56.0%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male       89 (48.6%)      134 (45.6%)      164 (44.0%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           209              295              346</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    61.6 +/- 11.7    60.3 +/- 11.7    60.6 +/- 12.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 61.0 [54.0-69.0] 60.0 [52.0-68.0] 61.0 [53.0-68.8]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        28.0-90.0        26.0-90.0        25.0-90.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female      107 (51.2%)      170 (57.6%)      197 (56.9%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male      102 (48.8%)      125 (42.4%)      149 (43.1%)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.137</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.131</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.706</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4:        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:   0.583</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:   0.305</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6:        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 12: Survival analysis</span></span></span>
@@ -580,12 +580,12 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        variables <span class="op">=</span> <span class="st">"Surv(os_months, os_status)"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                      Variable           Group            Total          Control</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        &lt;char&gt;          &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                          N                              850              183</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: Surv(os_months, os_status) Median (95% CI) 28.2 (25.1-32.2) 22.0 (18.6-32.4)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                          N                              850              209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: Surv(os_months, os_status) Median (95% CI) 26.7 (23.9-31.0) 25.3 (18.4-32.6)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Drug A           Drug B p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;           &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              294              373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 44.6 (35.8-57.7) 22.2 (19.3-26.7) &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              295              346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 41.2 (31.0-54.7) 20.3 (15.6-25.3) &lt; 0.001</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 13: Multiple survival endpoints</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -598,7 +598,16 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>            <span class="st">"Surv(os_months, os_status)"</span> <span class="op">=</span> <span class="st">"Overall Survival"</span>,</span></span>
 <span class="r-in"><span>            <span class="st">"Surv(pfs_months, pfs_status)"</span> <span class="op">=</span> <span class="st">"Progression-Free Survival"</span></span></span>
 <span class="r-in"><span>        <span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in .checkTypos(e, names_x):</span> Object 'pfs_months' not found amongst [patient_id, age, sex, race, ethnicity, bmi, smoking, hypertension, diabetes, ecog, ...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     Variable           Group            Total          Control</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       &lt;char&gt;          &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                         N                              850              209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:          Overall Survival Median (95% CI) 26.7 (23.9-31.0) 25.3 (18.4-32.6)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: Progression-Free Survival Median (95% CI)    6.9 (6.0-8.2)    6.8 (4.6-9.7)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Drug A           Drug B p-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;           &lt;char&gt;  &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              295              346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 41.2 (31.0-54.7) 20.3 (15.6-25.3) &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:  11.2 (8.5-13.9)    5.1 (4.5-6.6) &lt; 0.001</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 14: Mixed variable types</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -612,52 +621,52 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-out co"><span class="r-pr">#&gt;</span>                       Variable           Group            Total</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         &lt;char&gt;          &lt;char&gt;           &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1:                          N                              850</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:                        age     Mean +/- SD    59.5 +/- 11.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:                               Median [IQR] 59.0 [52.0-68.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:                        age     Mean +/- SD    60.8 +/- 11.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:                               Median [IQR] 61.0 [53.0-69.0]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  4:                                      Range        25.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:                        sex          Female      463 (54.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                                       Male      387 (45.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:                       race           White      584 (68.7%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:                                      Black      118 (13.9%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:                                      Asian      101 (11.9%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                                      Other        47 (5.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:                        bmi     Mean +/- SD     28.0 +/- 5.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:                               Median [IQR] 28.1 [24.2-31.7]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:                                      Range        15.0-45.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:                        sex          Female      474 (55.8%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                                       Male      376 (44.2%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:                       race           White      572 (67.3%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:                                      Black      141 (16.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:                                      Asian       91 (10.7%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                                      Other        46 (5.4%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:                        bmi     Mean +/- SD     28.1 +/- 5.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:                               Median [IQR] 28.1 [24.7-31.3]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:                                      Range        15.0-44.7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 14:                 creatinine     Mean +/- SD      1.0 +/- 0.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15:                               Median [IQR]    1.0 [0.8-1.2]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:                                      Range          0.4-2.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17:                    smoking           Never      374 (44.9%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18:                                     Former      289 (34.7%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19:                                    Current      170 (20.4%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20:               hypertension              No      489 (58.6%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21:                                        Yes      346 (41.4%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22: Surv(os_months, os_status) Median (95% CI) 28.2 (25.1-32.2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16:                                      Range          0.4-2.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17:                    smoking           Never      382 (45.9%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18:                                     Former      263 (31.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19:                                    Current      188 (22.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20:               hypertension              No      505 (60.5%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21:                                        Yes      330 (39.5%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22: Surv(os_months, os_status) Median (95% CI) 26.7 (23.9-31.0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                       Variable           Group            Total</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Control           Drug A           Drug B p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;char&gt;           &lt;char&gt;           &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:              183              294              373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:    58.4 +/- 11.8    59.2 +/- 11.1    60.4 +/- 11.5   0.137</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 59.0 [50.5-66.5] 59.0 [52.0-66.0] 60.0 [52.0-69.0]   0.131</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:        29.0-90.0        31.0-90.0        25.0-90.0        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:       94 (51.4%)      160 (54.4%)      209 (56.0%)   0.583</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:       89 (48.6%)      134 (45.6%)      164 (44.0%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:      124 (67.8%)      197 (67.0%)      263 (70.5%)   0.542</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:       24 (13.1%)       42 (14.3%)       52 (13.9%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:       24 (13.1%)       33 (11.2%)       44 (11.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:        11 (6.0%)        22 (7.5%)        14 (3.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:     28.4 +/- 5.4     28.0 +/- 5.2     27.9 +/- 5.1   0.526</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12: 29.1 [23.9-32.4] 27.8 [24.4-31.7] 28.1 [24.0-31.5]   0.533</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        16.6-41.0        15.0-45.8        15.0-41.6        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:      1.0 +/- 0.3      1.0 +/- 0.3      1.1 +/- 0.3   0.171</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:    0.9 [0.8-1.2]    1.0 [0.8-1.2]    1.1 [0.9-1.2]   0.085</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:          0.4-2.3          0.4-2.2          0.4-2.8        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17:      100 (55.6%)      117 (40.1%)      157 (43.5%)   0.006</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18:       45 (25.0%)      118 (40.4%)      126 (34.9%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19:       35 (19.4%)       57 (19.5%)       78 (21.6%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20:      102 (56.7%)      165 (56.5%)      222 (61.2%)   0.410</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21:       78 (43.3%)      127 (43.5%)      141 (38.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22: 22.0 (18.6-32.4) 44.6 (35.8-57.7) 22.2 (19.3-26.7) &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:              209              295              346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:    61.6 +/- 11.7    60.3 +/- 11.7    60.6 +/- 12.1   0.489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 61.0 [54.0-69.0] 60.0 [52.0-68.0] 61.0 [53.0-68.8]   0.706</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:        28.0-90.0        26.0-90.0        25.0-90.0        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:      107 (51.2%)      170 (57.6%)      197 (56.9%)   0.305</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:      102 (48.8%)      125 (42.4%)      149 (43.1%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:      133 (63.6%)      205 (69.5%)      234 (67.6%)   0.808</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:       35 (16.7%)       47 (15.9%)       59 (17.1%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:       27 (12.9%)        28 (9.5%)       36 (10.4%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:        14 (6.7%)        15 (5.1%)        17 (4.9%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:     28.5 +/- 5.0     27.8 +/- 5.0     28.1 +/- 5.1   0.356</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12: 28.1 [24.8-31.9] 27.9 [24.6-30.6] 28.2 [24.9-31.6]   0.455</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        15.1-44.7        15.0-40.9        15.0-40.1        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:      1.0 +/- 0.3      1.0 +/- 0.3      1.0 +/- 0.3   0.929</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15:    1.0 [0.8-1.2]    1.0 [0.8-1.2]    1.0 [0.8-1.2]   0.551</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16:          0.5-2.1          0.5-2.7          0.4-2.0        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17:       86 (42.2%)      135 (47.4%)      161 (46.8%)   0.543</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18:       65 (31.9%)       85 (29.8%)      113 (32.8%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19:       53 (26.0%)       65 (22.8%)       70 (20.3%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20:      126 (61.8%)      176 (61.5%)      203 (58.8%)   0.718</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21:       78 (38.2%)      110 (38.5%)      142 (41.2%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22: 25.3 (18.4-32.6) 41.2 (31.0-54.7) 20.3 (15.6-25.3) &lt; 0.001</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Control           Drug A           Drug B p-value</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 15: Export to PDF</span></span></span>
@@ -673,26 +682,26 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"bmi"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Variable        Group            Total                I               II</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;       &lt;char&gt;           &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           850              229              265</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    59.5 +/- 11.4    58.7 +/- 11.1    60.2 +/- 11.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 59.0 [52.0-68.0] 58.0 [50.0-67.0] 60.0 [53.0-68.0]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        25.0-90.0        31.0-90.0        31.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female      463 (54.5%)      123 (53.7%)      133 (50.2%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male      387 (45.5%)      106 (46.3%)      132 (49.8%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:      bmi  Mean +/- SD     28.0 +/- 5.2     28.3 +/- 5.1     27.9 +/- 5.1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8:          Median [IQR] 28.1 [24.2-31.7] 28.4 [25.0-31.8] 28.1 [23.9-31.7]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9:                 Range        15.0-45.8        15.0-41.9        15.0-41.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           850              217              240</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    60.8 +/- 11.9    61.1 +/- 12.4    60.9 +/- 11.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 61.0 [53.0-69.0] 60.0 [53.0-70.0] 62.0 [53.8-68.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        25.0-90.0        27.0-90.0        25.0-88.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      sex       Female      474 (55.8%)      116 (53.5%)      134 (55.8%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  Male      376 (44.2%)      101 (46.5%)      106 (44.2%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:      bmi  Mean +/- SD     28.1 +/- 5.1     28.3 +/- 5.1     27.9 +/- 4.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8:          Median [IQR] 28.1 [24.7-31.3] 28.3 [24.9-31.2] 28.0 [24.9-30.8]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9:                 Range        15.0-44.7        15.0-40.1        15.9-39.0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 III               IV p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;           &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              238              115        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    60.1 +/- 11.0    58.5 +/- 12.0   0.309</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 60.0 [52.0-68.0] 58.0 [50.0-67.5]   0.258</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:        28.0-90.0        25.0-90.0        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      139 (58.4%)       68 (59.1%)   0.213</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:       99 (41.6%)       47 (40.9%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:     27.9 +/- 5.1     27.9 +/- 5.9   0.770</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8: 27.8 [24.2-31.6] 27.6 [23.6-32.6]   0.735</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9:        15.0-40.9        15.0-45.8        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              251              139        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:    60.9 +/- 11.2    59.8 +/- 12.3   0.778</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 60.0 [54.0-68.0] 61.0 [52.0-68.5]   0.874</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:        28.0-90.0        26.0-90.0        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      139 (55.4%)       83 (59.7%)   0.715</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:      112 (44.6%)       56 (40.3%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:     28.4 +/- 5.0     27.6 +/- 5.5   0.386</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8: 28.5 [24.9-31.7] 27.5 [24.2-31.3]   0.358</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9:        15.1-41.5        15.0-44.7        </span>
 <span class="r-in"><span><span class="co"># Automatically uses ANOVA/Kruskal-Wallis and chi-squared</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 17: Access raw unformatted data</span></span></span>
@@ -701,38 +710,38 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>                  variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"bmi"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">raw_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"raw_data"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">raw_data</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable      Group  stat_type    Total  Total_sd Total_n  Control</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;     &lt;char&gt;     &lt;char&gt;    &lt;num&gt;     &lt;num&gt;   &lt;int&gt;    &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:      age    mean_sd    mean_sd 59.54824 11.428300     850 58.43716</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:          median_iqr median_iqr 59.00000        NA     850 59.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:               range      range 25.00000        NA     850 29.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:      bmi    mean_sd    mean_sd 28.01348  5.194862     838 28.38944</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:          median_iqr median_iqr 28.10000        NA     838 29.05000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:               range      range 15.00000        NA     838 16.60000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Control_sd Control_n   Drug A Drug A_sd Drug A_n   Drug B Drug B_sd Drug B_n</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;num&gt;     &lt;int&gt;    &lt;num&gt;     &lt;num&gt;    &lt;int&gt;    &lt;num&gt;     &lt;num&gt;    &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:  11.777476       183 59.19048 11.074574      294 60.37534 11.498650      373</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:         NA       183 59.00000        NA      294 60.00000        NA      373</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:         NA       183 31.00000        NA      294 25.00000        NA      373</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:   5.352361       180 27.97671  5.183831      292 27.85792  5.129915      366</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:         NA       180 27.75000        NA      292 28.10000        NA      366</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:         NA       180 15.00000        NA      292 15.00000        NA      366</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      p_value Total_q1 Total_q3 Control_q1 Control_q3 Drug A_q1 Drug A_q3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;    &lt;num&gt;    &lt;num&gt;      &lt;num&gt;      &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 0.1372781       NA       NA         NA         NA        NA        NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 0.1306915     52.0     68.0      50.50       66.5      52.0    66.000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:        NA       NA       NA         NA         NA        NA        NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 0.5263663       NA       NA         NA         NA        NA        NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 0.5325460     24.2     31.7      23.95       32.4      24.4    31.725</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:        NA       NA       NA         NA         NA        NA        NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Drug B_q1 Drug B_q3 Total_max Control_max Drug A_max Drug B_max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;     &lt;num&gt;     &lt;num&gt;       &lt;num&gt;      &lt;num&gt;      &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        NA        NA        NA          NA         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:        52      69.0        NA          NA         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:        NA        NA      90.0          90       90.0       90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:        NA        NA        NA          NA         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:        24      31.5        NA          NA         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:        NA        NA      45.8          41       45.8       41.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable      Group  stat_type    Total Total_sd Total_n  Control Control_sd</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;     &lt;char&gt;     &lt;char&gt;    &lt;num&gt;    &lt;num&gt;   &lt;int&gt;    &lt;num&gt;      &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:      age    mean_sd    mean_sd 60.75412 11.87279     850 61.58373  11.740132</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:          median_iqr median_iqr 61.00000       NA     850 61.00000         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:               range      range 25.00000       NA     850 28.00000         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:      bmi    mean_sd    mean_sd 28.08282  5.06012     838 28.47184   5.002466</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:          median_iqr median_iqr 28.10000       NA     838 28.15000         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:               range      range 15.00000       NA     838 15.10000         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Control_n   Drug A Drug A_sd Drug A_n   Drug B Drug B_sd Drug B_n   p_value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;int&gt;    &lt;num&gt;     &lt;num&gt;    &lt;int&gt;    &lt;num&gt;     &lt;num&gt;    &lt;int&gt;     &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:       209 60.33898 11.693085      295 60.60694 12.111624      346 0.4886753</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:       209 60.00000        NA      295 61.00000        NA      346 0.7058578</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:       209 26.00000        NA      295 25.00000        NA      346        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:       206 27.80767  5.045043      287 28.07942  5.106102      345 0.3562983</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:       206 27.90000        NA      287 28.20000        NA      345 0.4549029</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:       206 15.00000        NA      287 15.00000        NA      345        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Total_q1 Total_q3 Control_q1 Control_q3 Drug A_q1 Drug A_q3 Drug B_q1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt;    &lt;num&gt;      &lt;num&gt;      &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:       NA       NA         NA         NA        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   53.000     69.0     54.000     69.000     52.00     68.00      53.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:       NA       NA         NA         NA        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:       NA       NA         NA         NA        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:   24.725     31.3     24.825     31.875     24.55     30.65      24.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:       NA       NA         NA         NA        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Drug B_q3 Total_max Control_max Drug A_max Drug B_max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;     &lt;num&gt;       &lt;num&gt;      &lt;num&gt;      &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        NA        NA          NA         NA         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:     68.75        NA          NA         NA         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:        NA      90.0        90.0       90.0       90.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:        NA        NA          NA         NA         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:     31.60        NA          NA         NA         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:        NA      44.7        44.7       40.9       40.1</span>
 <span class="r-in"><span><span class="co"># Raw data includes unformatted numbers, SDs, quartiles, etc.</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 18: Check which grouping variable was used</span></span></span>
@@ -749,13 +758,13 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        variables <span class="op">=</span> <span class="st">"smoking"</span>,</span></span>
 <span class="r-in"><span>        na_include <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>        na_percent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable   Group       Total     Control      Drug A      Drug B p-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;  &lt;char&gt;      &lt;char&gt;      &lt;char&gt;      &lt;char&gt;      &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                 850         183         294         373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  smoking   Never 374 (44.0%) 100 (54.6%) 117 (39.8%) 157 (42.1%)   0.006</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           Former 289 (34.0%)  45 (24.6%) 118 (40.1%) 126 (33.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:          Current 170 (20.0%)  35 (19.1%)  57 (19.4%)  78 (20.9%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:          Unknown   17 (2.0%)    3 (1.6%)    2 (0.7%)   12 (3.2%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable   Group       Total    Control      Drug A      Drug B p-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;  &lt;char&gt;      &lt;char&gt;     &lt;char&gt;      &lt;char&gt;      &lt;char&gt;  &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                 850        209         295         346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  smoking   Never 382 (44.9%) 86 (41.1%) 135 (45.8%) 161 (46.5%)   0.543</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           Former 263 (30.9%) 65 (31.1%)  85 (28.8%) 113 (32.7%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:          Current 188 (22.1%) 53 (25.4%)  65 (22.0%)  70 (20.2%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:          Unknown   17 (2.0%)   5 (2.4%)   10 (3.4%)    2 (0.6%)        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Exclude NAs from denominator (non-missing sum to 100%)</span></span></span>
 <span class="r-in"><span><span class="fu">desctbl</span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -763,13 +772,13 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        variables <span class="op">=</span> <span class="st">"smoking"</span>,</span></span>
 <span class="r-in"><span>        na_include <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>        na_percent <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable   Group       Total     Control      Drug A      Drug B p-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;  &lt;char&gt;      &lt;char&gt;      &lt;char&gt;      &lt;char&gt;      &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                 850         183         294         373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  smoking   Never 374 (44.9%) 100 (55.6%) 117 (40.1%) 157 (43.5%)   0.006</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           Former 289 (34.7%)  45 (25.0%) 118 (40.4%) 126 (34.9%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:          Current 170 (20.4%)  35 (19.4%)  57 (19.5%)  78 (21.6%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:          Unknown   17 (2.0%)    3 (1.6%)    2 (0.7%)   12 (3.2%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable   Group       Total    Control      Drug A      Drug B p-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;  &lt;char&gt;      &lt;char&gt;     &lt;char&gt;      &lt;char&gt;      &lt;char&gt;  &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                 850        209         295         346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  smoking   Never 382 (45.9%) 86 (42.2%) 135 (47.4%) 161 (46.8%)   0.543</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           Former 263 (31.6%) 65 (31.9%)  85 (29.8%) 113 (32.8%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:          Current 188 (22.6%) 53 (26.0%)  65 (22.8%)  70 (20.3%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:          Unknown   17 (2.0%)   5 (2.4%)   10 (3.4%)    2 (0.6%)        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 20: Passing additional test arguments</span></span></span>
 <span class="r-in"><span><span class="co"># Equal variance t-test</span></span></span>
@@ -780,15 +789,15 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-in"><span>        var.equal <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Variable        Group            Total           Female             Male</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;       &lt;char&gt;           &lt;char&gt;           &lt;char&gt;           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           850              463              387</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    59.5 +/- 11.4    59.9 +/- 11.1    59.2 +/- 11.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 59.0 [52.0-68.0] 60.0 [52.0-68.0] 59.0 [51.0-67.0]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        25.0-90.0        25.0-90.0        30.0-90.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:        N                           850              474              376</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      age  Mean +/- SD    60.8 +/- 11.9    61.3 +/- 11.9    60.0 +/- 11.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          Median [IQR] 61.0 [53.0-69.0] 61.0 [54.0-68.8] 60.0 [52.8-69.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                 Range        25.0-90.0        26.0-90.0        25.0-87.0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.372</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.372</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.113</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.113</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4:        </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 21: Complete Table 1 for publication</span></span></span>
@@ -811,100 +820,100 @@ summaries:</p><ul><li><p><strong>Continuous</strong>: Numeric variables (integer
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        Variable                     Group            Total</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          &lt;char&gt;                    &lt;char&gt;           &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1:                           N                                        850</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:                 Age (years)              Median [IQR] 59.0 [52.0-68.0]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:                 Age (years)              Median [IQR] 61.0 [53.0-69.0]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  3:                                                 Range        25.0-90.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:                         Sex                    Female      463 (54.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:                                                  Male      387 (45.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                        Race                     White      584 (68.7%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:                                                 Black      118 (13.9%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:                                                 Asian      101 (11.9%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:                                                 Other        47 (5.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                   Ethnicity              Non-Hispanic      746 (87.8%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:                                              Hispanic      104 (12.2%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:     Body Mass Index (kg/m²)              Median [IQR] 28.1 [24.2-31.7]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:                                                 Range        15.0-45.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:              Smoking Status                     Never      374 (44.9%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:                                                Former      289 (34.7%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:                                               Current      170 (20.4%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17:                Hypertension                        No      489 (58.6%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18:                                                   Yes      346 (41.4%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19:                    Diabetes                        No      634 (76.0%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20:                                                   Yes      200 (24.0%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21:     ECOG Performance Status                         0      248 (29.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22:                                                     1      341 (40.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23:                                                     2      212 (25.2%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 24:                                                     3        41 (4.9%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:                         Sex                    Female      474 (55.8%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:                                                  Male      376 (44.2%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                        Race                     White      572 (67.3%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:                                                 Black      141 (16.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:                                                 Asian       91 (10.7%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:                                                 Other        46 (5.4%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                   Ethnicity              Non-Hispanic      756 (88.9%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:                                              Hispanic       94 (11.1%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:     Body Mass Index (kg/m²)              Median [IQR] 28.1 [24.7-31.3]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:                                                 Range        15.0-44.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:              Smoking Status                     Never      382 (45.9%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15:                                                Former      263 (31.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16:                                               Current      188 (22.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17:                Hypertension                        No      505 (60.5%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18:                                                   Yes      330 (39.5%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19:                    Diabetes                        No      599 (71.8%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20:                                                   Yes      235 (28.2%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21:     ECOG Performance Status                         0      264 (31.4%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22:                                                     1      339 (40.3%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23:                                                     2      194 (23.0%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24:                                                     3        45 (5.3%)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 25: Baseline Creatinine (mg/dL)              Median [IQR]    1.0 [0.8-1.2]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26:                                                 Range          0.4-2.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 27:  Baseline Hemoglobin (g/dL)              Median [IQR] 13.1 [11.7-14.4]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26:                                                 Range          0.4-2.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27:  Baseline Hemoglobin (g/dL)              Median [IQR] 13.0 [11.7-14.2]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 28:                                                 Range         7.0-18.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 29:                  Study Site                Site Alpha       90 (10.6%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 30:                                             Site Beta        77 (9.1%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 31:                                            Site Gamma        84 (9.9%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 32:                                            Site Delta        79 (9.3%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 33:                                          Site Epsilon       98 (11.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 34:                                             Site Zeta       93 (10.9%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 35:                                              Site Eta      105 (12.4%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 36:                                            Site Theta        69 (8.1%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 37:                                             Site Iota        76 (8.9%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 38:                                            Site Kappa        79 (9.3%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 39:               Disease Stage                         I      229 (27.0%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 40:                                                    II      265 (31.3%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 41:                                                   III      238 (28.1%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 42:                                                    IV      115 (13.6%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 43:                 Tumor Grade       Well-differentiated      169 (20.1%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 44:                             Moderately differentiated      407 (48.5%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 45:                                 Poorly differentiated      264 (31.4%)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 46:            Overall Survival           Median (95% CI) 28.2 (25.1-32.2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29:                  Study Site                Site Alpha        81 (9.5%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30:                                             Site Beta       87 (10.2%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31:                                            Site Gamma       91 (10.7%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32:                                            Site Delta       87 (10.2%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33:                                          Site Epsilon       85 (10.0%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34:                                             Site Zeta       85 (10.0%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35:                                              Site Eta       86 (10.1%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36:                                            Site Theta        75 (8.8%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37:                                             Site Iota        74 (8.7%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38:                                            Site Kappa       99 (11.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39:               Disease Stage                         I      217 (25.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40:                                                    II      240 (28.3%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41:                                                   III      251 (29.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42:                                                    IV      139 (16.4%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43:                 Tumor Grade       Well-differentiated      171 (20.4%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44:                             Moderately differentiated      417 (49.6%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45:                                 Poorly differentiated      252 (30.0%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46:            Overall Survival           Median (95% CI) 26.7 (23.9-31.0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        Variable                     Group            Total</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Control           Drug A           Drug B p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;char&gt;           &lt;char&gt;           &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:              183              294              373        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2: 59.0 [50.5-66.5] 59.0 [52.0-66.0] 60.0 [52.0-69.0]   0.131</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:        29.0-90.0        31.0-90.0        25.0-90.0        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:       94 (51.4%)      160 (54.4%)      209 (56.0%)   0.583</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:       89 (48.6%)      134 (45.6%)      164 (44.0%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:      124 (67.8%)      197 (67.0%)      263 (70.5%)   0.542</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:       24 (13.1%)       42 (14.3%)       52 (13.9%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:       24 (13.1%)       33 (11.2%)       44 (11.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:        11 (6.0%)        22 (7.5%)        14 (3.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:      162 (88.5%)      251 (85.4%)      333 (89.3%)   0.293</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:       21 (11.5%)       43 (14.6%)       40 (10.7%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12: 29.1 [23.9-32.4] 27.8 [24.4-31.7] 28.1 [24.0-31.5]   0.533</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        16.6-41.0        15.0-45.8        15.0-41.6        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:      100 (55.6%)      117 (40.1%)      157 (43.5%)   0.006</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:       45 (25.0%)      118 (40.4%)      126 (34.9%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:       35 (19.4%)       57 (19.5%)       78 (21.6%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17:      102 (56.7%)      165 (56.5%)      222 (61.2%)   0.410</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18:       78 (43.3%)      127 (43.5%)      141 (38.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19:      139 (77.2%)      222 (75.8%)      273 (75.6%)   0.912</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20:       41 (22.8%)       71 (24.2%)       88 (24.4%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21:       59 (32.4%)       87 (29.6%)      102 (27.9%)   0.813</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22:       69 (37.9%)      126 (42.9%)      146 (39.9%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23:       45 (24.7%)       69 (23.5%)       98 (26.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 24:         9 (4.9%)        12 (4.1%)        20 (5.5%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 25:    0.9 [0.8-1.2]    1.0 [0.8-1.2]    1.1 [0.9-1.2]   0.085</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26:          0.4-2.3          0.4-2.2          0.4-2.8        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 27: 13.1 [11.8-14.2] 13.3 [11.9-14.5] 13.0 [11.5-14.4]   0.436</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 28:         7.0-18.0         7.5-18.0         7.8-18.0        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 29:       23 (12.6%)        26 (8.8%)       41 (11.0%)   0.070</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 30:        15 (8.2%)       37 (12.6%)        25 (6.7%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 31:        17 (9.3%)        25 (8.5%)       42 (11.3%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 32:        17 (9.3%)        27 (9.2%)        35 (9.4%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 33:       21 (11.5%)       34 (11.6%)       43 (11.5%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 34:       20 (10.9%)       45 (15.3%)        28 (7.5%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 35:        15 (8.2%)       35 (11.9%)       55 (14.7%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 36:       19 (10.4%)        21 (7.1%)        29 (7.8%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 37:        16 (8.7%)        22 (7.5%)       38 (10.2%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 38:       20 (10.9%)        22 (7.5%)        37 (9.9%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 39:       50 (27.6%)       74 (25.2%)      105 (28.2%)   0.202</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 40:       68 (37.6%)       94 (32.0%)      103 (27.7%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 41:       44 (24.3%)       80 (27.2%)      114 (30.6%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 42:       19 (10.5%)       46 (15.6%)       50 (13.4%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 43:       37 (20.6%)       60 (20.5%)       72 (19.6%)   0.148</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 44:       95 (52.8%)      149 (50.9%)      163 (44.4%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 45:       48 (26.7%)       84 (28.7%)      132 (36.0%)        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 46: 22.0 (18.6-32.4) 44.6 (35.8-57.7) 22.2 (19.3-26.7) &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:              209              295              346        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2: 61.0 [54.0-69.0] 60.0 [52.0-68.0] 61.0 [53.0-68.8]   0.706</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:        28.0-90.0        26.0-90.0        25.0-90.0        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:      107 (51.2%)      170 (57.6%)      197 (56.9%)   0.305</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:      102 (48.8%)      125 (42.4%)      149 (43.1%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:      133 (63.6%)      205 (69.5%)      234 (67.6%)   0.808</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:       35 (16.7%)       47 (15.9%)       59 (17.1%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:       27 (12.9%)        28 (9.5%)       36 (10.4%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:        14 (6.7%)        15 (5.1%)        17 (4.9%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:      187 (89.5%)      263 (89.2%)      306 (88.4%)   0.922</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:       22 (10.5%)       32 (10.8%)       40 (11.6%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12: 28.1 [24.8-31.9] 27.9 [24.6-30.6] 28.2 [24.9-31.6]   0.455</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        15.1-44.7        15.0-40.9        15.0-40.1        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:       86 (42.2%)      135 (47.4%)      161 (46.8%)   0.543</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15:       65 (31.9%)       85 (29.8%)      113 (32.8%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16:       53 (26.0%)       65 (22.8%)       70 (20.3%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17:      126 (61.8%)      176 (61.5%)      203 (58.8%)   0.718</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18:       78 (38.2%)      110 (38.5%)      142 (41.2%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19:      137 (67.2%)      210 (73.4%)      252 (73.3%)   0.234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20:       67 (32.8%)       76 (26.6%)       92 (26.7%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21:       66 (32.2%)      100 (34.4%)       98 (28.3%)   0.105</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22:       90 (43.9%)      119 (40.9%)      130 (37.6%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23:       38 (18.5%)       59 (20.3%)       97 (28.0%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24:        11 (5.4%)        13 (4.5%)        21 (6.1%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25:    1.0 [0.8-1.2]    1.0 [0.8-1.2]    1.0 [0.8-1.2]   0.551</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26:          0.5-2.1          0.5-2.7          0.4-2.0        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27: 12.9 [11.7-14.0] 13.0 [11.6-14.2] 13.1 [11.8-14.5]   0.838</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28:         8.6-17.7         7.0-17.8         7.0-18.0        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29:       22 (10.5%)       30 (10.2%)        29 (8.4%)   0.003</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30:       22 (10.5%)       39 (13.2%)        26 (7.5%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31:       36 (17.2%)        24 (8.1%)        31 (9.0%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32:       21 (10.0%)        29 (9.8%)       37 (10.7%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33:        18 (8.6%)       34 (11.5%)        33 (9.5%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34:        17 (8.1%)        16 (5.4%)       52 (15.0%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35:        15 (7.2%)       33 (11.2%)       38 (11.0%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36:        19 (9.1%)        22 (7.5%)        34 (9.8%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37:        18 (8.6%)        28 (9.5%)        28 (8.1%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38:       21 (10.0%)       40 (13.6%)       38 (11.0%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39:       59 (28.2%)       73 (25.0%)       85 (24.6%)   0.449</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40:       60 (28.7%)       91 (31.2%)       89 (25.7%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41:       59 (28.2%)       87 (29.8%)      105 (30.3%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42:       31 (14.8%)       41 (14.0%)       67 (19.4%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43:       37 (18.0%)       68 (23.5%)       66 (19.1%)   0.153</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44:      115 (55.8%)      129 (44.6%)      173 (50.1%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45:       54 (26.2%)       92 (31.8%)      106 (30.7%)        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46: 25.3 (18.4-32.6) 41.2 (31.0-54.7) 20.3 (15.6-25.3) &lt; 0.001</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Control           Drug A           Drug B p-value</span>
 </code></pre></div>
     </div>

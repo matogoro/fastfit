@@ -105,9 +105,9 @@ model comparisons.</p>
 
 
 <dt id="arg-paper">paper<a class="anchor" aria-label="anchor" href="#arg-paper"></a></dt>
-<dd><p>Character string specifying paper size:</p><ul><li><p><code>"letter"</code> - US Letter (8.5" × 11") [default]</p></li>
-<li><p><code>"a4"</code> - A4 (210mm × 297mm)</p></li>
-<li><p><code>"legal"</code> - US Legal (8.5" × 14")</p></li>
+<dd><p>Character string specifying paper size:</p><ul><li><p><code>"letter"</code> - US Letter (8.5" x 11") [default]</p></li>
+<li><p><code>"a4"</code> - A4 (210mm x 297mm)</p></li>
+<li><p><code>"legal"</code> - US Legal (8.5" x 14")</p></li>
 <li><p><code>"auto"</code> - Auto-size to content (no margins, crops to fit)</p></li>
 </ul></dd>
 
@@ -246,18 +246,19 @@ LaTeX availability and provides installation guidance if missing.</p>
 <li><p>float, caption - Floats and captions</p></li>
 <li><p>xcolor, colortbl - Colors (for <code>zebra_stripes</code> or <code>dark_header</code>)</p></li>
 </ul><p><strong>Caption Formatting:</strong></p>
-<p>Captions support LaTeX commands for rich formatting:
-“`r
-# Multi-line caption with line breaks
-caption = "Table 1: Multivariable Analysis\\
-          OR = odds ratio; CI = confidence interval"</p>
-<p># With superscripts and italics
-caption = "Table 1: Results\\
-          {a}Adjusted for age\
-          {p}-values from Wald tests\"</p>
-<p># With special characters (must escape)
-caption = \"Results for \$1000 increase in income (\<!-- %)" -->
-“`</p>
+<p>Captions support LaTeX commands for rich formatting:</p><div class="sourceCode"><pre><code><span></span>
+<span><span class="co"># Multi-line caption with line breaks</span></span>
+<span><span class="va">caption</span> <span class="op">=</span> <span class="st">"Table 1: Multivariable Analysis\\</span></span>
+<span><span class="st">          OR = odds ratio; CI = confidence interval"</span></span>
+<span></span>
+<span><span class="co"># With superscripts (using LaTeX syntax)</span></span>
+<span><span class="va">caption</span> <span class="op">=</span> <span class="st">"Table 1: Results\\</span></span>
+<span><span class="st">          Adjusted for age and sex\\</span></span>
+<span><span class="st">          p-values from Wald tests"</span></span>
+<span></span>
+<span><span class="co"># With special characters (must escape percent signs)</span></span>
+<span><span class="va">caption</span> <span class="op">=</span> <span class="st">"Results for income (in thousands)"</span></span></code></pre></div>
+
 <p><strong>Auto-Sizing (paper = "auto"):</strong></p>
 <p>When <code>paper = "auto"</code>, the function attempts to create a minimal PDF
 sized exactly to the table content:</p><ol><li><p>Tries to use the <code>standalone</code> LaTeX class (cleanest output)</p></li>

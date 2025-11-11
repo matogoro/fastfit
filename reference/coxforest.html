@@ -507,35 +507,35 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-out co"><span class="r-pr">#&gt;</span>     smoking + hypertension + diabetes + ecog + treatment + stage + </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     grade, data = clintrial)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   n= 833, number of events= 549 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   n= 833, number of events= 557 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    (17 observations deleted due to missingness)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                     coef exp(coef)  se(coef)      z Pr(&gt;|z|)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> age                             0.019105  1.019289  0.003809  5.016 5.28e-07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sexMale                        -0.023848  0.976434  0.086703 -0.275 0.783271</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> bmi                            -0.014133  0.985967  0.008257 -1.712 0.086965</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> smokingFormer                  -0.123398  0.883912  0.098906 -1.248 0.212167</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> smokingCurrent                 -0.033359  0.967192  0.114861 -0.290 0.771491</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> hypertensionYes                 0.053110  1.054546  0.088093  0.603 0.546581</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> diabetesYes                    -0.077427  0.925494  0.103949 -0.745 0.456359</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecog1                           0.591274  1.806288  0.113676  5.201 1.98e-07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecog2                           0.994765  2.704088  0.121294  8.201 2.38e-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecog3                           1.610060  5.003110  0.193266  8.331  &lt; 2e-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentDrug A                -0.653331  0.520310  0.122070 -5.352 8.69e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentDrug B                -0.146503  0.863723  0.112254 -1.305 0.191857</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> stageII                         0.473681  1.605895  0.126592  3.742 0.000183</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> stageIII                        0.971586  2.642132  0.126104  7.705 1.31e-14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> stageIV                         1.861114  6.430895  0.146684 12.688  &lt; 2e-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gradeModerately differentiated  0.310683  1.364357  0.119868  2.592 0.009546</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gradePoorly differentiated      0.588086  1.800539  0.127792  4.602 4.19e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> age                             0.026294  1.026643  0.003792  6.933 4.11e-12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sexMale                         0.032669  1.033208  0.086472  0.378 0.705582</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> bmi                            -0.012033  0.988039  0.008632 -1.394 0.163305</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> smokingFormer                   0.077685  1.080782  0.101162  0.768 0.442533</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> smokingCurrent                  0.286440  1.331678  0.108743  2.634 0.008436</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> hypertensionYes                 0.220992  1.247313  0.087479  2.526 0.011530</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> diabetesYes                    -0.196961  0.821223  0.098990 -1.990 0.046624</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecog1                           0.418223  1.519260  0.108738  3.846 0.000120</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecog2                           0.752272  2.121816  0.121893  6.172 6.76e-10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecog3                           1.291807  3.639358  0.180272  7.166 7.73e-13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentDrug A                -0.557694  0.572528  0.116176 -4.800 1.58e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentDrug B                -0.113277  0.892903  0.106155 -1.067 0.285928</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stageII                         0.513344  1.670869  0.128722  3.988 6.66e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stageIII                        0.938428  2.555960  0.126047  7.445 9.69e-14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stageIV                         1.715942  5.561911  0.140625 12.202  &lt; 2e-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gradeModerately differentiated  0.350869  1.420302  0.117699  2.981 0.002872</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gradePoorly differentiated      0.459576  1.583402  0.129728  3.543 0.000396</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> age                            ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sexMale                           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> bmi                            .  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> bmi                               </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> smokingFormer                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> smokingCurrent                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> hypertensionYes                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> diabetesYes                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> smokingCurrent                 ** </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> hypertensionYes                *  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> diabetesYes                    *  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ecog1                          ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ecog2                          ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ecog3                          ***</span>
@@ -550,28 +550,28 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                exp(coef) exp(-coef) lower .95 upper .95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> age                               1.0193     0.9811    1.0117    1.0269</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sexMale                           0.9764     1.0241    0.8238    1.1573</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> bmi                               0.9860     1.0142    0.9701    1.0021</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> smokingFormer                     0.8839     1.1313    0.7281    1.0730</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> smokingCurrent                    0.9672     1.0339    0.7722    1.2114</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> hypertensionYes                   1.0545     0.9483    0.8873    1.2533</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> diabetesYes                       0.9255     1.0805    0.7549    1.1346</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecog1                             1.8063     0.5536    1.4455    2.2571</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecog2                             2.7041     0.3698    2.1319    3.4298</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecog3                             5.0031     0.1999    3.4256    7.3072</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentDrug A                   0.5203     1.9219    0.4096    0.6609</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentDrug B                   0.8637     1.1578    0.6931    1.0763</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> stageII                           1.6059     0.6227    1.2530    2.0581</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> stageIII                          2.6421     0.3785    2.0635    3.3829</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> stageIV                           6.4309     0.1555    4.8241    8.5729</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gradeModerately differentiated    1.3644     0.7329    1.0787    1.7257</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gradePoorly differentiated        1.8005     0.5554    1.4016    2.3130</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> age                               1.0266     0.9740    1.0190    1.0343</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sexMale                           1.0332     0.9679    0.8721    1.2240</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> bmi                               0.9880     1.0121    0.9715    1.0049</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> smokingFormer                     1.0808     0.9253    0.8864    1.3178</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> smokingCurrent                    1.3317     0.7509    1.0761    1.6480</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> hypertensionYes                   1.2473     0.8017    1.0508    1.4806</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> diabetesYes                       0.8212     1.2177    0.6764    0.9971</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecog1                             1.5193     0.6582    1.2276    1.8801</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecog2                             2.1218     0.4713    1.6709    2.6944</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecog3                             3.6394     0.2748    2.5561    5.1817</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentDrug A                   0.5725     1.7466    0.4559    0.7189</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentDrug B                   0.8929     1.1199    0.7252    1.0994</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stageII                           1.6709     0.5985    1.2983    2.1504</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stageIII                          2.5560     0.3912    1.9965    3.2722</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stageIV                           5.5619     0.1798    4.2221    7.3270</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gradeModerately differentiated    1.4203     0.7041    1.1277    1.7888</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gradePoorly differentiated        1.5834     0.6316    1.2279    2.0418</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Concordance= 0.71  (se = 0.011 )</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Likelihood ratio test= 302.9  on 17 df,   p=&lt;2e-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Wald test            = 302.9  on 17 df,   p=&lt;2e-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Score (logrank) test = 323.7  on 17 df,   p=&lt;2e-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Concordance= 0.694  (se = 0.011 )</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Likelihood ratio test= 282.9  on 17 df,   p=&lt;2e-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Wald test            = 279.5  on 17 df,   p=&lt;2e-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Score (logrank) test = 298.1  on 17 df,   p=&lt;2e-16</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Verify proportional hazards assumption</span></span></span>

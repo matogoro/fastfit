@@ -201,6 +201,12 @@ warning if <code>.warn = TRUE</code>).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $los_days</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pfs_months</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pfs_status</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $os_months</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -222,7 +228,7 @@ warning if <code>.warn = TRUE</code>).</p>
 <span class="r-in"><span><span class="co"># Example 5: Using the package's built-in label dictionary</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">clintrial_labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">setlabels</span><span class="op">(</span><span class="va">dt</span>, .labels <span class="op">=</span> <span class="va">clintrial_labels</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variables not found in data.table: Surv(os_months, os_status)</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variables not found in data.table: Surv(pfs_months, pfs_status), Surv(os_months, os_status)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 6: Suppress warnings for missing columns</span></span></span>
 <span class="r-in"><span><span class="co"># (useful when applying a standard label set to different datasets)</span></span></span>
@@ -247,56 +253,56 @@ warning if <code>.warn = TRUE</code>).</p>
 <span class="r-in"><span><span class="op">)</span><span class="op">[</span><span class="va">age</span> <span class="op">&gt;</span> <span class="fl">50</span><span class="op">]</span>  <span class="co"># Can immediately use the data.table</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      patient_id   age    sex   race    ethnicity   bmi smoking hypertension</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;char&gt; &lt;num&gt; &lt;fctr&gt; &lt;fctr&gt;       &lt;fctr&gt; &lt;num&gt;  &lt;fctr&gt;       &lt;fctr&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1:     PT0001    72 Female  White Non-Hispanic  26.5  Former           No</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   2:     PT0002    72   Male  Asian Non-Hispanic  27.9 Current           No</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   3:     PT0003    79 Female  Black     Hispanic  32.7   Never           No</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   4:     PT0004    58   Male  Other     Hispanic  33.2 Current          Yes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   5:     PT0005    69 Female  White Non-Hispanic  33.3   Never           No</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   1:     PT0001    55 Female  White Non-Hispanic  22.6   Never          Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   2:     PT0002    55 Female  Black Non-Hispanic  24.8   Never          Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   3:     PT0003    54 Female  Black Non-Hispanic  26.8  Former           No</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   4:     PT0004    65 Female  Asian Non-Hispanic  23.2   Never          Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   5:     PT0005    55   Male  Asian Non-Hispanic  30.8  Former          Yes</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ---                                                                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 659:     PT0846    61   Male  White Non-Hispanic  29.4  Former          Yes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 660:     PT0847    66   Male  White Non-Hispanic  30.4  Former          Yes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 661:     PT0848    68 Female  Other Non-Hispanic  34.7   Never           No</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 662:     PT0849    70 Female  White     Hispanic  33.3   Never           No</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 663:     PT0850    78 Female  White Non-Hispanic  27.1   Never           No</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      diabetes   ecog creatinine hemoglobin biomarker_x biomarker_y         site</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;fctr&gt; &lt;fctr&gt;      &lt;num&gt;      &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;fctr&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1:       No      1       1.20       13.6        3.12        27.9    Site Zeta</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   2:       No      0       1.02       12.9        0.48        31.6   Site Kappa</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   3:       No      1       1.23       12.4        4.89         0.0 Site Epsilon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   4:       No      1       1.03       11.8        3.56        49.0   Site Alpha</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   5:       No      1       0.88       13.0        6.03         8.2   Site Theta</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ---                                                                           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 659:       No      2       0.79       15.1       12.13        27.0 Site Epsilon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 660:      Yes      2       0.63       12.7        2.29        36.6   Site Kappa</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 661:      Yes      3       1.14       14.8        3.17        40.2   Site Alpha</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 662:      Yes      0       0.93       11.3        6.67        32.3 Site Epsilon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 663:       No      3       1.36        9.3       11.86        30.2     Site Eta</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                          grade  stage treatment surgery los_days os_months</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                         &lt;fctr&gt; &lt;fctr&gt;    &lt;fctr&gt;  &lt;fctr&gt;    &lt;num&gt;     &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1: Moderately differentiated     II    Drug B      No     15.3      36.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   2:       Well-differentiated      I   Control     Yes     15.0      60.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   3: Moderately differentiated    III    Drug A      No     19.6      60.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   4: Moderately differentiated    III    Drug A      No     18.4       7.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   5:       Well-differentiated    III   Control      No     16.5      41.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ---                                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 659: Moderately differentiated    III   Control     Yes     27.1       5.1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 660: Moderately differentiated     II    Drug A      No     17.0       1.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 661:     Poorly differentiated     II    Drug A      No     19.3       1.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 662: Moderately differentiated     II   Control     Yes     18.9      23.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 663: Moderately differentiated      I    Drug B      No     23.0       1.1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      os_status</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1:         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   2:         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   3:         0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   4:         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   5:         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ---          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 659:         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 660:         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 661:         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 662:         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 663:         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 682:     PT0845    58   Male  Asian Non-Hispanic  22.2  Former          Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 683:     PT0846    68 Female  White Non-Hispanic  27.4   Never          Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 684:     PT0847    60 Female  White Non-Hispanic  33.0  Former          Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 685:     PT0848    58 Female  White Non-Hispanic  34.8   Never           No</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 686:     PT0850    70   Male  White Non-Hispanic  25.8 Current          Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      diabetes   ecog creatinine hemoglobin biomarker_x biomarker_y       site</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;fctr&gt; &lt;fctr&gt;      &lt;num&gt;      &lt;num&gt;       &lt;num&gt;       &lt;num&gt;     &lt;fctr&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   1:       No      1       0.72       15.8        3.73        31.4  Site Iota</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   2:      Yes      0       1.17       13.8        2.14        14.3 Site Gamma</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   3:      Yes      2       1.17       13.8        3.79        17.0 Site Kappa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   4:       No      1       1.24       13.8        6.66         1.8   Site Eta</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   5:      Yes      1       1.18       12.8        6.04        45.9 Site Gamma</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ---                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 682:      Yes      1       0.69       12.2        6.82        53.9 Site Kappa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 683:       No      3       0.78       15.4        3.66        45.5 Site Delta</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 684:       No      2       1.29       16.2        3.70        15.3  Site Iota</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 685:       No      1       0.64       12.4        7.63        10.0   Site Eta</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 686:       No      2       0.85        7.5       18.23        20.1 Site Theta</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                          grade  stage treatment surgery los_days pfs_months</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         &lt;fctr&gt; &lt;fctr&gt;    &lt;fctr&gt;  &lt;fctr&gt;    &lt;num&gt;      &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   1: Moderately differentiated     II   Control      No     16.8        4.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   2:     Poorly differentiated      I   Control     Yes     15.2       40.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   3:       Well-differentiated      I   Control     Yes     18.0       60.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   4:     Poorly differentiated    III    Drug A      No     17.5        1.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   5: Moderately differentiated      I   Control     Yes     22.7        1.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ---                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 682:     Poorly differentiated    III    Drug A     Yes     25.7        5.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 683:     Poorly differentiated      I    Drug A      No     18.2       15.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 684: Moderately differentiated     II   Control     Yes     18.4        6.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 685: Moderately differentiated      I    Drug A     Yes     13.2        5.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 686:       Well-differentiated      I    Drug A      No     26.6       10.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      pfs_status os_months os_status</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   1:          1      25.8         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   2:          1      60.0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   3:          0      60.0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   4:          1       2.0         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   5:          1       2.8         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ---                               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 682:          1      60.0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 683:          1      16.4         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 684:          1      11.5         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 685:          0       5.0         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 686:          1      18.4         1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 9: Programmatically setting labels</span></span></span>
 <span class="r-in"><span><span class="co"># Build labels dynamically</span></span></span>
@@ -321,7 +327,7 @@ warning if <code>.warn = TRUE</code>).</p>
 <span class="r-in"><span><span class="co"># Example 12: Using labels in table output functions</span></span></span>
 <span class="r-in"><span><span class="co"># (conceptual example - actual implementation depends on other fastfit functions)</span></span></span>
 <span class="r-in"><span><span class="fu">setlabels</span><span class="op">(</span><span class="va">dt</span>, .labels <span class="op">=</span> <span class="va">clintrial_labels</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variables not found in data.table: Surv(os_months, os_status)</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variables not found in data.table: Surv(pfs_months, pfs_status), Surv(os_months, os_status)</span>
 <span class="r-in"><span><span class="co"># Now descriptive() or other fastfit functions can use these labels</span></span></span>
 <span class="r-in"><span><span class="co"># instead of raw variable names</span></span></span>
 <span class="r-in"><span></span></span>
