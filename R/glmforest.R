@@ -159,7 +159,7 @@
 #'       \item Observations analyzed (with percentage of total data)
 #'       \item Model family (Binomial, Poisson, etc.)
 #'       \item Deviance statistics
-#'       \item Pseudo-R² (McFadden's)
+#'       \item Pseudo-R^2 (McFadden)
 #'       \item AIC
 #'     }
 #' }
@@ -228,7 +228,7 @@
 #'   \item \strong{Observations analyzed}: Total N and percentage of original 
 #'     data (accounting for missing values)
 #'   \item \strong{Null/Residual Deviance}: Model fit improvement
-#'   \item \strong{Pseudo-R²}: McFadden's R² = 1 - (log L₁ / log L₀)
+#'   \item \strong{Pseudo-R^2}: McFadden R^2 = 1 - (log L_1 / log L_2)
 #'   \item \strong{AIC}: For model comparison (lower is better)
 #' }
 #' 
@@ -1168,7 +1168,7 @@ glmforest <- function(model, data = NULL,
                               label = paste0("Observations analyzed: ", gmodel$nobs_with_pct,
                                              "\nModel: ", gmodel$family,
                                              "\nNull (Residual) Deviance: ", null_dev_formatted, " (", resid_dev_formatted, ")",
-                                             "\nPseudo R²: ", pseudo_r2_formatted,
+                                             "\nPseudo R^2: ", pseudo_r2_formatted,
                                              "\nAIC: ", gmodel$AIC_formatted),
                               size = annot_font * 0.8, hjust = 0, vjust = 1.2, fontface = "italic")
         
@@ -1304,7 +1304,7 @@ glmforest <- function(model, data = NULL,
                                           label = paste0("Observations analyzed: ", gmodel$nobs_with_pct,
                                                          "\nModel: ", gmodel$family,
                                                          "\nNull (Residual) Deviance: ", null_dev_formatted, " (", resid_dev_formatted, ")",
-                                                         "\nPseudo R²: ", pseudo_r2_formatted,
+                                                         "\nPseudo R^2: ", pseudo_r2_formatted,
                                                          "\nAIC: ", gmodel$AIC_formatted),
                                           size = annot_font * 0.8, hjust = 0, vjust = 1.2, fontface = "italic")
                 }

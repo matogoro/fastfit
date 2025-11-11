@@ -66,16 +66,16 @@ extract_model_metrics <- function(model, raw_data, model_type) {
             ## Multiple pseudo R-squared measures
             n <- length(model$y)
             
-            ## McFadden's R²
+            ## McFadden R^2
             null_model <- glm(model$y ~ 1, family = model$family)
             metrics$mcfadden_r2 <- as.numeric(1 - (logLik(model)/logLik(null_model)))
             metrics$pseudo_r2 <- metrics$mcfadden_r2  # Set generic pseudo_r2
             
-            ## Nagelkerke's R² (Cox-Snell adjusted)
+            ## Nagelkerke R^2 (Cox-Snell adjusted)
             cox_snell <- 1 - exp((model$deviance - model$null.deviance)/n)
             metrics$nagelkerke_r2 <- cox_snell / (1 - exp(-model$null.deviance/n))
             
-            ## Tjur's R² (coefficient of discrimination)
+            ## Tjur R^2 (coefficient of discrimination)
             pred_probs <- fitted(model)
             metrics$tjur_r2 <- mean(pred_probs[model$y == 1]) - mean(pred_probs[model$y == 0])
             
@@ -481,7 +481,7 @@ print.compfit_result <- function(x, ...) {
                                    "global_p" = "Global p-value",
                                    "rmse" = "RMSE",
                                    "brier" = "Brier score",
-                                   "adj_r2" = "Adjusted R²",
+                                   "adj_r2" = "Adjusted R^2",
                                    metric  # fallback
                                    )
             cat(sprintf("  %s: %.0f%%\n", display_name, weights[[metric]] * 100))

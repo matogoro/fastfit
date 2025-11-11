@@ -642,7 +642,7 @@ calc_continuous_stat <- function(x, stat_type, digits) {
                          } else {
                              sprintf(paste0("%.", digits, "f"), sd_val)
                          }
-               paste0(mean_str, " ± ", sd_str)
+               paste0(mean_str, " +/- ", sd_str)
            },
            "median_iqr" = {
                med_val <- median(x)
@@ -719,7 +719,7 @@ calc_continuous_stat <- function(x, stat_type, digits) {
 #' @keywords internal
 get_stat_label <- function(stat_type) {
     switch(stat_type,
-           "mean_sd" = "Mean ± SD",
+           "mean_sd" = "Mean +/- SD",
            "median_iqr" = "Median [IQR]",
            "median_range" = "Median (Range)",
            "range" = "Range",

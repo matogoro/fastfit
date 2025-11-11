@@ -448,10 +448,10 @@ condense_table_rows <- function(df, indent_groups = TRUE) {
                 ## For continuous/survival, keep only first row
                 if (is_descriptive) {
                     stat_type <- gsub("\\s*\\(.*\\)", "", groups[1])
-                    stat_type <- gsub("\\s*±.*", "", stat_type)
+                    stat_type <- gsub("\\s*\\+/-.*", "", stat_type)
                     if (stat_type != "" && !is.na(stat_type) && stat_type != "-") {
-                        if (grepl("Mean ± SD", groups[1])) {
-                            result[var_start, Variable := paste0(var_name, ", mean ± SD")]
+                        if (grepl("Mean \\+/- SD", groups[1])) {
+                            result[var_start, Variable := paste0(var_name, ", mean +/- SD")]
                         } else if (grepl("Median", groups[1]) && grepl("IQR", groups[1])) {
                             result[var_start, Variable := paste0(var_name, ", median [IQR]")]
                         } else if (grepl("Median", groups[1]) && is_survival) {
@@ -470,6 +470,7 @@ condense_table_rows <- function(df, indent_groups = TRUE) {
                 }
                 
             } else if (is_binary) {
+                
                 ## For binary categorical
                 data_cols <- setdiff(names(result), c("Variable", "Group", "p-value", "p.value"))
                 
