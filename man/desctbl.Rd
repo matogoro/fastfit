@@ -326,11 +326,14 @@ desctbl(clintrial,
             "Surv(os_months, os_status)"    # Survival
         ))
 
-# Example 15: Export to PDF
+# Example 15: Export table
 table1 <- desctbl(clintrial,
                   by = "treatment",
                   variables = c("age", "sex", "bmi"))
-tbl2pdf(table1, "table1.pdf")
+
+# Can export directly to PDF/LaTeX/HTML for publication
+# tbl2pdf(table1, "table1.pdf")
+# tbl2docx(table1, "table1.docx")
 
 # Example 16: Three or more groups
 desctbl(clintrial,

@@ -467,6 +467,7 @@ print(final_table)
 
 # Can export directly to PDF/LaTeX/HTML for publication
 # tbl2pdf(final_table, "regression_results.pdf")
+# tbl2docx(final_table, "regression_results.docx")
 
 }
 \seealso{
