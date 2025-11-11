@@ -59,7 +59,7 @@ the full capabilities of descriptive and regression analysis functions.</p>
 
     <div id="format">
     <h2>Format</h2>
-    <p>A data frame with 800 observations and 20 variables:</p><dl><dt>patient_id</dt>
+    <p>A data frame with 850 observations and 24 variables:</p><dl><dt>patient_id</dt>
 <dd><p>Unique patient identifier (character)</p></dd>
 
   <dt>age</dt>
@@ -80,20 +80,20 @@ the full capabilities of descriptive and regression analysis functions.</p>
   <dt>smoking</dt>
 <dd><p>Smoking history (factor: Never, Former, Current)</p></dd>
 
-  <dt>diabetes</dt>
-<dd><p>Diabetes diagnosis (factor: No, Yes)</p></dd>
-
   <dt>hypertension</dt>
 <dd><p>Hypertension diagnosis (factor: No, Yes)</p></dd>
 
-  <dt>stage</dt>
-<dd><p>Disease stage at diagnosis (factor: I, II, III, IV)</p></dd>
-
-  <dt>grade</dt>
-<dd><p>Tumor grade (factor: Well/Moderately/Poorly differentiated)</p></dd>
+  <dt>diabetes</dt>
+<dd><p>Diabetes diagnosis (factor: No, Yes)</p></dd>
 
   <dt>ecog</dt>
 <dd><p>ECOG performance status (factor: 0, 1, 2, 3)</p></dd>
+
+  <dt>creatinine</dt>
+<dd><p>Baseline creatinine in mg/dL (numeric)</p></dd>
+
+  <dt>hemoglobin</dt>
+<dd><p>Baseline hemoglobin in g/dL (numeric)</p></dd>
 
   <dt>biomarker_x</dt>
 <dd><p>Serum biomarker A in ng/mL (numeric)</p></dd>
@@ -101,11 +101,14 @@ the full capabilities of descriptive and regression analysis functions.</p>
   <dt>biomarker_y</dt>
 <dd><p>Serum biomarker B in U/L (numeric)</p></dd>
 
-  <dt>hemoglobin</dt>
-<dd><p>Baseline hemoglobin in g/dL (numeric)</p></dd>
+  <dt>site</dt>
+<dd><p>Enrolling site (factor: Site_A through Site_J)</p></dd>
 
-  <dt>creatinine</dt>
-<dd><p>Baseline creatinine in mg/dL (numeric)</p></dd>
+  <dt>grade</dt>
+<dd><p>Tumor grade (factor: Well/Moderately/Poorly differentiated)</p></dd>
+
+  <dt>stage</dt>
+<dd><p>Disease stage at diagnosis (factor: I, II, III, IV)</p></dd>
 
   <dt>treatment</dt>
 <dd><p>Randomized treatment (factor: Control, Drug A, Drug B)</p></dd>
@@ -116,8 +119,11 @@ the full capabilities of descriptive and regression analysis functions.</p>
   <dt>los_days</dt>
 <dd><p>Hospital length of stay in days (numeric)</p></dd>
 
-  <dt>site</dt>
-<dd><p>Enrolling site (factor: Site_A through Site_J)</p></dd>
+  <dt>pfs_months</dt>
+<dd><p>Progression-Free Survival Time (months)</p></dd>
+
+  <dt>pfs_status</dt>
+<dd><p>Progression or Death Event</p></dd>
 
   <dt>os_months</dt>
 <dd><p>Overall survival time in months (numeric)</p></dd>
