@@ -5,7 +5,7 @@
 \alias{clintrial}
 \title{Simulated Clinical Trial Dataset}
 \format{
-A data frame with 800 observations and 20 variables:
+A data frame with 850 observations and 24 variables:
 \describe{
   \item{patient_id}{Unique patient identifier (character)}
   \item{age}{Age at enrollment in years (numeric: 18-90)}
@@ -14,19 +14,21 @@ A data frame with 800 observations and 20 variables:
   \item{ethnicity}{Hispanic ethnicity (factor: Non-Hispanic, Hispanic)}
   \item{bmi}{Body mass index in kg/m² (numeric)}
   \item{smoking}{Smoking history (factor: Never, Former, Current)}
-  \item{diabetes}{Diabetes diagnosis (factor: No, Yes)}
   \item{hypertension}{Hypertension diagnosis (factor: No, Yes)}
-  \item{stage}{Disease stage at diagnosis (factor: I, II, III, IV)}
-  \item{grade}{Tumor grade (factor: Well/Moderately/Poorly differentiated)}
+  \item{diabetes}{Diabetes diagnosis (factor: No, Yes)}
   \item{ecog}{ECOG performance status (factor: 0, 1, 2, 3)}
+  \item{creatinine}{Baseline creatinine in mg/dL (numeric)}
+  \item{hemoglobin}{Baseline hemoglobin in g/dL (numeric)}
   \item{biomarker_x}{Serum biomarker A in ng/mL (numeric)}
   \item{biomarker_y}{Serum biomarker B in U/L (numeric)}
-  \item{hemoglobin}{Baseline hemoglobin in g/dL (numeric)}
-  \item{creatinine}{Baseline creatinine in mg/dL (numeric)}
+  \item{site}{Enrolling site (factor: Site_A through Site_J)}
+  \item{grade}{Tumor grade (factor: Well/Moderately/Poorly differentiated)}
+  \item{stage}{Disease stage at diagnosis (factor: I, II, III, IV)}
   \item{treatment}{Randomized treatment (factor: Control, Drug A, Drug B)}
   \item{surgery}{Surgical resection (factor: No, Yes)}
   \item{los_days}{Hospital length of stay in days (numeric)}
-  \item{site}{Enrolling site (factor: Site_A through Site_J)}
+  \item{pfs_months}{Progression-Free Survival Time (months)}
+  \item{pfs_status}{Progression or Death Event}
   \item{os_months}{Overall survival time in months (numeric)}
   \item{os_status}{Death indicator (numeric: 0=censored, 1=death)}
 }

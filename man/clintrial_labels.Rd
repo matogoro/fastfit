@@ -5,7 +5,7 @@
 \alias{clintrial_labels}
 \title{Variable Labels for Clinical Trial Dataset}
 \format{
-Named character vector with 20 elements
+Named character vector with 24 elements
 }
 \usage{
 clintrial_labels
