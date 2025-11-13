@@ -242,6 +242,7 @@
 #' \code{\link{desctbl}} for descriptive tables
 #'
 #' @examples
+#' \donttest{
 #' # Load data and create regression table
 #' data(clintrial)
 #' data(clintrial_labels)
@@ -384,6 +385,7 @@
 #' #     \input{landscape_table.tex}
 #' #   \end{table}
 #' # \end{landscape}
+#' }
 #'
 #' @export
 tbl2tex <- function (table,
