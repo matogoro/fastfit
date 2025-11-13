@@ -271,7 +271,7 @@
 #'     data = clintrial,
 #'     outcome = "os_status",
 #'     predictors = c("age", "sex", "treatment", "stage"),
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' 
 #' # Example 1: Basic HTML export (standalone)
@@ -331,9 +331,9 @@
 #' # Example 13: Descriptive statistics table
 #' desc_table <- desctbl(
 #'     data = clintrial,
-#'     strata = "treatment",
-#'     vars = c("age", "sex", "bmi"),
-#'     var_labels = clintrial_labels
+#'     by = "treatment",
+#'     variables = c("age", "sex", "bmi"),
+#'     labels = clintrial_labels
 #' )
 #' 
 #' tbl2html(desc_table, "baseline.html",

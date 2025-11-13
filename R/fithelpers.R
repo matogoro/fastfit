@@ -4,7 +4,7 @@ format_model_table <- function(data,
                                effect_col = NULL,
                                digits = 2, 
                                digits_p = 3, 
-                               var_labels = NULL,
+                               labels = NULL,
                                show_n = TRUE,
                                show_events = TRUE,
                                reference_label = "reference",
@@ -83,12 +83,12 @@ format_model_table <- function(data,
     }
     
     ## Apply variable labels if provided - with interaction term support
-    if (!is.null(var_labels) && "Variable" %in% names(result) && length(var_labels) > 0) {
+    if (!is.null(labels) && "Variable" %in% names(result) && length(labels) > 0) {
         
         ## Create lookup table for main effects
         label_dt <- data.table::data.table(
-                                    var_orig = names(var_labels),
-                                    var_new = unname(unlist(var_labels))
+                                    var_orig = names(labels),
+                                    var_new = unname(unlist(labels))
                                 )
         
         ## Update main effect variable names using merge
@@ -102,8 +102,8 @@ format_model_table <- function(data,
                 original_var <- result$Variable[idx]
                 
                 ## Check if there's a direct custom label for this exact interaction
-                if (original_var %in% names(var_labels)) {
-                    result$Variable[idx] <- var_labels[[original_var]]
+                if (original_var %in% names(labels)) {
+                    result$Variable[idx] <- labels[[original_var]]
                     next
                 }
                 
@@ -118,7 +118,7 @@ format_model_table <- function(data,
                     
                     ## Try to match against base variable names
                     ## Sort by length (longest first) to match more specific names first
-                    sorted_vars <- names(var_labels)[order(-nchar(names(var_labels)))]
+                    sorted_vars <- names(labels)[order(-nchar(names(labels)))]
                     
                     for (base_var in sorted_vars) {
                         if (startsWith(comp, base_var)) {
@@ -127,10 +127,10 @@ format_model_table <- function(data,
                             
                             if (nchar(suffix) == 0) {
                                 ## Just the variable name (continuous)
-                                labeled_parts[j] <- var_labels[[base_var]]
+                                labeled_parts[j] <- labels[[base_var]]
                             } else {
                                 ## Variable + category level
-                                labeled_parts[j] <- paste0(suffix, " ", var_labels[[base_var]])
+                                labeled_parts[j] <- paste0(suffix, " ", labels[[base_var]])
                             }
                             found_label <- TRUE
                             break
@@ -144,7 +144,7 @@ format_model_table <- function(data,
                 }
                 
                 ## Combine with " x "
-                result$Variable[idx] <- paste(labeled_parts, collapse = " x ")
+                result$Variable[idx] <- paste(labeled_parts, collapse = " * ")
             }
         }
     }

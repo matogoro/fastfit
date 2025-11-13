@@ -307,7 +307,7 @@
 #'     data = clintrial,
 #'     outcome = "os_status",
 #'     predictors = c("age", "sex", "treatment", "stage"),
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' 
 #' # Example 1: Basic RTF export
@@ -388,7 +388,7 @@
 #'     data = clintrial,
 #'     strata = "treatment",
 #'     vars = c("age", "sex", "bmi", "stage"),
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' 
 #' tbl2rtf(desc, "baseline.rtf",

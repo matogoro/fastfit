@@ -77,7 +77,7 @@
 #'   
 #' @param digits_p Integer specifying decimal places for p-values. Default is 3.
 #'   
-#' @param var_labels Named character vector or list for custom variable display 
+#' @param labels Named character vector or list for custom variable display 
 #'   labels. Default is \code{NULL}.
 #'   
 #' @param metrics Character specification for which statistics to display:
@@ -248,7 +248,7 @@
 #'                   "diabetes", "treatment", "stage"),
 #'     method = "screen",
 #'     p_threshold = 0.05,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(result1)
 #' # Shows both univariable and multivariable results
@@ -262,7 +262,7 @@
 #'                   "diabetes", "ecog", "treatment", "stage", "grade"),
 #'     method = "screen",
 #'     p_threshold = 0.20,  # More liberal for screening
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(result2)
 #' 
@@ -272,7 +272,7 @@
 #'     outcome = "os_status",
 #'     predictors = c("age", "sex", "treatment", "stage"),
 #'     method = "all",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(result3)
 #' # All predictors in both analyses
@@ -284,7 +284,7 @@
 #'     predictors = c("age", "sex", "bmi", "smoking", "treatment", "stage"),
 #'     method = "custom",
 #'     multi_predictors = c("age", "treatment", "stage"),  # Manual selection
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(result4)
 #' # Univariable for all, multivariable for selected only
@@ -297,7 +297,7 @@
 #'     model_type = "coxph",
 #'     method = "screen",
 #'     p_threshold = 0.10,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(cox_result)
 #' # Returns hazard ratios (HR/aHR)
@@ -309,7 +309,7 @@
 #'     predictors = c("age", "sex", "treatment", "stage"),
 #'     method = "all",
 #'     columns = "multi",  # Multivariable results only
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(multi_only)
 #' 
@@ -319,7 +319,7 @@
 #'     outcome = "os_status",
 #'     predictors = c("age", "sex", "treatment", "stage"),
 #'     columns = "uni",  # Univariable results only
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(uni_only)
 #' 
@@ -329,7 +329,7 @@
 #'     outcome = "os_status",
 #'     predictors = c("age", "sex", "treatment"),
 #'     metrics = "effect",  # Effect estimates only
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(effects_only)
 #' 
@@ -339,7 +339,7 @@
 #'     outcome = "os_status",
 #'     predictors = c("age", "sex", "treatment"),
 #'     metrics = "p",  # P-values only
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(pvals_only)
 #' 
@@ -379,7 +379,7 @@
 #'     predictors = c("age", "sex", "smoking", "creatinine"),
 #'     model_type = "lm",
 #'     method = "all",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(linear_result)
 #' 
@@ -391,7 +391,7 @@
 #'     model_type = "glm",
 #'     family = "poisson",
 #'     method = "all",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(poisson_result)
 #' # Returns rate ratios (RR/aRR)
@@ -434,7 +434,7 @@
 #'     p_threshold = 0.10,
 #'     columns = "both",
 #'     metrics = "both",
-#'     var_labels = clintrial_labels,
+#'     labels = clintrial_labels,
 #'     digits = 2,
 #'     digits_p = 3
 #' )
@@ -460,7 +460,7 @@ fastfit <- function(data,
                     show_events = TRUE,
                     digits = 2,
                     digits_p = 3,
-                    var_labels = NULL,
+                    labels = NULL,
                     metrics = "both",
                     return_type = "table",
                     keep_models = FALSE,
@@ -503,7 +503,7 @@ fastfit <- function(data,
             show_events = show_events,
             digits = digits,
             digits_p = digits_p,
-            var_labels = var_labels,
+            labels = labels,
             keep_models = keep_models,
             exponentiate = exponentiate,
             ...
@@ -562,7 +562,7 @@ fastfit <- function(data,
                 show_events = show_events,
                 digits = digits,
                 digits_p = digits_p,
-                var_labels = var_labels,
+                labels = labels,
                 keep_qc_stats = FALSE,  # Don't need QC stats for display
                 add_reference_rows = add_reference_rows,
                 exponentiate = exponentiate,
@@ -591,7 +591,7 @@ fastfit <- function(data,
         metrics = metrics,
         show_n = show_n,
         show_events = show_events,
-        var_labels = var_labels,
+        labels = labels,
         exponentiate = exponentiate
     )
 
@@ -626,7 +626,7 @@ fastfit <- function(data,
 format_fastfit_combined <- function(uni_formatted, multi_formatted, 
                                     uni_raw, multi_raw,
                                     predictors, columns, metrics, 
-                                    show_n, show_events, var_labels,
+                                    show_n, show_events, labels,
                                     exponentiate = NULL) {
     
     ## Get unique variables from both tables

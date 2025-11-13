@@ -9,12 +9,13 @@ compfit(
   outcome,
   model_list,
   model_names = NULL,
+  interaction_terms_list = NULL,
   model_type = "auto",
   family = "binomial",
   conf_level = 0.95,
   include_coefficients = FALSE,
   scoring_weights = NULL,
-  var_labels = NULL,
+  labels = NULL,
   ...
 )
 }
@@ -29,6 +30,12 @@ for one model. Can also be a single character vector to auto-generate nested mod
 
 \item{model_names}{Character vector of names for each model. If NULL, uses
 "Model 1", "Model 2", etc. Default is NULL.}
+
+\item{interaction_terms_list}{List of character vectors specifying interaction
+terms for each model. Each element corresponds to one model in model_list.
+Use NULL for models without interactions. Use colon notation for interactions
+(e.g., c("age:treatment")). If NULL, no interactions are added to any model.
+Default is NULL.}
 
 \item{model_type}{Character string specifying model type. If "auto", detects
 based on outcome. Options: "auto", "glm", "lm", "coxph", "clogit".
@@ -45,7 +52,7 @@ coefficient estimates. Default is FALSE.}
 between 0 and 1, and they should sum to 1. Available metrics depend on model
 type. If NULL, uses sensible defaults. See Details for available metrics.}
 
-\item{var_labels}{Named character vector for custom variable labels. Default is NULL.}
+\item{labels}{Named character vector for custom variable labels. Default is NULL.}
 
 \item{...}{Additional arguments passed to model fitting functions.}
 }
@@ -86,6 +93,18 @@ For survival models, the global p-value comes from the log-rank test.
 
 Models that fail to converge are flagged and penalized in the FastFit Score.
 
+\strong{Interaction Terms:}
+
+When \code{interaction_terms_list} is provided, each element specifies the
+interaction terms for the corresponding model in \code{model_list}. This is
+particularly useful for testing whether adding interactions improves model fit:
+\itemize{
+  \item Use NULL for models without interactions
+  \item Specify interactions using colon notation: c("age:treatment", "sex:stage")
+  \item Main effects for all variables in interactions must be in the predictor list
+  \item Common pattern: Compare main effects model vs model with interactions
+}
+
 Scoring weights can be customized based on model type:
 \itemize{
   \item GLM: "convergence", "aic", "concordance", "pseudo_r2", "brier" 
@@ -112,6 +131,42 @@ comparison <- compfit(data = mydata,
                      model_list = models,
                      model_names = c("Base", "Clinical", "Full"))
 print(comparison)
+
+# Test effect of adding interaction terms
+models_interaction <- list(
+  main = c("age", "treatment", "sex"),
+  interaction = c("age", "treatment", "sex")
+)
+
+comp_interact <- compfit(
+  data = mydata,
+  outcome = "os_status",
+  model_list = models_interaction,
+  model_names = c("Main Effects", "With Interaction"),
+  interaction_terms_list = list(
+    NULL,                    # No interactions in first model
+    c("age:treatment")       # Add interaction in second model
+  )
+)
+
+# Compare multiple interaction structures
+models_complex <- list(
+  simple = c("age", "treatment", "sex"),
+  age_interact = c("age", "treatment", "sex"),
+  full_interact = c("age", "treatment", "sex")
+)
+
+comp_complex <- compfit(
+  data = mydata,
+  outcome = "os_status",
+  model_list = models_complex,
+  interaction_terms_list = list(
+    NULL,
+    c("age:treatment"),
+    c("age:treatment", "sex:treatment")
+  ),
+  labels = my_labels
+)
 
 # Auto-detect model type for survival outcome
 surv_models <- list(

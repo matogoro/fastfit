@@ -20,7 +20,7 @@ fastfit(
   show_events = TRUE,
   digits = 2,
   digits_p = 3,
-  var_labels = NULL,
+  labels = NULL,
   metrics = "both",
   return_type = "table",
   keep_models = FALSE,
@@ -99,7 +99,7 @@ Default is 2.}
 
 \item{digits_p}{Integer specifying decimal places for p-values. Default is 3.}
 
-\item{var_labels}{Named character vector or list for custom variable display 
+\item{labels}{Named character vector or list for custom variable display 
 labels. Default is \code{NULL}.}
 
 \item{metrics}{Character specification for which statistics to display:
@@ -273,7 +273,7 @@ result1 <- fastfit(
                   "diabetes", "treatment", "stage"),
     method = "screen",
     p_threshold = 0.05,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(result1)
 # Shows both univariable and multivariable results
@@ -287,7 +287,7 @@ result2 <- fastfit(
                   "diabetes", "ecog", "treatment", "stage", "grade"),
     method = "screen",
     p_threshold = 0.20,  # More liberal for screening
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(result2)
 
@@ -297,7 +297,7 @@ result3 <- fastfit(
     outcome = "os_status",
     predictors = c("age", "sex", "treatment", "stage"),
     method = "all",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(result3)
 # All predictors in both analyses
@@ -309,7 +309,7 @@ result4 <- fastfit(
     predictors = c("age", "sex", "bmi", "smoking", "treatment", "stage"),
     method = "custom",
     multi_predictors = c("age", "treatment", "stage"),  # Manual selection
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(result4)
 # Univariable for all, multivariable for selected only
@@ -322,7 +322,7 @@ cox_result <- fastfit(
     model_type = "coxph",
     method = "screen",
     p_threshold = 0.10,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(cox_result)
 # Returns hazard ratios (HR/aHR)
@@ -334,7 +334,7 @@ multi_only <- fastfit(
     predictors = c("age", "sex", "treatment", "stage"),
     method = "all",
     columns = "multi",  # Multivariable results only
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(multi_only)
 
@@ -344,7 +344,7 @@ uni_only <- fastfit(
     outcome = "os_status",
     predictors = c("age", "sex", "treatment", "stage"),
     columns = "uni",  # Univariable results only
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(uni_only)
 
@@ -354,7 +354,7 @@ effects_only <- fastfit(
     outcome = "os_status",
     predictors = c("age", "sex", "treatment"),
     metrics = "effect",  # Effect estimates only
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(effects_only)
 
@@ -364,7 +364,7 @@ pvals_only <- fastfit(
     outcome = "os_status",
     predictors = c("age", "sex", "treatment"),
     metrics = "p",  # P-values only
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(pvals_only)
 
@@ -404,7 +404,7 @@ linear_result <- fastfit(
     predictors = c("age", "sex", "smoking", "creatinine"),
     model_type = "lm",
     method = "all",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(linear_result)
 
@@ -416,7 +416,7 @@ poisson_result <- fastfit(
     model_type = "glm",
     family = "poisson",
     method = "all",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(poisson_result)
 # Returns rate ratios (RR/aRR)
@@ -459,7 +459,7 @@ final_table <- fastfit(
     p_threshold = 0.10,
     columns = "both",
     metrics = "both",
-    var_labels = clintrial_labels,
+    labels = clintrial_labels,
     digits = 2,
     digits_p = 3
 )

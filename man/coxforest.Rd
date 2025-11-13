@@ -24,7 +24,7 @@ coxforest(
   center_padding = 4,
   zebra_stripes = TRUE,
   ref_label = "reference",
-  var_labels = NULL,
+  labels = NULL,
   color = "#8A61D8",
   units = "in"
 )
@@ -99,7 +99,7 @@ Default is \code{TRUE}.}
 \item{ref_label}{Character string to display for reference categories. 
 Default is \code{"reference"}.}
 
-\item{var_labels}{Named character vector providing custom display labels for 
+\item{labels}{Named character vector providing custom display labels for 
 variables. Example: \code{c(age = "Age (years)", stage = "Disease Stage")}. 
 Default is \code{NULL}.}
 
@@ -253,7 +253,7 @@ plot2 <- coxforest(
     model = model1,
     data = clintrial,
     title = "Prognostic Factors for Overall Survival",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot2)
 
@@ -267,7 +267,7 @@ model3 <- coxph(
 plot3 <- coxforest(
     model = model3,
     data = clintrial,
-    var_labels = clintrial_labels,
+    labels = clintrial_labels,
     indent_groups = TRUE
 )
 print(plot3)
@@ -283,7 +283,7 @@ plot4 <- coxforest(
     model = model4,
     data = clintrial,
     condense_table = TRUE,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot4)
 
@@ -293,7 +293,7 @@ plot5 <- coxforest(
     data = clintrial,
     color = "#E74C3C",  # Red
     zebra_stripes = FALSE,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot5)
 
@@ -303,7 +303,7 @@ plot6 <- coxforest(
     data = clintrial,
     show_n = FALSE,
     show_events = TRUE,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot6)
 
@@ -312,7 +312,7 @@ plot7 <- coxforest(
     model = model3,
     data = clintrial,
     tbl_width = 0.65,  # More space for long variable names
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot7)
 
@@ -322,7 +322,7 @@ plot8 <- coxforest(
     data = clintrial,
     plot_width = 14,
     plot_height = 8,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 
 # Example 9: Use recommended dimensions for saving
@@ -340,7 +340,7 @@ plot10 <- coxforest(
     plot_width = 35,
     plot_height = 25,
     units = "cm",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 
 # Example 11: Stratified Cox model
@@ -354,7 +354,7 @@ plot11 <- coxforest(
     model = model11,
     data = clintrial,
     title = "Stratified by Study Site",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot11)
 
@@ -368,7 +368,7 @@ plot12 <- coxforest(
     model = model12,
     data = clintrial,
     title = "Clustered by Study Site",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot12)
 # Standard errors account for site clustering
@@ -378,7 +378,7 @@ plot13 <- coxforest(
     model = model1,
     data = clintrial,
     ref_label = "1.00 (ref)",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot13)
 
@@ -388,7 +388,7 @@ plot14 <- coxforest(
     data = clintrial,
     font_size = 1.4,
     title_size = 28,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot14)
 
@@ -403,7 +403,7 @@ final_plot <- coxforest(
     model = final_model,
     data = clintrial,
     title = "Multivariable Cox Regression: Prognostic Factors for Overall Survival",
-    var_labels = clintrial_labels,
+    labels = clintrial_labels,
     indent_groups = TRUE,
     zebra_stripes = TRUE,
     show_n = TRUE,

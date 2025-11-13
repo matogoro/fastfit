@@ -24,7 +24,7 @@ glmforest(
   center_padding = 4,
   zebra_stripes = TRUE,
   ref_label = "reference",
-  var_labels = NULL,
+  labels = NULL,
   color = "#3A7E8A",
   exponentiate = NULL,
   units = "in"
@@ -114,7 +114,7 @@ grouping and readability. Default is \code{TRUE}.}
 factor variables. Typically shown in place of effect estimates. 
 Default is \code{"reference"}. Common alternatives: "ref", "1.00 (ref)".}
 
-\item{var_labels}{Named character vector or list providing custom display 
+\item{labels}{Named character vector or list providing custom display 
 labels for variables. Names should match variable names in the model, 
 values are the labels to display. Example: 
 \code{c(age = "Age (years)", bmi = "Body Mass Index")}. Default is \code{NULL} 
@@ -300,7 +300,7 @@ plot2 <- glmforest(
     model = model1,
     data = clintrial,
     title = "Risk Factors for Mortality",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot2)
 
@@ -312,7 +312,7 @@ plot3 <- glmforest(
     color = "#D62728",  # Red points
     font_size = 1.2,    # Larger text
     zebra_stripes = FALSE,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot3)
 
@@ -321,7 +321,7 @@ plot4 <- glmforest(
     model = model1,
     data = clintrial,
     indent_groups = TRUE,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot4)
 # Group column hidden, levels indented under variables
@@ -336,7 +336,7 @@ plot5 <- glmforest(
     model = model5,
     data = clintrial,
     condense_table = TRUE,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot5)
 # Binary variables shown in single rows
@@ -347,7 +347,7 @@ plot6 <- glmforest(
     data = clintrial,
     show_n = FALSE,
     show_events = FALSE,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot6)
 
@@ -356,7 +356,7 @@ plot7 <- glmforest(
     model = model1,
     data = clintrial,
     tbl_width = 0.7,  # More space for table
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot7)
 
@@ -375,7 +375,7 @@ plot9 <- glmforest(
     data = clintrial,
     plot_width = 14,
     plot_height = 10,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 # No dimension recommendations printed
 
@@ -386,7 +386,7 @@ plot10 <- glmforest(
     plot_width = 30,  # 30 cm
     plot_height = 20,  # 20 cm
     units = "cm",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 
 # Example 11: Poisson regression for count data
@@ -399,7 +399,7 @@ plot11 <- glmforest(
     data = clintrial,
     title = "Rate Ratios for Length of Stay",
     effect_label = "Rate Ratio",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot11)
 # Shows rate ratios instead of odds ratios
@@ -410,7 +410,7 @@ plot12 <- glmforest(
     data = clintrial,
     exponentiate = FALSE,  # Show log odds
     effect_label = "Log Odds",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot12)
 # Reference line at 0 instead of 1
@@ -420,7 +420,7 @@ plot13 <- glmforest(
     model = model1,
     data = clintrial,
     ref_label = "1.00 (ref)",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot13)
 
@@ -430,7 +430,7 @@ plot14 <- glmforest(
     data = clintrial,
     font_size = 1.5,      # 50\% larger
     title_size = 30,      # Larger title
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot14)
 
@@ -446,7 +446,7 @@ final_plot <- glmforest(
     model = final_model,
     data = clintrial,
     title = "Multivariable Logistic Regression: Risk Factors for Mortality",
-    var_labels = clintrial_labels,
+    labels = clintrial_labels,
     indent_groups = TRUE,
     zebra_stripes = TRUE,
     color = "#3A7E8A",

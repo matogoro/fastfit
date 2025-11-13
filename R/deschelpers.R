@@ -4,11 +4,11 @@ process_variable <- function(data, var, group_var = NULL,
                              stats_continuous, stats_categorical,
                              digits, na_include, na_label,
                              test, test_continuous, test_categorical,
-                             total, total_label, var_labels, na_percent, ...) {
+                             total, total_label, labels, na_percent, ...) {
     
     ## Get variable label
-    var_label <- if (!is.null(var_labels) && var %chin% names(var_labels)) {
-                     var_labels[var]
+    var_label <- if (!is.null(labels) && var %chin% names(labels)) {
+                     labels[var]
                  } else {
                      var
                  }

@@ -103,9 +103,9 @@
 #' @param total_label Character string for the total column header. 
 #'   Default is \code{"Total"}.
 #'   
-#' @param var_labels Named character vector or list providing custom display 
+#' @param labels Named character vector or list providing custom display 
 #'   labels for variables. Names should match variable names (or \code{Surv()} 
-#'   expressions), values are the display labels. Variables not in \code{var_labels} 
+#'   expressions), values are the display labels. Variables not in \code{labels} 
 #'   use their original names. Can also be used to label the grouping variable 
 #'   specified in \code{by}. Default is \code{NULL}.
 #'   
@@ -116,7 +116,7 @@
 #' @return A data.table with S3 class \code{"desctbl"} containing formatted 
 #'   descriptive statistics. The table structure includes:
 #'   \describe{
-#'     \item{Variable}{Character. Variable name or label (from \code{var_labels})}
+#'     \item{Variable}{Character. Variable name or label (from \code{labels})}
 #'     \item{Group}{Character. For continuous variables: statistic type 
 #'       (e.g., "Mean ± SD", "Median [IQR]"). For categorical variables: 
 #'       category level. Empty for variable name rows.}
@@ -262,7 +262,7 @@
 #' desctbl(clintrial,
 #'         by = "treatment",
 #'         variables = c("age", "sex", "bmi"),
-#'         var_labels = labels)
+#'         labels = labels)
 #' 
 #' # Example 10: Position total column last
 #' desctbl(clintrial,
@@ -288,7 +288,7 @@
 #'             "Surv(os_months, os_status)",
 #'             "Surv(pfs_months, pfs_status)"
 #'         ),
-#'         var_labels = c(
+#'         labels = c(
 #'             "Surv(os_months, os_status)" = "Overall Survival",
 #'             "Surv(pfs_months, pfs_status)" = "Progression-Free Survival"
 #'         ))
@@ -366,7 +366,7 @@
 #'         "site", "stage", "grade",
 #'         "Surv(os_months, os_status)"
 #'     ),
-#'     var_labels = clintrial_labels,
+#'     labels = clintrial_labels,
 #'     stats_continuous = c("median_iqr", "range"),
 #'     total = TRUE,
 #'     na_include = FALSE
@@ -388,7 +388,7 @@ desctbl <- function(data,
                     test_categorical = "auto",
                     total = TRUE,
                     total_label = "Total",
-                    var_labels = NULL,
+                    labels = NULL,
                     ...) {
     
     if (!data.table::is.data.table(data)) {
@@ -400,8 +400,8 @@ desctbl <- function(data,
     group_var_label <- NULL
     
     ## Apply label to group variable if provided
-    if (!is.null(group_var) && !is.null(var_labels) && group_var %chin% names(var_labels)) {
-        group_var_label <- var_labels[group_var]
+    if (!is.null(group_var) && !is.null(labels) && group_var %chin% names(labels)) {
+        group_var_label <- labels[group_var]
     } else if (!is.null(group_var)) {
         group_var_label <- group_var
     }
@@ -430,7 +430,7 @@ desctbl <- function(data,
             test_categorical = test_categorical,
             total = total,
             total_label = total_label,
-            var_labels = var_labels,
+            labels = labels,
             na_percent = na_percent,
             ...
         )

@@ -64,9 +64,9 @@
 #'   P-values smaller than \code{10^(-digits_p)} are displayed as "< 0.001", 
 #'   "< 0.01", etc. Default is 3.
 #'   
-#' @param var_labels Named character vector or list providing custom display 
+#' @param labels Named character vector or list providing custom display 
 #'   labels for variables. Names should match predictor names, values are the 
-#'   display labels. Predictors not in \code{var_labels} use their original names. 
+#'   display labels. Predictors not in \code{labels} use their original names. 
 #'   Default is \code{NULL}.
 #'   
 #' @param keep_models Logical. If \code{TRUE}, stores all fitted model objects 
@@ -89,7 +89,7 @@
 #' @return A data.table with S3 class \code{"uscreen_result"} containing formatted 
 #'   univariable screening results. The table structure includes:
 #'   \describe{
-#'     \item{Variable}{Character. Predictor name or custom label (from \code{var_labels})}
+#'     \item{Variable}{Character. Predictor name or custom label (from \code{labels})}
 #'     \item{Group}{Character. For factor variables: category level. For continuous 
 #'       variables: typically empty or descriptive statistic label}
 #'     \item{n}{Integer. Sample size used in the model (if \code{show_n = TRUE})}
@@ -223,7 +223,7 @@
 #'     data = clintrial,
 #'     outcome = "os_status",
 #'     predictors = c("age", "sex", "bmi", "treatment"),
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(screen2)
 #' 
@@ -235,7 +235,7 @@
 #'     predictors = c("age", "sex", "bmi", "smoking", "hypertension", 
 #'                   "diabetes", "ecog", "stage"),
 #'     p_threshold = 0.20,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(screen3)
 #' # Only significant predictors are shown
@@ -247,7 +247,7 @@
 #'     outcome = "Surv(os_months, os_status)",
 #'     predictors = c("age", "sex", "treatment", "stage", "grade"),
 #'     model_type = "coxph",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(cox_screen)
 #' # Returns hazard ratios (HR) instead of odds ratios
@@ -271,7 +271,7 @@
 #'     outcome = "bmi",
 #'     predictors = c("age", "sex", "smoking", "creatinine", "hemoglobin"),
 #'     model_type = "lm",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(linear_screen)
 #' 
@@ -282,7 +282,7 @@
 #'     predictors = c("age", "sex", "treatment", "surgery", "stage"),
 #'     model_type = "glm",
 #'     family = "poisson",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(poisson_screen)
 #' # Returns rate ratios (RR)
@@ -354,7 +354,7 @@
 #'     predictors = c("age", "sex", "bmi", "smoking", "hypertension", 
 #'                   "diabetes", "ecog", "treatment", "stage", "grade"),
 #'     p_threshold = 0.05,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' 
 #' # Check how many predictors passed the filter
@@ -379,7 +379,7 @@
 #'     data = clintrial,
 #'     outcome = "os_status",
 #'     predictors = sig_predictors,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(multi_model)
 #'
@@ -396,7 +396,7 @@ uscreen <- function(data,
                     show_events = TRUE,
                     digits = 2,
                     digits_p = 3,
-                    var_labels = NULL,
+                    labels = NULL,
                     keep_models = FALSE,
                     exponentiate = NULL,
                     ...) {
@@ -479,7 +479,7 @@ uscreen <- function(data,
                                     show_events = show_events,
                                     digits = digits,
                                     digits_p = digits_p,
-                                    var_labels = var_labels,
+                                    labels = labels,
                                     exponentiate = exponentiate
                                     )
     

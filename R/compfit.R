@@ -27,7 +27,7 @@
 #' @param scoring_weights Named list of scoring weights. Each weight should be
 #'   between 0 and 1, and they should sum to 1. Available metrics depend on model
 #'   type. If NULL, uses sensible defaults. See Details for available metrics.
-#' @param var_labels Named character vector for custom variable labels. Default is NULL.
+#' @param labels Named character vector for custom variable labels. Default is NULL.
 #' @param ... Additional arguments passed to model fitting functions.
 #'
 #' @return A data.table with class "compfit_result" containing:
@@ -132,7 +132,7 @@
 #'     c("age:treatment"),
 #'     c("age:treatment", "sex:treatment")
 #'   ),
-#'   var_labels = my_labels
+#'   labels = my_labels
 #' )
 #' 
 #' # Auto-detect model type for survival outcome
@@ -171,7 +171,7 @@ compfit <- function(data,
                     conf_level = 0.95,
                     include_coefficients = FALSE,
                     scoring_weights = NULL,
-                    var_labels = NULL,
+                    labels = NULL,
                     ...) {
     
     if (!data.table::is.data.table(data)) {
@@ -252,7 +252,7 @@ compfit <- function(data,
                 model_type = model_type,
                 family = family,
                 conf_level = conf_level,
-                var_labels = var_labels,
+                labels = labels,
                 keep_qc_stats = TRUE,
                 ...)
         }, error = function(e) {

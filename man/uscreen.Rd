@@ -17,7 +17,7 @@ uscreen(
   show_events = TRUE,
   digits = 2,
   digits_p = 3,
-  var_labels = NULL,
+  labels = NULL,
   keep_models = FALSE,
   exponentiate = NULL,
   ...
@@ -82,9 +82,9 @@ estimates (OR, HR, RR, coefficients). Default is 2.}
 P-values smaller than \code{10^(-digits_p)} are displayed as "< 0.001", 
 "< 0.01", etc. Default is 3.}
 
-\item{var_labels}{Named character vector or list providing custom display 
+\item{labels}{Named character vector or list providing custom display 
 labels for variables. Names should match predictor names, values are the 
-display labels. Predictors not in \code{var_labels} use their original names. 
+display labels. Predictors not in \code{labels} use their original names. 
 Default is \code{NULL}.}
 
 \item{keep_models}{Logical. If \code{TRUE}, stores all fitted model objects 
@@ -108,7 +108,7 @@ to \code{TRUE} to force exponentiation or \code{FALSE} to force coefficients.}
 A data.table with S3 class \code{"uscreen_result"} containing formatted 
   univariable screening results. The table structure includes:
   \describe{
-    \item{Variable}{Character. Predictor name or custom label (from \code{var_labels})}
+    \item{Variable}{Character. Predictor name or custom label (from \code{labels})}
     \item{Group}{Character. For factor variables: category level. For continuous 
       variables: typically empty or descriptive statistic label}
     \item{n}{Integer. Sample size used in the model (if \code{show_n = TRUE})}
@@ -243,7 +243,7 @@ screen2 <- uscreen(
     data = clintrial,
     outcome = "os_status",
     predictors = c("age", "sex", "bmi", "treatment"),
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(screen2)
 
@@ -255,7 +255,7 @@ screen3 <- uscreen(
     predictors = c("age", "sex", "bmi", "smoking", "hypertension", 
                   "diabetes", "ecog", "stage"),
     p_threshold = 0.20,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(screen3)
 # Only significant predictors are shown
@@ -267,7 +267,7 @@ cox_screen <- uscreen(
     outcome = "Surv(os_months, os_status)",
     predictors = c("age", "sex", "treatment", "stage", "grade"),
     model_type = "coxph",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(cox_screen)
 # Returns hazard ratios (HR) instead of odds ratios
@@ -291,7 +291,7 @@ linear_screen <- uscreen(
     outcome = "bmi",
     predictors = c("age", "sex", "smoking", "creatinine", "hemoglobin"),
     model_type = "lm",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(linear_screen)
 
@@ -302,7 +302,7 @@ poisson_screen <- uscreen(
     predictors = c("age", "sex", "treatment", "surgery", "stage"),
     model_type = "glm",
     family = "poisson",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(poisson_screen)
 # Returns rate ratios (RR)
@@ -374,7 +374,7 @@ sig_only <- uscreen(
     predictors = c("age", "sex", "bmi", "smoking", "hypertension", 
                   "diabetes", "ecog", "treatment", "stage", "grade"),
     p_threshold = 0.05,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 
 # Check how many predictors passed the filter
@@ -399,7 +399,7 @@ multi_model <- fit(
     data = clintrial,
     outcome = "os_status",
     predictors = sig_predictors,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(multi_model)
 

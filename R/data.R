@@ -50,7 +50,7 @@
 #'         by = "treatment", 
 #'         variables = c("age", "sex", "stage", "ecog", 
 #'                      "biomarker_x", "Surv(os_months, os_status)"),
-#'         var_labels = clintrial_labels)
+#'         labels = clintrial_labels)
 #' 
 #' # Univariable screening
 #' uscreen(clintrial,
@@ -58,14 +58,14 @@
 #'         predictors = c("age", "sex", "stage", "grade", "ecog",
 #'                       "biomarker_x", "treatment"),
 #'         model_type = "coxph",
-#'         var_labels = clintrial_labels)
+#'         labels = clintrial_labels)
 #' 
 #' # Multivariable model
 #' fit(clintrial,
 #'     outcome = "Surv(os_months, os_status)",
 #'     predictors = c("age", "stage", "ecog", "biomarker_x", "treatment"),
 #'     model_type = "coxph",
-#'     var_labels = clintrial_labels)
+#'     labels = clintrial_labels)
 #' 
 #' # Complete analysis pipeline
 #' fastfit(clintrial,
@@ -75,14 +75,14 @@
 #'         method = "screen",
 #'         p_threshold = 0.20,
 #'         model_type = "coxph",
-#'         var_labels = clintrial_labels)
+#'         labels = clintrial_labels)
 #'         
 "clintrial"
 
 #' Variable Labels for Clinical Trial Dataset  
 #'
 #' A named character vector providing descriptive labels for all variables
-#' in the clinical_trial dataset. Use with var_labels parameter in functions.
+#' in the clinical_trial dataset. Use with labels parameter in functions.
 #'
 #' @format Named character vector with 24 elements
 #' @seealso \code{\link{clintrial}}

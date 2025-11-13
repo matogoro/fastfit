@@ -20,7 +20,7 @@ fit(
   show_events = TRUE,
   digits = 2,
   digits_p = 3,
-  var_labels = NULL,
+  labels = NULL,
   keep_qc_stats = TRUE,
   exponentiate = NULL,
   ...
@@ -99,7 +99,7 @@ estimates (OR, HR, RR, coefficients). Default is 2.}
 P-values smaller than \code{10^(-digits_p)} are displayed as "< 0.001", 
 etc. Default is 3.}
 
-\item{var_labels}{Named character vector or list providing custom display 
+\item{labels}{Named character vector or list providing custom display 
 labels for variables. Names should match variable names, values are display 
 labels. Default is \code{NULL}.}
 
@@ -249,7 +249,7 @@ multi_model <- fit(
     data = clintrial,
     outcome = "os_status",
     predictors = c("age", "sex", "bmi", "treatment"),
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(multi_model)
 # Labeled as "Multivariable aOR" (adjusted OR)
@@ -260,7 +260,7 @@ cox_model <- fit(
     outcome = "Surv(os_months, os_status)",
     predictors = c("age", "sex", "treatment", "stage"),
     model_type = "coxph",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(cox_model)
 
@@ -270,7 +270,7 @@ interact_model <- fit(
     outcome = "os_status",
     predictors = c("age", "treatment", "sex"),
     interaction_terms = c("age:treatment"),
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(interact_model)
 
@@ -281,7 +281,7 @@ strat_model <- fit(
     predictors = c("age", "sex", "treatment"),
     model_type = "coxph",
     strata = "site",  # Separate baseline hazards by site
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(strat_model)
 
@@ -292,7 +292,7 @@ cluster_model <- fit(
     predictors = c("age", "treatment"),
     model_type = "coxph",
     cluster = "site",  # Robust SEs accounting for site clustering
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(cluster_model)
 
@@ -302,7 +302,7 @@ linear_model <- fit(
     outcome = "bmi",
     predictors = c("age", "sex", "smoking"),
     model_type = "lm",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(linear_model)
 
@@ -313,7 +313,7 @@ poisson_model <- fit(
     predictors = c("age", "treatment", "surgery", "stage"),
     model_type = "glm",
     family = "poisson",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(poisson_model)
 # Returns rate ratios (RR/aRR)
@@ -346,7 +346,7 @@ complex_model <- fit(
     outcome = "os_status",
     predictors = c("age", "sex", "treatment", "bmi"),
     interaction_terms = c("age:treatment", "sex:bmi"),
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(complex_model)
 

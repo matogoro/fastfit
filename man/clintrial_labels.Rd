@@ -12,7 +12,7 @@ clintrial_labels
 }
 \description{
 A named character vector providing descriptive labels for all variables
-in the clinical_trial dataset. Use with var_labels parameter in functions.
+in the clinical_trial dataset. Use with labels parameter in functions.
 }
 \seealso{
 \code{\link{clintrial}}

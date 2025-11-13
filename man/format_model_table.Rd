@@ -9,7 +9,7 @@ format_model_table(
   effect_col = NULL,
   digits = 2,
   digits_p = 3,
-  var_labels = NULL,
+  labels = NULL,
   show_n = TRUE,
   show_events = TRUE,
   reference_label = "reference",

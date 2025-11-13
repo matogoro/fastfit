@@ -23,7 +23,7 @@ lmforest(
   center_padding = 4,
   zebra_stripes = TRUE,
   ref_label = "reference",
-  var_labels = NULL,
+  labels = NULL,
   units = "in",
   color = "#5A8F5A"
 )
@@ -90,7 +90,7 @@ background shading to different variables. Default is \code{TRUE}.}
 \item{ref_label}{Character string to display for reference categories of 
 factor variables. Default is \code{"reference"}.}
 
-\item{var_labels}{Named character vector providing custom display labels for 
+\item{labels}{Named character vector providing custom display labels for 
 variables. Example: \code{c(age = "Age (years)", height = "Height (cm)")}. 
 Default is \code{NULL}.}
 
@@ -262,7 +262,7 @@ plot2 <- lmforest(
     data = clintrial,
     title = "Predictors of Body Mass Index",
     effect_label = "Change in BMI (kg/m^2)",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot2)
 
@@ -275,7 +275,7 @@ model3 <- lm(
 plot3 <- lmforest(
     model = model3,
     data = clintrial,
-    var_labels = clintrial_labels,
+    labels = clintrial_labels,
     indent_groups = TRUE
 )
 print(plot3)
@@ -294,7 +294,7 @@ plot5 <- lmforest(
     model = model5,
     data = clintrial,
     condense_table = TRUE,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot5)
 
@@ -303,7 +303,7 @@ plot6 <- lmforest(
     model = model1,
     data = clintrial,
     color = "#2ECC71",  # Bright green
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot6)
 
@@ -312,7 +312,7 @@ plot7 <- lmforest(
     model = model1,
     data = clintrial,
     show_n = FALSE,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot7)
 
@@ -321,7 +321,7 @@ plot8 <- lmforest(
     model = model3,
     data = clintrial,
     tbl_width = 0.55,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot8)
 
@@ -336,7 +336,7 @@ plot10 <- lmforest(
     data = clintrial,
     plot_width = 12,
     plot_height = 7,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 
 # Example 11: Different units
@@ -346,7 +346,7 @@ plot11 <- lmforest(
     plot_width = 30,
     plot_height = 20,
     units = "cm",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 
 # Example 12: No zebra stripes
@@ -354,7 +354,7 @@ plot12 <- lmforest(
     model = model1,
     data = clintrial,
     zebra_stripes = FALSE,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot12)
 
@@ -363,7 +363,7 @@ plot13 <- lmforest(
     model = model1,
     data = clintrial,
     ref_label = "0.00 (ref)",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot13)
 
@@ -373,7 +373,7 @@ plot14 <- lmforest(
     data = clintrial,
     font_size = 1.3,
     title_size = 26,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot14)
 
@@ -382,7 +382,7 @@ plot15 <- lmforest(
     model = model1,
     data = clintrial,
     digits = 3,
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot15)
 
@@ -397,7 +397,7 @@ plot16 <- lmforest(
     data = clintrial,
     title = "Predictors of Baseline Hemoglobin",
     effect_label = "Change in Hemoglobin (g/dL)",
-    var_labels = clintrial_labels
+    labels = clintrial_labels
 )
 print(plot16)
 
@@ -421,7 +421,7 @@ final_plot <- lmforest(
     data = clintrial,
     title = "Multivariable Linear Regression: Predictors of Body Mass Index",
     effect_label = "Change in BMI (kg/m^2)",
-    var_labels = clintrial_labels,
+    labels = clintrial_labels,
     indent_groups = TRUE,
     zebra_stripes = TRUE,
     show_n = TRUE,

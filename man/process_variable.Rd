@@ -18,7 +18,7 @@ process_variable(
   test_categorical,
   total,
   total_label,
-  var_labels,
+  labels,
   na_percent,
   ...
 )

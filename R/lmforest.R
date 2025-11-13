@@ -68,7 +68,7 @@
 #' @param ref_label Character string to display for reference categories of 
 #'   factor variables. Default is \code{"reference"}.
 #'   
-#' @param var_labels Named character vector providing custom display labels for 
+#' @param labels Named character vector providing custom display labels for 
 #'   variables. Example: \code{c(age = "Age (years)", height = "Height (cm)")}. 
 #'   Default is \code{NULL}.
 #'   
@@ -238,7 +238,7 @@
 #'     data = clintrial,
 #'     title = "Predictors of Body Mass Index",
 #'     effect_label = "Change in BMI (kg/m^2)",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(plot2)
 #' 
@@ -251,7 +251,7 @@
 #' plot3 <- lmforest(
 #'     model = model3,
 #'     data = clintrial,
-#'     var_labels = clintrial_labels,
+#'     labels = clintrial_labels,
 #'     indent_groups = TRUE
 #' )
 #' print(plot3)
@@ -270,7 +270,7 @@
 #'     model = model5,
 #'     data = clintrial,
 #'     condense_table = TRUE,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(plot5)
 #' 
@@ -279,7 +279,7 @@
 #'     model = model1,
 #'     data = clintrial,
 #'     color = "#2ECC71",  # Bright green
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(plot6)
 #' 
@@ -288,7 +288,7 @@
 #'     model = model1,
 #'     data = clintrial,
 #'     show_n = FALSE,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(plot7)
 #' 
@@ -297,7 +297,7 @@
 #'     model = model3,
 #'     data = clintrial,
 #'     tbl_width = 0.55,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(plot8)
 #' 
@@ -312,7 +312,7 @@
 #'     data = clintrial,
 #'     plot_width = 12,
 #'     plot_height = 7,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' 
 #' # Example 11: Different units
@@ -322,7 +322,7 @@
 #'     plot_width = 30,
 #'     plot_height = 20,
 #'     units = "cm",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' 
 #' # Example 12: No zebra stripes
@@ -330,7 +330,7 @@
 #'     model = model1,
 #'     data = clintrial,
 #'     zebra_stripes = FALSE,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(plot12)
 #' 
@@ -339,7 +339,7 @@
 #'     model = model1,
 #'     data = clintrial,
 #'     ref_label = "0.00 (ref)",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(plot13)
 #' 
@@ -349,7 +349,7 @@
 #'     data = clintrial,
 #'     font_size = 1.3,
 #'     title_size = 26,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(plot14)
 #' 
@@ -358,7 +358,7 @@
 #'     model = model1,
 #'     data = clintrial,
 #'     digits = 3,
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(plot15)
 #' 
@@ -373,7 +373,7 @@
 #'     data = clintrial,
 #'     title = "Predictors of Baseline Hemoglobin",
 #'     effect_label = "Change in Hemoglobin (g/dL)",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(plot16)
 #' 
@@ -397,7 +397,7 @@
 #'     data = clintrial,
 #'     title = "Multivariable Linear Regression: Predictors of Body Mass Index",
 #'     effect_label = "Change in BMI (kg/m^2)",
-#'     var_labels = clintrial_labels,
+#'     labels = clintrial_labels,
 #'     indent_groups = TRUE,
 #'     zebra_stripes = TRUE,
 #'     show_n = TRUE,
@@ -430,7 +430,7 @@ lmforest <- function(model, data = NULL,
                      center_padding = 4,
                      zebra_stripes = TRUE,
                      ref_label = "reference",
-                     var_labels = NULL,
+                     labels = NULL,
                      units = "in",
                      color = "#5A8F5A") {
     
@@ -756,8 +756,8 @@ lmforest <- function(model, data = NULL,
             if (v != "" && !grepl("^    ", v)) {
                 clean_v <- gsub(" \\(.*\\)", "", v)
 
-                label <- if (!is.null(var_labels) && clean_v %in% names(var_labels)) {
-                             var_labels[clean_v]
+                label <- if (!is.null(labels) && clean_v %in% names(labels)) {
+                             labels[clean_v]
                          } else if (!is.null(attr(data[[clean_v]], "label"))) {
                              attr(data[[clean_v]], "label")
                          } else {
@@ -783,8 +783,8 @@ lmforest <- function(model, data = NULL,
     } else {
         for(v in unique(to_show_exp_clean$var)) {
             if(v %in% to_show_exp_clean$var) {
-                if(!is.null(var_labels) && v %in% names(var_labels)) {
-                    to_show_exp_clean[var == v, var_display := var_labels[v]]
+                if(!is.null(labels) && v %in% names(labels)) {
+                    to_show_exp_clean[var == v, var_display := labels[v]]
                 }
                 else if(!is.null(attr(data[[v]], "label"))) {
                     to_show_exp_clean[var == v, var_display := attr(data[[v]], "label")]

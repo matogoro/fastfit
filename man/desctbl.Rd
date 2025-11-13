@@ -20,7 +20,7 @@ desctbl(
   test_categorical = "auto",
   total = TRUE,
   total_label = "Total",
-  var_labels = NULL,
+  labels = NULL,
   ...
 )
 }
@@ -122,9 +122,9 @@ categorical variables:
 \item{total_label}{Character string for the total column header. 
 Default is \code{"Total"}.}
 
-\item{var_labels}{Named character vector or list providing custom display 
+\item{labels}{Named character vector or list providing custom display 
 labels for variables. Names should match variable names (or \code{Surv()} 
-expressions), values are the display labels. Variables not in \code{var_labels} 
+expressions), values are the display labels. Variables not in \code{labels} 
 use their original names. Can also be used to label the grouping variable 
 specified in \code{by}. Default is \code{NULL}.}
 
@@ -136,7 +136,7 @@ functions (e.g., \code{var.equal = TRUE} for t-tests,
 A data.table with S3 class \code{"desctbl"} containing formatted 
   descriptive statistics. The table structure includes:
   \describe{
-    \item{Variable}{Character. Variable name or label (from \code{var_labels})}
+    \item{Variable}{Character. Variable name or label (from \code{labels})}
     \item{Group}{Character. For continuous variables: statistic type 
       (e.g., "Mean ± SD", "Median [IQR]"). For categorical variables: 
       category level. Empty for variable name rows.}
@@ -285,7 +285,7 @@ labels <- c(
 desctbl(clintrial,
         by = "treatment",
         variables = c("age", "sex", "bmi"),
-        var_labels = labels)
+        labels = labels)
 
 # Example 10: Position total column last
 desctbl(clintrial,
@@ -311,7 +311,7 @@ desctbl(clintrial,
             "Surv(os_months, os_status)",
             "Surv(pfs_months, pfs_status)"
         ),
-        var_labels = c(
+        labels = c(
             "Surv(os_months, os_status)" = "Overall Survival",
             "Surv(pfs_months, pfs_status)" = "Progression-Free Survival"
         ))
@@ -389,7 +389,7 @@ table1 <- desctbl(
         "site", "stage", "grade",
         "Surv(os_months, os_status)"
     ),
-    var_labels = clintrial_labels,
+    labels = clintrial_labels,
     stats_continuous = c("median_iqr", "range"),
     total = TRUE,
     na_include = FALSE

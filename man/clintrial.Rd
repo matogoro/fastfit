@@ -60,7 +60,7 @@ desctbl(clintrial,
         by = "treatment", 
         variables = c("age", "sex", "stage", "ecog", 
                      "biomarker_x", "Surv(os_months, os_status)"),
-        var_labels = clintrial_labels)
+        labels = clintrial_labels)
 
 # Univariable screening
 uscreen(clintrial,
@@ -68,14 +68,14 @@ uscreen(clintrial,
         predictors = c("age", "sex", "stage", "grade", "ecog",
                       "biomarker_x", "treatment"),
         model_type = "coxph",
-        var_labels = clintrial_labels)
+        labels = clintrial_labels)
 
 # Multivariable model
 fit(clintrial,
     outcome = "Surv(os_months, os_status)",
     predictors = c("age", "stage", "ecog", "biomarker_x", "treatment"),
     model_type = "coxph",
-    var_labels = clintrial_labels)
+    labels = clintrial_labels)
 
 # Complete analysis pipeline
 fastfit(clintrial,
@@ -85,7 +85,7 @@ fastfit(clintrial,
         method = "screen",
         p_threshold = 0.20,
         model_type = "coxph",
-        var_labels = clintrial_labels)
+        labels = clintrial_labels)
         
 }
 \keyword{datasets}

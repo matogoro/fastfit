@@ -78,7 +78,7 @@
 #'   P-values smaller than \code{10^(-digits_p)} are displayed as "< 0.001", 
 #'   etc. Default is 3.
 #'   
-#' @param var_labels Named character vector or list providing custom display 
+#' @param labels Named character vector or list providing custom display 
 #'   labels for variables. Names should match variable names, values are display 
 #'   labels. Default is \code{NULL}.
 #'   
@@ -226,7 +226,7 @@
 #'     data = clintrial,
 #'     outcome = "os_status",
 #'     predictors = c("age", "sex", "bmi", "treatment"),
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(multi_model)
 #' # Labeled as "Multivariable aOR" (adjusted OR)
@@ -237,7 +237,7 @@
 #'     outcome = "Surv(os_months, os_status)",
 #'     predictors = c("age", "sex", "treatment", "stage"),
 #'     model_type = "coxph",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(cox_model)
 #' 
@@ -247,7 +247,7 @@
 #'     outcome = "os_status",
 #'     predictors = c("age", "treatment", "sex"),
 #'     interaction_terms = c("age:treatment"),
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(interact_model)
 #' 
@@ -258,7 +258,7 @@
 #'     predictors = c("age", "sex", "treatment"),
 #'     model_type = "coxph",
 #'     strata = "site",  # Separate baseline hazards by site
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(strat_model)
 #' 
@@ -269,7 +269,7 @@
 #'     predictors = c("age", "treatment"),
 #'     model_type = "coxph",
 #'     cluster = "site",  # Robust SEs accounting for site clustering
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(cluster_model)
 #' 
@@ -279,7 +279,7 @@
 #'     outcome = "bmi",
 #'     predictors = c("age", "sex", "smoking"),
 #'     model_type = "lm",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(linear_model)
 #' 
@@ -290,7 +290,7 @@
 #'     predictors = c("age", "treatment", "surgery", "stage"),
 #'     model_type = "glm",
 #'     family = "poisson",
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(poisson_model)
 #' # Returns rate ratios (RR/aRR)
@@ -323,7 +323,7 @@
 #'     outcome = "os_status",
 #'     predictors = c("age", "sex", "treatment", "bmi"),
 #'     interaction_terms = c("age:treatment", "sex:bmi"),
-#'     var_labels = clintrial_labels
+#'     labels = clintrial_labels
 #' )
 #' print(complex_model)
 #' 
@@ -385,7 +385,7 @@ fit <- function(data,
                 show_events = TRUE,
                 digits = 2,
                 digits_p = 3,
-                var_labels = NULL,
+                labels = NULL,
                 keep_qc_stats = TRUE,
                 exponentiate = NULL,
                 ...) {
@@ -494,7 +494,7 @@ fit <- function(data,
                                     show_events = show_events,
                                     digits = digits,
                                     digits_p = digits_p,
-                                    var_labels = var_labels,
+                                    labels = labels,
                                     exponentiate = exponentiate)
 
     ## Attach metadata
