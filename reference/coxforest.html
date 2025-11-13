@@ -22,7 +22,7 @@ and presentations."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aj
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastfit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.6</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@ and presentations.</p>
 <span>  center_padding <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  zebra_stripes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ref_label <span class="op">=</span> <span class="st">"reference"</span>,</span>
-<span>  var_labels <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  labels <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  color <span class="op">=</span> <span class="st">"#8A61D8"</span>,</span>
 <span>  units <span class="op">=</span> <span class="st">"in"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -197,7 +197,7 @@ Default is <code>TRUE</code>.</p></dd>
 Default is <code>"reference"</code>.</p></dd>
 
 
-<dt id="arg-var-labels">var_labels<a class="anchor" aria-label="anchor" href="#arg-var-labels"></a></dt>
+<dt id="arg-labels">labels<a class="anchor" aria-label="anchor" href="#arg-labels"></a></dt>
 <dd><p>Named character vector providing custom display labels for
 variables. Example: <code>c(age = "Age (years)", stage = "Disease Stage")</code>.
 Default is <code>NULL</code>.</p></dd>
@@ -320,7 +320,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    model <span class="op">=</span> <span class="va">model1</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    title <span class="op">=</span> <span class="st">"Prognostic Factors for Overall Survival"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended plot dimensions: width = 13.7 in, height = 5.0 in</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">plot2</span><span class="op">)</span></span></span>
@@ -336,7 +336,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span><span class="va">plot3</span> <span class="op">&lt;-</span> <span class="fu">coxforest</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    model <span class="op">=</span> <span class="va">model3</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span>,</span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span>,</span></span>
 <span class="r-in"><span>    indent_groups <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended plot dimensions: width = 13.7 in, height = 8.5 in</span>
@@ -354,7 +354,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    model <span class="op">=</span> <span class="va">model4</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    condense_table <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended plot dimensions: width = 12.2 in, height = 5.2 in</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">plot4</span><span class="op">)</span></span></span>
@@ -366,7 +366,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    color <span class="op">=</span> <span class="st">"#E74C3C"</span>,  <span class="co"># Red</span></span></span>
 <span class="r-in"><span>    zebra_stripes <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended plot dimensions: width = 13.7 in, height = 5.0 in</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">plot5</span><span class="op">)</span></span></span>
@@ -378,7 +378,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    show_n <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>    show_events <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended plot dimensions: width = 12.2 in, height = 5.0 in</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">plot6</span><span class="op">)</span></span></span>
@@ -389,7 +389,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    model <span class="op">=</span> <span class="va">model3</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    tbl_width <span class="op">=</span> <span class="fl">0.65</span>,  <span class="co"># More space for long variable names</span></span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended plot dimensions: width = 16.0 in, height = 7.2 in</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">plot7</span><span class="op">)</span></span></span>
@@ -401,7 +401,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    plot_width <span class="op">=</span> <span class="fl">14</span>,</span></span>
 <span class="r-in"><span>    plot_height <span class="op">=</span> <span class="fl">8</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 9: Use recommended dimensions for saving</span></span></span>
@@ -420,7 +420,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    plot_width <span class="op">=</span> <span class="fl">35</span>,</span></span>
 <span class="r-in"><span>    plot_height <span class="op">=</span> <span class="fl">25</span>,</span></span>
 <span class="r-in"><span>    units <span class="op">=</span> <span class="st">"cm"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 11: Stratified Cox model</span></span></span>
@@ -434,7 +434,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    model <span class="op">=</span> <span class="va">model11</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    title <span class="op">=</span> <span class="st">"Stratified by Study Site"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended plot dimensions: width = 13.7 in, height = 5.0 in</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">plot11</span><span class="op">)</span></span></span>
@@ -450,7 +450,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    model <span class="op">=</span> <span class="va">model12</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    title <span class="op">=</span> <span class="st">"Clustered by Study Site"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended plot dimensions: width = 13.7 in, height = 5.0 in</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">plot12</span><span class="op">)</span></span></span>
@@ -462,7 +462,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    model <span class="op">=</span> <span class="va">model1</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    ref_label <span class="op">=</span> <span class="st">"1.00 (ref)"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended plot dimensions: width = 13.7 in, height = 5.0 in</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">plot13</span><span class="op">)</span></span></span>
@@ -474,7 +474,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    font_size <span class="op">=</span> <span class="fl">1.4</span>,</span></span>
 <span class="r-in"><span>    title_size <span class="op">=</span> <span class="fl">28</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended plot dimensions: width = 16.8 in, height = 5.0 in</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">plot14</span><span class="op">)</span></span></span>
@@ -491,7 +491,7 @@ should verify this assumption using:</p><ul><li><p><code>cox.zph(model)</code> f
 <span class="r-in"><span>    model <span class="op">=</span> <span class="va">final_model</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    title <span class="op">=</span> <span class="st">"Multivariable Cox Regression: Prognostic Factors for Overall Survival"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span>,</span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span>,</span></span>
 <span class="r-in"><span>    indent_groups <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>    zebra_stripes <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>    show_n <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>

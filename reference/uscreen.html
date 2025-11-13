@@ -21,7 +21,7 @@ formatted results with optional p-value filtering."><!-- mathjax --><script src=
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastfit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.6</span>
       </span>
     </div>
 
@@ -71,7 +71,7 @@ formatted results with optional p-value filtering.</p>
 <span>  show_events <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  digits <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  digits_p <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  var_labels <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  labels <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keep_models <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  exponentiate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -159,10 +159,10 @@ P-values smaller than <code>10^(-digits_p)</code> are displayed as "&lt; 0.001",
 "&lt; 0.01", etc. Default is 3.</p></dd>
 
 
-<dt id="arg-var-labels">var_labels<a class="anchor" aria-label="anchor" href="#arg-var-labels"></a></dt>
+<dt id="arg-labels">labels<a class="anchor" aria-label="anchor" href="#arg-labels"></a></dt>
 <dd><p>Named character vector or list providing custom display
 labels for variables. Names should match predictor names, values are the
-display labels. Predictors not in <code>var_labels</code> use their original names.
+display labels. Predictors not in <code>labels</code> use their original names.
 Default is <code>NULL</code>.</p></dd>
 
 
@@ -193,7 +193,7 @@ to <code>TRUE</code> to force exponentiation or <code>FALSE</code> to force coef
     <h2>Value</h2>
     <p>A data.table with S3 class <code>"uscreen_result"</code> containing formatted
   univariable screening results. The table structure includes:</p><dl><dt>Variable</dt>
-<dd><p>Character. Predictor name or custom label (from <code>var_labels</code>)</p></dd>
+<dd><p>Character. Predictor name or custom label (from <code>labels</code>)</p></dd>
 
     <dt>Group</dt>
 <dd><p>Character. For factor variables: category level. For continuous
@@ -345,7 +345,7 @@ you need:</p><ul><li><p>Model diagnostic plots</p></li>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"bmi"</span>, <span class="st">"treatment"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">screen2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -382,7 +382,7 @@ you need:</p><ul><li><p>Model diagnostic plots</p></li>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"bmi"</span>, <span class="st">"smoking"</span>, <span class="st">"hypertension"</span>, </span></span>
 <span class="r-in"><span>                  <span class="st">"diabetes"</span>, <span class="st">"ecog"</span>, <span class="st">"stage"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    p_threshold <span class="op">=</span> <span class="fl">0.20</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">screen3</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -437,7 +437,7 @@ you need:</p><ul><li><p>Model diagnostic plots</p></li>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"Surv(os_months, os_status)"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"treatment"</span>, <span class="st">"stage"</span>, <span class="st">"grade"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    model_type <span class="op">=</span> <span class="st">"coxph"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cox_screen</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -521,7 +521,7 @@ you need:</p><ul><li><p>Model diagnostic plots</p></li>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"bmi"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"smoking"</span>, <span class="st">"creatinine"</span>, <span class="st">"hemoglobin"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    model_type <span class="op">=</span> <span class="st">"lm"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">linear_screen</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -559,7 +559,7 @@ you need:</p><ul><li><p>Model diagnostic plots</p></li>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"treatment"</span>, <span class="st">"surgery"</span>, <span class="st">"stage"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    model_type <span class="op">=</span> <span class="st">"glm"</span>,</span></span>
 <span class="r-in"><span>    family <span class="op">=</span> <span class="st">"poisson"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>non-integer x = 16.800000</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>non-integer x = 15.200000</span>
@@ -4438,7 +4438,7 @@ you need:</p><ul><li><p>Model diagnostic plots</p></li>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"bmi"</span>, <span class="st">"smoking"</span>, <span class="st">"hypertension"</span>, </span></span>
 <span class="r-in"><span>                  <span class="st">"diabetes"</span>, <span class="st">"ecog"</span>, <span class="st">"treatment"</span>, <span class="st">"stage"</span>, <span class="st">"grade"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    p_threshold <span class="op">=</span> <span class="fl">0.05</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Check how many predictors passed the filter</span></span></span>
@@ -4464,7 +4464,7 @@ you need:</p><ul><li><p>Model diagnostic plots</p></li>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="va">sig_predictors</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multi_model</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

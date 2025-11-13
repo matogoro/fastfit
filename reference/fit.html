@@ -21,7 +21,7 @@ multivariable models automatically."><!-- mathjax --><script src="https://cdnjs.
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastfit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.6</span>
       </span>
     </div>
 
@@ -74,7 +74,7 @@ multivariable models automatically.</p>
 <span>  show_events <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  digits <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  digits_p <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  var_labels <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  labels <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keep_qc_stats <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  exponentiate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -182,7 +182,7 @@ P-values smaller than <code>10^(-digits_p)</code> are displayed as "&lt; 0.001",
 etc. Default is 3.</p></dd>
 
 
-<dt id="arg-var-labels">var_labels<a class="anchor" aria-label="anchor" href="#arg-var-labels"></a></dt>
+<dt id="arg-labels">labels<a class="anchor" aria-label="anchor" href="#arg-labels"></a></dt>
 <dd><p>Named character vector or list providing custom display
 labels for variables. Names should match variable names, values are display
 labels. Default is <code>NULL</code>.</p></dd>
@@ -357,7 +357,7 @@ parameters.</p></dd>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"bmi"</span>, <span class="st">"treatment"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multi_model</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -391,7 +391,7 @@ parameters.</p></dd>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"Surv(os_months, os_status)"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"treatment"</span>, <span class="st">"stage"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    model_type <span class="op">=</span> <span class="st">"coxph"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cox_model</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -418,7 +418,7 @@ parameters.</p></dd>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"treatment"</span>, <span class="st">"sex"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    interaction_terms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age:treatment"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">interact_model</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -434,8 +434,8 @@ parameters.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4:                                       Drug B    346    246</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5:                                  Sex  Female    474    317</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6:                                         Male    376    252</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7: Age (years) x Drug A Treatment Group       -    850    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8: Age (years) x Drug B Treatment Group       -    850    569</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7: Age (years) * Drug A Treatment Group       -    850    569</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8: Age (years) * Drug B Treatment Group       -    850    569</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Multivariable aOR (95% CI) p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        &lt;char&gt;  &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:           1.08 (1.04-1.11) &lt; 0.001</span>
@@ -454,7 +454,7 @@ parameters.</p></dd>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"treatment"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    model_type <span class="op">=</span> <span class="st">"coxph"</span>,</span></span>
 <span class="r-in"><span>    strata <span class="op">=</span> <span class="st">"site"</span>,  <span class="co"># Separate baseline hazards by site</span></span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">strat_model</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -478,7 +478,7 @@ parameters.</p></dd>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"treatment"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    model_type <span class="op">=</span> <span class="st">"coxph"</span>,</span></span>
 <span class="r-in"><span>    cluster <span class="op">=</span> <span class="st">"site"</span>,  <span class="co"># Robust SEs accounting for site clustering</span></span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cluster_model</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -499,7 +499,7 @@ parameters.</p></dd>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"bmi"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"smoking"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    model_type <span class="op">=</span> <span class="st">"lm"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">linear_model</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -523,7 +523,7 @@ parameters.</p></dd>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"treatment"</span>, <span class="st">"surgery"</span>, <span class="st">"stage"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    model_type <span class="op">=</span> <span class="st">"glm"</span>,</span></span>
 <span class="r-in"><span>    family <span class="op">=</span> <span class="st">"poisson"</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>non-integer x = 16.800000</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>non-integer x = 15.200000</span>
@@ -1365,7 +1365,7 @@ parameters.</p></dd>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"treatment"</span>, <span class="st">"bmi"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    interaction_terms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age:treatment"</span>, <span class="st">"sex:bmi"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">complex_model</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -1382,9 +1382,9 @@ parameters.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  5:                                       Drug A    295    170</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  6:                                       Drug B    346    246</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  7:              Body Mass Index (kg/m²)       -    838    562</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8: Age (years) x Drug A Treatment Group       -    838    562</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9: Age (years) x Drug B Treatment Group       -    838    562</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:   Male Sex x Body Mass Index (kg/m²)       -    838    562</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8: Age (years) * Drug A Treatment Group       -    838    562</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9: Age (years) * Drug B Treatment Group       -    838    562</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:   Male Sex * Body Mass Index (kg/m²)       -    838    562</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Multivariable aOR (95% CI) p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         &lt;char&gt;  &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1:           1.08 (1.05-1.12) &lt; 0.001</span>

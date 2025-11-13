@@ -21,7 +21,7 @@ creating data-driven presentations, conference talks, and stakeholder reports.">
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastfit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.6</span>
       </span>
     </div>
 
@@ -368,7 +368,7 @@ print(pres, target = "custom.pptx")
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"treatment"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 1: Basic PowerPoint slide</span></span></span>
@@ -431,7 +431,7 @@ print(pres, target = "custom.pptx")
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    strata <span class="op">=</span> <span class="st">"treatment"</span>,</span></span>
 <span class="r-in"><span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"bmi"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    var_labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">tbl2pptx</span><span class="op">(</span><span class="va">desc</span>, <span class="st">"baseline.pptx"</span>,</span></span>
