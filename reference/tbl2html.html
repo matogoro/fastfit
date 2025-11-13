@@ -63,7 +63,7 @@ including responsive design support, color schemes, and interactive features.</p
 <span>  format_headers <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  variable_padding <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  bold_significant <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  sig_threshold <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  p_threshold <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  indent_groups <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  condense_table <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  zebra_stripes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -112,7 +112,7 @@ in <code>&lt;b&gt;</code> tags for bold display. Makes important results stand o
 visually. Default is <code>TRUE</code>.</p></dd>
 
 
-<dt id="arg-sig-threshold">sig_threshold<a class="anchor" aria-label="anchor" href="#arg-sig-threshold"></a></dt>
+<dt id="arg-p-threshold">p_threshold<a class="anchor" aria-label="anchor" href="#arg-p-threshold"></a></dt>
 <dd><p>Numeric. P-value threshold for significance highlighting.
 Only used when <code>bold_significant = TRUE</code>. Default is 0.05.</p></dd>
 
@@ -363,7 +363,7 @@ tbl2html(results, "table.html")</p>
 <span class="r-in"><span>  <span class="co"># Example 11: Stricter significance threshold</span></span></span>
 <span class="r-in"><span>  <span class="fu">tbl2html</span><span class="op">(</span><span class="va">results</span>, <span class="st">"strict.html"</span>,</span></span>
 <span class="r-in"><span>           bold_significant <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>           sig_threshold <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></span>
+<span class="r-in"><span>           p_threshold <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Table exported to strict.html</span>
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span>  <span class="co"># Example 12: No header formatting</span></span></span>

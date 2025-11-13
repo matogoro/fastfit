@@ -61,7 +61,7 @@ quality metrics to facilitate rapid model comparison.</p>
 <span>  <span class="va">outcome</span>,</span>
 <span>  <span class="va">model_list</span>,</span>
 <span>  model_names <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  interaction_terms_list <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  interactions_list <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  family <span class="op">=</span> <span class="st">"binomial"</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
@@ -95,7 +95,7 @@ for one model. Can also be a single character vector to auto-generate nested mod
 "Model 1", "Model 2", etc. Default is NULL.</p></dd>
 
 
-<dt id="arg-interaction-terms-list">interaction_terms_list<a class="anchor" aria-label="anchor" href="#arg-interaction-terms-list"></a></dt>
+<dt id="arg-interactions-list">interactions_list<a class="anchor" aria-label="anchor" href="#arg-interactions-list"></a></dt>
 <dd><p>List of character vectors specifying interaction
 terms for each model. Each element corresponds to one model in model_list.
 Use NULL for models without interactions. Use colon notation for interactions
@@ -197,7 +197,7 @@ concordance (discrimination), and model convergence status.</p>
 For survival models, the global p-value comes from the log-rank test.</p>
 <p>Models that fail to converge are flagged and penalized in the FastFit Score.</p>
 <p><strong>Interaction Terms:</strong></p>
-<p>When <code>interaction_terms_list</code> is provided, each element specifies the
+<p>When <code>interactions_list</code> is provided, each element specifies the
 interaction terms for the corresponding model in <code>model_list</code>. This is
 particularly useful for testing whether adding interactions improves model fit:</p><ul><li><p>Use NULL for models without interactions</p></li>
 <li><p>Specify interactions using colon notation: c("age:treatment", "sex:stage")</p></li>
@@ -245,7 +245,7 @@ selection criteria rather than as a definitive selection method.</p>
 <span class="r-in"><span>  outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
 <span class="r-in"><span>  model_list <span class="op">=</span> <span class="va">models_interaction</span>,</span></span>
 <span class="r-in"><span>  model_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Main Effects"</span>, <span class="st">"With Interaction"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  interaction_terms_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  interactions_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="cn">NULL</span>,                    <span class="co"># No interactions in first model</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age:treatment"</span><span class="op">)</span>       <span class="co"># Add interaction in second model</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
@@ -262,7 +262,7 @@ selection criteria rather than as a definitive selection method.</p>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="va">mydata</span>,</span></span>
 <span class="r-in"><span>  outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
 <span class="r-in"><span>  model_list <span class="op">=</span> <span class="va">models_complex</span>,</span></span>
-<span class="r-in"><span>  interaction_terms_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  interactions_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="cn">NULL</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age:treatment"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age:treatment"</span>, <span class="st">"sex:treatment"</span><span class="op">)</span></span></span>

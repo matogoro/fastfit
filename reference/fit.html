@@ -64,7 +64,7 @@ multivariable models automatically.</p>
 <span>  <span class="va">predictors</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="st">"glm"</span>,</span>
 <span>  family <span class="op">=</span> <span class="st">"binomial"</span>,</span>
-<span>  interaction_terms <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  interactions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -124,7 +124,7 @@ options include:</p><ul><li><p><code>"binomial"</code> - Logistic regression [de
 </ul><p>See <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">family</a></code> for all options. Ignored for non-GLM models.</p></dd>
 
 
-<dt id="arg-interaction-terms">interaction_terms<a class="anchor" aria-label="anchor" href="#arg-interaction-terms"></a></dt>
+<dt id="arg-interactions">interactions<a class="anchor" aria-label="anchor" href="#arg-interactions"></a></dt>
 <dd><p>Character vector of interaction terms using colon
 notation (e.g., <code>c("age:sex", "treatment:stage")</code>). Interaction terms
 are added to the model in addition to main effects. Default is <code>NULL</code>
@@ -265,7 +265,7 @@ parameters.</p></dd>
     <dt>model_type</dt>
 <dd><p>Character. The regression model type used</p></dd>
 
-    <dt>interaction_terms</dt>
+    <dt>interactions</dt>
 <dd><p>Character vector (if interactions specified).
       The interaction terms included</p></dd>
 
@@ -292,7 +292,7 @@ parameters.</p></dd>
     - "a" prefix indicates "adjusted" for other variables in the model
     - Represents associations adjusted for confounding</p></li>
 </ul><p><strong>Interaction Terms:</strong></p>
-<p>Interactions are specified using colon notation and added to the model:</p><ul><li><p><code>interaction_terms = c("age:treatment")</code> creates interaction
+<p>Interactions are specified using colon notation and added to the model:</p><ul><li><p><code>interactions = c("age:treatment")</code> creates interaction
     between age and treatment</p></li>
 <li><p>Main effects for both variables are automatically included</p></li>
 <li><p>Multiple interactions can be specified:
@@ -417,7 +417,7 @@ parameters.</p></dd>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"treatment"</span>, <span class="st">"sex"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    interaction_terms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age:treatment"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    interactions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age:treatment"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">interact_model</span><span class="op">)</span></span></span>
@@ -1364,7 +1364,7 @@ parameters.</p></dd>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"treatment"</span>, <span class="st">"bmi"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    interaction_terms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age:treatment"</span>, <span class="st">"sex:bmi"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    interactions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age:treatment"</span>, <span class="st">"sex:bmi"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">complex_model</span><span class="op">)</span></span></span>

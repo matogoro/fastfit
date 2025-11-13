@@ -62,10 +62,10 @@ into LaTeX manuscripts.</p>
 <span>  <span class="va">table</span>,</span>
 <span>  <span class="va">file</span>,</span>
 <span>  format_headers <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  var_padding <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  variable_padding <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cell_padding <span class="op">=</span> <span class="st">"normal"</span>,</span>
 <span>  bold_significant <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  sig_threshold <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  p_threshold <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  align <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  indent_groups <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  condense_table <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -100,7 +100,7 @@ converting underscores to spaces, italicizing statistical notation (<em>n</em>,
 <em>p</em>), and applying title case. Default is <code>TRUE</code>.</p></dd>
 
 
-<dt id="arg-var-padding">var_padding<a class="anchor" aria-label="anchor" href="#arg-var-padding"></a></dt>
+<dt id="arg-variable-padding">variable_padding<a class="anchor" aria-label="anchor" href="#arg-variable-padding"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, adds vertical spacing around
 variable groups using <code>\addlinespace</code> for improved readability.
 Default is <code>TRUE</code>.</p></dd>
@@ -120,7 +120,7 @@ Default is <code>TRUE</code>.</p></dd>
 in textbf commands for bold display. Default is <code>TRUE</code>.</p></dd>
 
 
-<dt id="arg-sig-threshold">sig_threshold<a class="anchor" aria-label="anchor" href="#arg-sig-threshold"></a></dt>
+<dt id="arg-p-threshold">p_threshold<a class="anchor" aria-label="anchor" href="#arg-p-threshold"></a></dt>
 <dd><p>Numeric. P-value threshold for bolding. Default is 0.05.</p></dd>
 
 
@@ -378,11 +378,11 @@ with categorical variables:</p><ul><li><p>Variable names appear unindented and b
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Note: Cell padding applied with \arraystretch{1.5}</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Table exported to relaxed.tex</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 9: Custom column alignment</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2tex</span><span class="op">(</span><span class="va">results</span>, <span class="st">"aligned.tex"</span>,</span></span>
-<span class="r-in"><span>        align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"c"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>        booktabs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in `align&lt;-.xtable`(`*tmp*`, value = switch(1 + is.null(align),     align, c("r", c("r", "l")[(characters | factors) + 1]))):</span> "align" must have length equal to 7 ( ncol(x) + 1 )</span>
+<span class="r-in"><span><span class="co"># Example 9: Custom column alignment (auto-detected by default)</span></span></span>
+<span class="r-in"><span><span class="fu">tbl2tex</span><span class="op">(</span><span class="va">results</span>, <span class="st">"custom_align.tex"</span>,</span></span>
+<span class="r-in"><span>        align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Note: Cell padding applied with \arraystretch{1.3}</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Table exported to custom_align.tex</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 10: No header formatting (keep original names)</span></span></span>
 <span class="r-in"><span><span class="fu">tbl2tex</span><span class="op">(</span><span class="va">results</span>, <span class="st">"raw_headers.tex"</span>,</span></span>
@@ -400,7 +400,7 @@ with categorical variables:</p><ul><li><p>Variable names appear unindented and b
 <span class="r-in"><span><span class="co"># Example 12: Stricter significance threshold</span></span></span>
 <span class="r-in"><span><span class="fu">tbl2tex</span><span class="op">(</span><span class="va">results</span>, <span class="st">"strict_sig.tex"</span>,</span></span>
 <span class="r-in"><span>        bold_significant <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>        sig_threshold <span class="op">=</span> <span class="fl">0.01</span>,  <span class="co"># Bold only if p &lt; 0.01</span></span></span>
+<span class="r-in"><span>        p_threshold <span class="op">=</span> <span class="fl">0.01</span>,  <span class="co"># Bold only if p &lt; 0.01</span></span></span>
 <span class="r-in"><span>        booktabs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Note: Cell padding applied with \arraystretch{1.3}</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Table exported to strict_sig.tex</span>

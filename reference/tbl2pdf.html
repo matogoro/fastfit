@@ -68,10 +68,10 @@ model comparisons.</p>
 <span>  font_size <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>  caption <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  format_headers <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  var_padding <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  variable_padding <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cell_padding <span class="op">=</span> <span class="st">"normal"</span>,</span>
 <span>  bold_significant <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  sig_threshold <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  p_threshold <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  align <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  indent_groups <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  condense_table <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -142,7 +142,7 @@ to column headers: converts underscores to spaces, italicizes statistical
 notation (<em>n</em>, <em>p</em>), and improves readability. Default is <code>TRUE</code>.</p></dd>
 
 
-<dt id="arg-var-padding">var_padding<a class="anchor" aria-label="anchor" href="#arg-var-padding"></a></dt>
+<dt id="arg-variable-padding">variable_padding<a class="anchor" aria-label="anchor" href="#arg-variable-padding"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, adds vertical spacing between
 different variables in the table, creating visual grouping. Particularly
 useful for regression tables with multiple predictors. Default is <code>TRUE</code>.</p></dd>
@@ -164,7 +164,7 @@ p-values below the significance threshold, making significant results stand
 out visually. Default is <code>TRUE</code>.</p></dd>
 
 
-<dt id="arg-sig-threshold">sig_threshold<a class="anchor" aria-label="anchor" href="#arg-sig-threshold"></a></dt>
+<dt id="arg-p-threshold">p_threshold<a class="anchor" aria-label="anchor" href="#arg-p-threshold"></a></dt>
 <dd><p>Numeric. P-value threshold for bold formatting. Only
 used when <code>bold_significant = TRUE</code>. Default is 0.05. Common alternatives:
 0.01, 0.10.</p></dd>
@@ -379,7 +379,7 @@ sized exactly to the table content:</p><ol><li><p>Tries to use the <code>standal
 <span class="r-in"><span>          indent_groups <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>          zebra_stripes <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>          bold_significant <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>          sig_threshold <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></span>
+<span class="r-in"><span>          p_threshold <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span>  <span class="co"># Example 13: Adjust cell padding</span></span></span>
 <span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"relaxed_padding.pdf"</span>,</span></span>
@@ -396,7 +396,7 @@ sized exactly to the table content:</p><ol><li><p>Tries to use the <code>standal
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span>  <span class="co"># Example 16: Custom column alignment</span></span></span>
 <span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"custom_align.pdf"</span>,</span></span>
-<span class="r-in"><span>          align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>          align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span>  <span class="co"># Example 17: Descriptive statistics table</span></span></span>
 <span class="r-in"><span>  <span class="va">desc_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="desctbl.html">desctbl</a></span><span class="op">(</span></span></span>
