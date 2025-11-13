@@ -304,165 +304,153 @@ sized exactly to the table content:</p><ol><li><p>Tries to use the <code>standal
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Load example data and create a regression table</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">clintrial</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">clintrial_labels</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># These examples require a LaTeX installation (pdflatex)</span></span></span>
+<span class="r-in"><span><span class="co"># Install TinyTeX with: tinytex::install_tinytex()</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Create a regression table</span></span></span>
-<span class="r-in"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="fit.html">fit</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
-<span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
-<span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"treatment"</span>, <span class="st">"stage"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 1: Basic PDF export</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"basic_results.pdf"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "basic_results.pdf"):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 2: Landscape orientation for wide tables</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"wide_results.pdf"</span>,</span></span>
-<span class="r-in"><span>        orientation <span class="op">=</span> <span class="st">"landscape"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "wide_results.pdf", orientation = "landscape"):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 3: With caption</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"captioned.pdf"</span>,</span></span>
-<span class="r-in"><span>        caption <span class="op">=</span> <span class="st">"Table 1: Multivariable logistic regression results"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "captioned.pdf", caption = "Table 1: Multivariable logistic regression results"):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 4: Multi-line caption with formatting</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"formatted_caption.pdf"</span>,</span></span>
-<span class="r-in"><span>        caption <span class="op">=</span> <span class="st">"Table 1: Risk Factors for Mortality\\\\</span></span></span>
-<span class="r-in"><span><span class="st">                  aOR = adjusted odds ratio; CI = confidence interval\\\\</span></span></span>
-<span class="r-in"><span><span class="st">                  \\textsuperscript{a}Adjusted for age, sex, and treatment"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "formatted_caption.pdf", caption = "Table 1: Risk Factors for Mortality\\\\\n                  aOR = adjusted odds ratio; CI = confidence interval\\\\\n                  \\textsuperscript{a}Adjusted for age, sex, and treatment"):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 5: Auto-sized PDF (no fixed page dimensions)</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"autosize.pdf"</span>,</span></span>
-<span class="r-in"><span>        paper <span class="op">=</span> <span class="st">"auto"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "autosize.pdf", paper = "auto"):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 6: A4 paper with custom margins</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"a4_custom.pdf"</span>,</span></span>
-<span class="r-in"><span>        paper <span class="op">=</span> <span class="st">"a4"</span>,</span></span>
-<span class="r-in"><span>        margins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.75</span>, <span class="fl">0.75</span>, <span class="fl">0.75</span>, <span class="fl">0.75</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "a4_custom.pdf", paper = "a4", margins = c(0.75,     0.75, 0.75, 0.75)):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 7: Larger font for readability</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"large_font.pdf"</span>,</span></span>
-<span class="r-in"><span>        font_size <span class="op">=</span> <span class="fl">11</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "large_font.pdf", font_size = 11):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 8: Indented hierarchical display</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"indented.pdf"</span>,</span></span>
-<span class="r-in"><span>        indent_groups <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "indented.pdf", indent_groups = TRUE):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 9: Condensed table (reduced height)</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"condensed.pdf"</span>,</span></span>
-<span class="r-in"><span>        condense_table <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "condensed.pdf", condense_table = TRUE):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 10: With zebra stripes</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"striped.pdf"</span>,</span></span>
-<span class="r-in"><span>        zebra_stripes <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>        stripe_color <span class="op">=</span> <span class="st">"gray!15"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "striped.pdf", zebra_stripes = TRUE, stripe_color = "gray!15"):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 11: Dark header style</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"dark_header.pdf"</span>,</span></span>
-<span class="r-in"><span>        dark_header <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "dark_header.pdf", dark_header = TRUE):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 12: Combination of formatting options</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"publication_ready.pdf"</span>,</span></span>
-<span class="r-in"><span>        orientation <span class="op">=</span> <span class="st">"portrait"</span>,</span></span>
-<span class="r-in"><span>        paper <span class="op">=</span> <span class="st">"letter"</span>,</span></span>
-<span class="r-in"><span>        font_size <span class="op">=</span> <span class="fl">9</span>,</span></span>
-<span class="r-in"><span>        caption <span class="op">=</span> <span class="st">"Table 2: Multivariable Analysis\\\\</span></span></span>
-<span class="r-in"><span><span class="st">                  Model adjusted for age, sex, and clinical factors"</span>,</span></span>
-<span class="r-in"><span>        indent_groups <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>        zebra_stripes <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>        bold_significant <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>        sig_threshold <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "publication_ready.pdf", orientation = "portrait",     paper = "letter", font_size = 9, caption = "Table 2: Multivariable Analysis\\\\\n                  Model adjusted for age, sex, and clinical factors",     indent_groups = TRUE, zebra_stripes = TRUE, bold_significant = TRUE,     sig_threshold = 0.05):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 13: Adjust cell padding</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"relaxed_padding.pdf"</span>,</span></span>
-<span class="r-in"><span>        cell_padding <span class="op">=</span> <span class="st">"relaxed"</span><span class="op">)</span>  <span class="co"># More spacious</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "relaxed_padding.pdf", cell_padding = "relaxed"):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 14: No scaling (natural table width)</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"no_scale.pdf"</span>,</span></span>
-<span class="r-in"><span>        fit_to_page <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>        font_size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "no_scale.pdf", fit_to_page = FALSE, font_size = 10):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 15: Hide significance bolding</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"no_bold.pdf"</span>,</span></span>
-<span class="r-in"><span>        bold_significant <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "no_bold.pdf", bold_significant = FALSE):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 16: Custom column alignment</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"custom_align.pdf"</span>,</span></span>
-<span class="r-in"><span>        align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "custom_align.pdf", align = c("l", "l", "r",     "r", "c")):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 17: Descriptive statistics table</span></span></span>
-<span class="r-in"><span><span class="va">desc_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="desctbl.html">desctbl</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
-<span class="r-in"><span>    strata <span class="op">=</span> <span class="st">"treatment"</span>,</span></span>
-<span class="r-in"><span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"bmi"</span>, <span class="st">"stage"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in desctbl(data = clintrial, strata = "treatment", vars = c("age",     "sex", "bmi", "stage"), labels = clintrial_labels):</span> argument "variables" is missing, with no default</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">desc_table</span>, <span class="st">"descriptive.pdf"</span>,</span></span>
-<span class="r-in"><span>        caption <span class="op">=</span> <span class="st">"Table 1: Baseline Characteristics by Treatment Group"</span>,</span></span>
-<span class="r-in"><span>        landscape <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(desc_table, "descriptive.pdf", caption = "Table 1: Baseline Characteristics by Treatment Group",     landscape = TRUE):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 18: Model comparison table</span></span></span>
-<span class="r-in"><span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    base <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    full <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"bmi"</span>, <span class="st">"treatment"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="compfit.html">compfit</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
-<span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
-<span class="r-in"><span>    model_list <span class="op">=</span> <span class="va">models</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Auto-detected binary outcome, using logistic regression</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Fitting Model 1 with 2 predictors...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Fitting Model 2 with 4 predictors...</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">comparison</span>, <span class="st">"model_comparison.pdf"</span>,</span></span>
-<span class="r-in"><span>        caption <span class="op">=</span> <span class="st">"Table 3: Model Comparison Statistics"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(comparison, "model_comparison.pdf", caption = "Table 3: Model Comparison Statistics"):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 19: Very wide table with aggressive fitting</span></span></span>
-<span class="r-in"><span><span class="va">wide_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="fit.html">fit</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
-<span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
-<span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"race"</span>, <span class="st">"bmi"</span>, <span class="st">"smoking"</span>, </span></span>
-<span class="r-in"><span>                  <span class="st">"hypertension"</span>, <span class="st">"diabetes"</span>, <span class="st">"treatment"</span>, <span class="st">"stage"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">wide_model</span>, <span class="st">"very_wide.pdf"</span>,</span></span>
-<span class="r-in"><span>        orientation <span class="op">=</span> <span class="st">"landscape"</span>,</span></span>
-<span class="r-in"><span>        paper <span class="op">=</span> <span class="st">"legal"</span>,  <span class="co"># Even wider than letter</span></span></span>
-<span class="r-in"><span>        font_size <span class="op">=</span> <span class="fl">7</span>,</span></span>
-<span class="r-in"><span>        fit_to_page <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>        condense_table <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(wide_model, "very_wide.pdf", orientation = "landscape",     paper = "legal", font_size = 7, fit_to_page = TRUE, condense_table = TRUE):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 20: Troubleshooting - keep logs</span></span></span>
-<span class="r-in"><span><span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"debug.pdf"</span>,</span></span>
-<span class="r-in"><span>        show_logs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl2pdf(results, "debug.pdf", show_logs = TRUE):</span> PDF compilation requires LaTeX. Install TinyTeX with: tinytex::install_tinytex()</span>
-<span class="r-in"><span><span class="co"># If it fails, check debug.log for error messages</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.which.html" class="external-link">Sys.which</a></span><span class="op">(</span><span class="st">"pdflatex"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="co"># Load example data and create a regression table</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">clintrial</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">clintrial_labels</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Create a regression table</span></span></span>
+<span class="r-in"><span>  <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="fit.html">fit</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
+<span class="r-in"><span>      outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
+<span class="r-in"><span>      predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"treatment"</span>, <span class="st">"stage"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 1: Basic PDF export</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"basic_results.pdf"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 2: Landscape orientation for wide tables</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"wide_results.pdf"</span>,</span></span>
+<span class="r-in"><span>          orientation <span class="op">=</span> <span class="st">"landscape"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 3: With caption</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"captioned.pdf"</span>,</span></span>
+<span class="r-in"><span>          caption <span class="op">=</span> <span class="st">"Table 1: Multivariable logistic regression results"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 4: Multi-line caption with formatting</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"formatted_caption.pdf"</span>,</span></span>
+<span class="r-in"><span>          caption <span class="op">=</span> <span class="st">"Table 1: Risk Factors for Mortality\\\\</span></span></span>
+<span class="r-in"><span><span class="st">                    aOR = adjusted odds ratio; CI = confidence interval\\\\</span></span></span>
+<span class="r-in"><span><span class="st">                    \\textsuperscript{a}Adjusted for age, sex, and treatment"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 5: Auto-sized PDF (no fixed page dimensions)</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"autosize.pdf"</span>,</span></span>
+<span class="r-in"><span>          paper <span class="op">=</span> <span class="st">"auto"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 6: A4 paper with custom margins</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"a4_custom.pdf"</span>,</span></span>
+<span class="r-in"><span>          paper <span class="op">=</span> <span class="st">"a4"</span>,</span></span>
+<span class="r-in"><span>          margins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.75</span>, <span class="fl">0.75</span>, <span class="fl">0.75</span>, <span class="fl">0.75</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 7: Larger font for readability</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"large_font.pdf"</span>,</span></span>
+<span class="r-in"><span>          font_size <span class="op">=</span> <span class="fl">11</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 8: Indented hierarchical display</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"indented.pdf"</span>,</span></span>
+<span class="r-in"><span>          indent_groups <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 9: Condensed table (reduced height)</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"condensed.pdf"</span>,</span></span>
+<span class="r-in"><span>          condense_table <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 10: With zebra stripes</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"striped.pdf"</span>,</span></span>
+<span class="r-in"><span>          zebra_stripes <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>          stripe_color <span class="op">=</span> <span class="st">"gray!15"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 11: Dark header style</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"dark_header.pdf"</span>,</span></span>
+<span class="r-in"><span>          dark_header <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 12: Combination of formatting options</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"publication_ready.pdf"</span>,</span></span>
+<span class="r-in"><span>          orientation <span class="op">=</span> <span class="st">"portrait"</span>,</span></span>
+<span class="r-in"><span>          paper <span class="op">=</span> <span class="st">"letter"</span>,</span></span>
+<span class="r-in"><span>          font_size <span class="op">=</span> <span class="fl">9</span>,</span></span>
+<span class="r-in"><span>          caption <span class="op">=</span> <span class="st">"Table 2: Multivariable Analysis\\\\</span></span></span>
+<span class="r-in"><span><span class="st">                    Model adjusted for age, sex, and clinical factors"</span>,</span></span>
+<span class="r-in"><span>          indent_groups <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>          zebra_stripes <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>          bold_significant <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>          sig_threshold <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 13: Adjust cell padding</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"relaxed_padding.pdf"</span>,</span></span>
+<span class="r-in"><span>          cell_padding <span class="op">=</span> <span class="st">"relaxed"</span><span class="op">)</span>  <span class="co"># More spacious</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 14: No scaling (natural table width)</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"no_scale.pdf"</span>,</span></span>
+<span class="r-in"><span>          fit_to_page <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>          font_size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 15: Hide significance bolding</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"no_bold.pdf"</span>,</span></span>
+<span class="r-in"><span>          bold_significant <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 16: Custom column alignment</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"custom_align.pdf"</span>,</span></span>
+<span class="r-in"><span>          align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 17: Descriptive statistics table</span></span></span>
+<span class="r-in"><span>  <span class="va">desc_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="desctbl.html">desctbl</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
+<span class="r-in"><span>      strata <span class="op">=</span> <span class="st">"treatment"</span>,</span></span>
+<span class="r-in"><span>      vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"bmi"</span>, <span class="st">"stage"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">desc_table</span>, <span class="st">"descriptive.pdf"</span>,</span></span>
+<span class="r-in"><span>          caption <span class="op">=</span> <span class="st">"Table 1: Baseline Characteristics by Treatment Group"</span>,</span></span>
+<span class="r-in"><span>          landscape <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 18: Model comparison table</span></span></span>
+<span class="r-in"><span>  <span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      base <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      full <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"bmi"</span>, <span class="st">"treatment"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="compfit.html">compfit</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
+<span class="r-in"><span>      outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
+<span class="r-in"><span>      model_list <span class="op">=</span> <span class="va">models</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">comparison</span>, <span class="st">"model_comparison.pdf"</span>,</span></span>
+<span class="r-in"><span>          caption <span class="op">=</span> <span class="st">"Table 3: Model Comparison Statistics"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 19: Very wide table with aggressive fitting</span></span></span>
+<span class="r-in"><span>  <span class="va">wide_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="fit.html">fit</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      data <span class="op">=</span> <span class="va">clintrial</span>,</span></span>
+<span class="r-in"><span>      outcome <span class="op">=</span> <span class="st">"os_status"</span>,</span></span>
+<span class="r-in"><span>      predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"race"</span>, <span class="st">"bmi"</span>, <span class="st">"smoking"</span>, </span></span>
+<span class="r-in"><span>                    <span class="st">"hypertension"</span>, <span class="st">"diabetes"</span>, <span class="st">"treatment"</span>, <span class="st">"stage"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">wide_model</span>, <span class="st">"very_wide.pdf"</span>,</span></span>
+<span class="r-in"><span>          orientation <span class="op">=</span> <span class="st">"landscape"</span>,</span></span>
+<span class="r-in"><span>          paper <span class="op">=</span> <span class="st">"legal"</span>,  <span class="co"># Even wider than letter</span></span></span>
+<span class="r-in"><span>          font_size <span class="op">=</span> <span class="fl">7</span>,</span></span>
+<span class="r-in"><span>          fit_to_page <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>          condense_table <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="co"># Example 20: Troubleshooting - keep logs</span></span></span>
+<span class="r-in"><span>  <span class="fu">tbl2pdf</span><span class="op">(</span><span class="va">results</span>, <span class="st">"debug.pdf"</span>,</span></span>
+<span class="r-in"><span>          show_logs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="co"># If it fails, check debug.log for error messages</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"pdflatex not found. Install LaTeX to run these examples."</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Recommended: tinytex::install_tinytex()"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> pdflatex not found. Install LaTeX to run these examples.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Recommended: tinytex::install_tinytex()</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
