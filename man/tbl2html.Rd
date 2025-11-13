@@ -279,141 +279,142 @@ Generated HTML works in all modern browsers:
 }
 }
 \examples{
-# Load data and create table
-data(clintrial)
-data(clintrial_labels)
-
-results <- fit(
-    data = clintrial,
-    outcome = "os_status",
-    predictors = c("age", "sex", "treatment", "stage"),
-    labels = clintrial_labels
-)
-
-# Example 1: Basic HTML export (standalone)
-tbl2html(results, "results.html")
-# Open results.html in web browser
-
-# Example 2: With caption
-tbl2html(results, "captioned.html",
-         caption = "Table 1: Multivariable Logistic Regression Results")
-
-# Example 3: For embedding (no CSS)
-tbl2html(results, "embed.html",
-         include_css = FALSE)
-# Include in your HTML document
-
-# Example 4: Hierarchical display
-tbl2html(results, "indented.html",
-         indent_groups = TRUE)
-
-# Example 5: Condensed table
-tbl2html(results, "condensed.html",
-         condense_table = TRUE)
-
-# Example 6: With zebra stripes
-tbl2html(results, "striped.html",
-         zebra_stripes = TRUE,
-         stripe_color = "#F0F0F0")
-
-# Example 7: Dark header style
-tbl2html(results, "dark.html",
-         dark_header = TRUE)
-
-# Example 8: Combination styling
-tbl2html(results, "styled.html",
-         zebra_stripes = TRUE,
-         dark_header = TRUE,
-         bold_significant = TRUE)
-
-# Example 9: Custom stripe color
-tbl2html(results, "blue_stripes.html",
-         zebra_stripes = TRUE,
-         stripe_color = "#E3F2FD")  # Light blue
-
-# Example 10: Disable significance bolding
-tbl2html(results, "no_bold.html",
-         bold_significant = FALSE)
-
-# Example 11: Stricter significance threshold
-tbl2html(results, "strict.html",
-         bold_significant = TRUE,
-         sig_threshold = 0.01)
-
-# Example 12: No header formatting
-tbl2html(results, "raw_headers.html",
-         format_headers = FALSE)
-
-# Example 13: Descriptive statistics table
-desc_table <- desctbl(
-    data = clintrial,
-    by = "treatment",
-    variables = c("age", "sex", "bmi"),
-    labels = clintrial_labels
-)
-
-tbl2html(desc_table, "baseline.html",
-         caption = "Table 1: Baseline Characteristics by Treatment Group")
-
-# Example 14: For R Markdown (no CSS, for inline display)
-tbl2html(results, "rmd_table.html",
-         include_css = FALSE,
-         indent_groups = TRUE)
-
-# Then in R Markdown:
-# ```{r results='asis', echo=FALSE}
-# cat(readLines("rmd_table.html"), sep = "\n")
-# ```
-
-# Example 15: Email-friendly version
-tbl2html(results, "email.html",
-         include_css = TRUE,  # Self-contained
-         zebra_stripes = TRUE,
-         caption = "Regression Results - See Attached")
-# Can be directly included in HTML emails
-
-# Example 16: Publication-ready web version
-tbl2html(results, "publication.html",
-         caption = "Table 2: Multivariable Analysis of Risk Factors",
-         indent_groups = TRUE,
-         zebra_stripes = FALSE,  # Clean look
-         bold_significant = TRUE,
-         dark_header = FALSE)
-
-# Example 17: Modern dark theme
-tbl2html(results, "dark_theme.html",
-         dark_header = TRUE,
-         stripe_color = "#2A2A2A",  # Dark gray stripes
-         zebra_stripes = TRUE)
-
-# Example 18: Minimal styling for custom CSS
-tbl2html(results, "minimal.html",
-         include_css = FALSE,
-         format_headers = FALSE,
-         bold_significant = FALSE)
-# Apply your own CSS classes and styling
-
-# Example 19: Model comparison table
-models <- list(
-    base = c("age", "sex"),
-    full = c("age", "sex", "treatment", "stage")
-)
-
-comparison <- compfit(
-    data = clintrial,
-    outcome = "os_status",
-    model_list = models
-)
-
-tbl2html(comparison, "comparison.html",
-         caption = "Model Comparison Statistics")
-
-# Example 20: Mobile-optimized table
-tbl2html(results, "mobile.html",
-         condense_table = TRUE,  # Reduce width
-         font_size = 10)  # Note: font_size not in this function,
-                          # adjust in CSS if needed
-
+\donttest{
+  # Load data and create table
+  data(clintrial)
+  data(clintrial_labels)
+  
+  results <- fit(
+      data = clintrial,
+      outcome = "os_status",
+      predictors = c("age", "sex", "treatment", "stage"),
+      labels = clintrial_labels
+  )
+  
+  # Example 1: Basic HTML export (standalone)
+  tbl2html(results, "results.html")
+  # Open results.html in web browser
+  
+  # Example 2: With caption
+  tbl2html(results, "captioned.html",
+           caption = "Table 1: Multivariable Logistic Regression Results")
+  
+  # Example 3: For embedding (no CSS)
+  tbl2html(results, "embed.html",
+           include_css = FALSE)
+  # Include in your HTML document
+  
+  # Example 4: Hierarchical display
+  tbl2html(results, "indented.html",
+           indent_groups = TRUE)
+  
+  # Example 5: Condensed table
+  tbl2html(results, "condensed.html",
+           condense_table = TRUE)
+  
+  # Example 6: With zebra stripes
+  tbl2html(results, "striped.html",
+           zebra_stripes = TRUE,
+           stripe_color = "#F0F0F0")
+  
+  # Example 7: Dark header style
+  tbl2html(results, "dark.html",
+           dark_header = TRUE)
+  
+  # Example 8: Combination styling
+  tbl2html(results, "styled.html",
+           zebra_stripes = TRUE,
+           dark_header = TRUE,
+           bold_significant = TRUE)
+  
+  # Example 9: Custom stripe color
+  tbl2html(results, "blue_stripes.html",
+           zebra_stripes = TRUE,
+           stripe_color = "#E3F2FD")  # Light blue
+  
+  # Example 10: Disable significance bolding
+  tbl2html(results, "no_bold.html",
+           bold_significant = FALSE)
+  
+  # Example 11: Stricter significance threshold
+  tbl2html(results, "strict.html",
+           bold_significant = TRUE,
+           sig_threshold = 0.01)
+  
+  # Example 12: No header formatting
+  tbl2html(results, "raw_headers.html",
+           format_headers = FALSE)
+  
+  # Example 13: Descriptive statistics table
+  desc_table <- desctbl(
+      data = clintrial,
+      by = "treatment",
+      variables = c("age", "sex", "bmi"),
+      labels = clintrial_labels
+  )
+  
+  tbl2html(desc_table, "baseline.html",
+           caption = "Table 1: Baseline Characteristics by Treatment Group")
+  
+  # Example 14: For R Markdown (no CSS, for inline display)
+  tbl2html(results, "rmd_table.html",
+           include_css = FALSE,
+           indent_groups = TRUE)
+  
+  # Then in R Markdown:
+  # ```{r results='asis', echo=FALSE}
+  # cat(readLines("rmd_table.html"), sep = "\n")
+  # ```
+  
+  # Example 15: Email-friendly version
+  tbl2html(results, "email.html",
+           include_css = TRUE,  # Self-contained
+           zebra_stripes = TRUE,
+           caption = "Regression Results - See Attached")
+  # Can be directly included in HTML emails
+  
+  # Example 16: Publication-ready web version
+  tbl2html(results, "publication.html",
+           caption = "Table 2: Multivariable Analysis of Risk Factors",
+           indent_groups = TRUE,
+           zebra_stripes = FALSE,  # Clean look
+           bold_significant = TRUE,
+           dark_header = FALSE)
+  
+  # Example 17: Modern dark theme
+  tbl2html(results, "dark_theme.html",
+           dark_header = TRUE,
+           stripe_color = "#2A2A2A",  # Dark gray stripes
+           zebra_stripes = TRUE)
+  
+  # Example 18: Minimal styling for custom CSS
+  tbl2html(results, "minimal.html",
+           include_css = FALSE,
+           format_headers = FALSE,
+           bold_significant = FALSE)
+  # Apply your own CSS classes and styling
+  
+  # Example 19: Model comparison table
+  models <- list(
+      base = c("age", "sex"),
+      full = c("age", "sex", "treatment", "stage")
+  )
+  
+  comparison <- compfit(
+      data = clintrial,
+      outcome = "os_status",
+      model_list = models
+  )
+  
+  tbl2html(comparison, "comparison.html",
+           caption = "Model Comparison Statistics")
+  
+  # Example 20: Mobile-optimized table
+  tbl2html(results, "mobile.html",
+           condense_table = TRUE,  # Reduce width
+           font_size = 10)  # Note: font_size not in this function,
+                            # adjust in CSS if needed
+}
 }
 \seealso{
 \code{\link{tbl2pdf}} for PDF output,

@@ -261,6 +261,7 @@ Typical workflow for journal submission:
 }
 }
 \examples{
+\donttest{
 # Load data and create regression table
 data(clintrial)
 data(clintrial_labels)
@@ -403,6 +404,7 @@ tbl2tex(comparison, "model_comparison.tex",
 #     \input{landscape_table.tex}
 #   \end{table}
 # \end{landscape}
+}
 
 }
 \seealso{

@@ -253,141 +253,151 @@ If PDF compilation fails:
 }
 }
 \examples{
-# Load example data and create a regression table
-data(clintrial)
-data(clintrial_labels)
-library(survival)
+\donttest{
+# These examples require a LaTeX installation (pdflatex)
+# Install TinyTeX with: tinytex::install_tinytex()
 
-# Create a regression table
-results <- fit(
-    data = clintrial,
-    outcome = "os_status",
-    predictors = c("age", "sex", "treatment", "stage"),
-    labels = clintrial_labels
-)
-
-# Example 1: Basic PDF export
-tbl2pdf(results, "basic_results.pdf")
-
-# Example 2: Landscape orientation for wide tables
-tbl2pdf(results, "wide_results.pdf",
-        orientation = "landscape")
-
-# Example 3: With caption
-tbl2pdf(results, "captioned.pdf",
-        caption = "Table 1: Multivariable logistic regression results")
-
-# Example 4: Multi-line caption with formatting
-tbl2pdf(results, "formatted_caption.pdf",
-        caption = "Table 1: Risk Factors for Mortality\\\\\\\\
-                  aOR = adjusted odds ratio; CI = confidence interval\\\\\\\\
-                  \\\\textsuperscript{a}Adjusted for age, sex, and treatment")
-
-# Example 5: Auto-sized PDF (no fixed page dimensions)
-tbl2pdf(results, "autosize.pdf",
-        paper = "auto")
-
-# Example 6: A4 paper with custom margins
-tbl2pdf(results, "a4_custom.pdf",
-        paper = "a4",
-        margins = c(0.75, 0.75, 0.75, 0.75))
-
-# Example 7: Larger font for readability
-tbl2pdf(results, "large_font.pdf",
-        font_size = 11)
-
-# Example 8: Indented hierarchical display
-tbl2pdf(results, "indented.pdf",
-        indent_groups = TRUE)
-
-# Example 9: Condensed table (reduced height)
-tbl2pdf(results, "condensed.pdf",
-        condense_table = TRUE)
-
-# Example 10: With zebra stripes
-tbl2pdf(results, "striped.pdf",
-        zebra_stripes = TRUE,
-        stripe_color = "gray!15")
-
-# Example 11: Dark header style
-tbl2pdf(results, "dark_header.pdf",
-        dark_header = TRUE)
-
-# Example 12: Combination of formatting options
-tbl2pdf(results, "publication_ready.pdf",
-        orientation = "portrait",
-        paper = "letter",
-        font_size = 9,
-        caption = "Table 2: Multivariable Analysis\\\\\\\\
-                  Model adjusted for age, sex, and clinical factors",
-        indent_groups = TRUE,
-        zebra_stripes = TRUE,
-        bold_significant = TRUE,
-        sig_threshold = 0.05)
-
-# Example 13: Adjust cell padding
-tbl2pdf(results, "relaxed_padding.pdf",
-        cell_padding = "relaxed")  # More spacious
-
-# Example 14: No scaling (natural table width)
-tbl2pdf(results, "no_scale.pdf",
-        fit_to_page = FALSE,
-        font_size = 10)
-
-# Example 15: Hide significance bolding
-tbl2pdf(results, "no_bold.pdf",
-        bold_significant = FALSE)
-
-# Example 16: Custom column alignment
-tbl2pdf(results, "custom_align.pdf",
-        align = c("l", "l", "r", "r", "c"))
-
-# Example 17: Descriptive statistics table
-desc_table <- desctbl(
-    data = clintrial,
-    strata = "treatment",
-    vars = c("age", "sex", "bmi", "stage"),
-    labels = clintrial_labels
-)
-
-tbl2pdf(desc_table, "descriptive.pdf",
-        caption = "Table 1: Baseline Characteristics by Treatment Group",
-        landscape = TRUE)
-
-# Example 18: Model comparison table
-models <- list(
-    base = c("age", "sex"),
-    full = c("age", "sex", "bmi", "treatment")
-)
-
-comparison <- compfit(
-    data = clintrial,
-    outcome = "os_status",
-    model_list = models
-)
-
-tbl2pdf(comparison, "model_comparison.pdf",
-        caption = "Table 3: Model Comparison Statistics")
-
-# Example 19: Very wide table with aggressive fitting
-wide_model <- fit(
-    data = clintrial,
-    outcome = "os_status",
-    predictors = c("age", "sex", "race", "bmi", "smoking", 
-                  "hypertension", "diabetes", "treatment", "stage")
-)
-
-tbl2pdf(wide_model, "very_wide.pdf",
-        orientation = "landscape",
-        paper = "legal",  # Even wider than letter
-        font_size = 7,
-        fit_to_page = TRUE,
-        condense_table = TRUE)
-
-# Example 20: Troubleshooting - keep logs
-tbl2pdf(results, "debug.pdf",
-        show_logs = TRUE)
-# If it fails, check debug.log for error messages
+if (nzchar(Sys.which("pdflatex"))) {
+  # Load example data and create a regression table
+  data(clintrial)
+  data(clintrial_labels)
+  library(survival)
+  
+  # Create a regression table
+  results <- fit(
+      data = clintrial,
+      outcome = "os_status",
+      predictors = c("age", "sex", "treatment", "stage"),
+      labels = clintrial_labels
+  )
+  
+  # Example 1: Basic PDF export
+  tbl2pdf(results, "basic_results.pdf")
+  
+  # Example 2: Landscape orientation for wide tables
+  tbl2pdf(results, "wide_results.pdf",
+          orientation = "landscape")
+  
+  # Example 3: With caption
+  tbl2pdf(results, "captioned.pdf",
+          caption = "Table 1: Multivariable logistic regression results")
+  
+  # Example 4: Multi-line caption with formatting
+  tbl2pdf(results, "formatted_caption.pdf",
+          caption = "Table 1: Risk Factors for Mortality\\\\\\\\
+                    aOR = adjusted odds ratio; CI = confidence interval\\\\\\\\
+                    \\\\textsuperscript{a}Adjusted for age, sex, and treatment")
+  
+  # Example 5: Auto-sized PDF (no fixed page dimensions)
+  tbl2pdf(results, "autosize.pdf",
+          paper = "auto")
+  
+  # Example 6: A4 paper with custom margins
+  tbl2pdf(results, "a4_custom.pdf",
+          paper = "a4",
+          margins = c(0.75, 0.75, 0.75, 0.75))
+  
+  # Example 7: Larger font for readability
+  tbl2pdf(results, "large_font.pdf",
+          font_size = 11)
+  
+  # Example 8: Indented hierarchical display
+  tbl2pdf(results, "indented.pdf",
+          indent_groups = TRUE)
+  
+  # Example 9: Condensed table (reduced height)
+  tbl2pdf(results, "condensed.pdf",
+          condense_table = TRUE)
+  
+  # Example 10: With zebra stripes
+  tbl2pdf(results, "striped.pdf",
+          zebra_stripes = TRUE,
+          stripe_color = "gray!15")
+  
+  # Example 11: Dark header style
+  tbl2pdf(results, "dark_header.pdf",
+          dark_header = TRUE)
+  
+  # Example 12: Combination of formatting options
+  tbl2pdf(results, "publication_ready.pdf",
+          orientation = "portrait",
+          paper = "letter",
+          font_size = 9,
+          caption = "Table 2: Multivariable Analysis\\\\\\\\
+                    Model adjusted for age, sex, and clinical factors",
+          indent_groups = TRUE,
+          zebra_stripes = TRUE,
+          bold_significant = TRUE,
+          sig_threshold = 0.05)
+  
+  # Example 13: Adjust cell padding
+  tbl2pdf(results, "relaxed_padding.pdf",
+          cell_padding = "relaxed")  # More spacious
+  
+  # Example 14: No scaling (natural table width)
+  tbl2pdf(results, "no_scale.pdf",
+          fit_to_page = FALSE,
+          font_size = 10)
+  
+  # Example 15: Hide significance bolding
+  tbl2pdf(results, "no_bold.pdf",
+          bold_significant = FALSE)
+  
+  # Example 16: Custom column alignment
+  tbl2pdf(results, "custom_align.pdf",
+          align = c("l", "l", "r", "r", "c"))
+  
+  # Example 17: Descriptive statistics table
+  desc_table <- desctbl(
+      data = clintrial,
+      strata = "treatment",
+      vars = c("age", "sex", "bmi", "stage"),
+      labels = clintrial_labels
+  )
+  
+  tbl2pdf(desc_table, "descriptive.pdf",
+          caption = "Table 1: Baseline Characteristics by Treatment Group",
+          landscape = TRUE)
+  
+  # Example 18: Model comparison table
+  models <- list(
+      base = c("age", "sex"),
+      full = c("age", "sex", "bmi", "treatment")
+  )
+  
+  comparison <- compfit(
+      data = clintrial,
+      outcome = "os_status",
+      model_list = models
+  )
+  
+  tbl2pdf(comparison, "model_comparison.pdf",
+          caption = "Table 3: Model Comparison Statistics")
+  
+  # Example 19: Very wide table with aggressive fitting
+  wide_model <- fit(
+      data = clintrial,
+      outcome = "os_status",
+      predictors = c("age", "sex", "race", "bmi", "smoking", 
+                    "hypertension", "diabetes", "treatment", "stage")
+  )
+  
+  tbl2pdf(wide_model, "very_wide.pdf",
+          orientation = "landscape",
+          paper = "legal",  # Even wider than letter
+          font_size = 7,
+          fit_to_page = TRUE,
+          condense_table = TRUE)
+  
+  # Example 20: Troubleshooting - keep logs
+  tbl2pdf(results, "debug.pdf",
+          show_logs = TRUE)
+  # If it fails, check debug.log for error messages
+} else {
+  message("pdflatex not found. Install LaTeX to run these examples.")
+  message("Recommended: tinytex::install_tinytex()")
+}
+}
 
 }
 \seealso{
