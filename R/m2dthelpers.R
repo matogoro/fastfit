@@ -11,28 +11,46 @@ detect_model_type <- function(model) {
         term_names <- coef_names
     }
     
-    ## For models without factor variables, just count terms
+    ## Identify interaction terms (contain ":")
+    is_interaction <- grepl(":", term_names, fixed = TRUE)
+    interaction_terms <- term_names[is_interaction]
+    main_terms <- term_names[!is_interaction]
+    
+    ## For models without factor variables, count unique base variables from main effects
     if (is.null(model$xlevels) || length(model$xlevels) == 0) {
-        n_terms <- length(term_names)
+        ## Count main effect terms
+        n_terms <- length(main_terms)
+        
+        ## If we have interactions, extract unique base variables from them too
+        if (length(interaction_terms) > 0) {
+            ## Extract variables from interactions (split on ":")
+            interaction_vars <- unique(unlist(strsplit(interaction_terms, ":", fixed = TRUE)))
+            ## Count any interaction variables not already in main effects
+            new_vars <- setdiff(interaction_vars, main_terms)
+            n_terms <- n_terms + length(new_vars)
+        }
+        
         return(data.table::fifelse(n_terms == 1, "Univariable", "Multivariable"))
     }
     
     ## For models with factor variables, count unique base variables
-    ## Start with number of factor variables
-    n_vars <- length(model$xlevels)
-    
-    ## Create regex pattern to match all factor variable terms
     factor_pattern <- paste0("^(", paste(names(model$xlevels), collapse = "|"), ")")
+    is_factor_term <- grepl(factor_pattern, main_terms)
+    factor_vars_present <- unique(sapply(main_terms[is_factor_term], function(term) {
+        for (var in names(model$xlevels)) {
+            if (startsWith(term, var)) return(var)
+        }
+        return(NA_character_)
+    }))
+    factor_vars_present <- factor_vars_present[!is.na(factor_vars_present)]
+    n_vars <- length(factor_vars_present)
     
-    ## Find which terms are NOT factor terms (i.e., continuous variables)
-    is_factor_term <- grepl(factor_pattern, term_names)
-    
-    ## Count unique continuous variables
-    ## Each continuous term that's not a factor level is a separate variable
-    continuous_terms <- term_names[!is_factor_term]
+    ## Count unique continuous variables IN MAIN EFFECTS
+    continuous_terms <- main_terms[!is_factor_term]
     n_continuous <- length(unique(continuous_terms))
     
-    ## Total unique variables
+    ## Total unique variables (from main effects only)
+    ## Interactions don't add new variables to the count
     n_terms <- n_vars + n_continuous
     
     return(data.table::fifelse(n_terms == 1, "Univariable", "Multivariable"))
@@ -86,15 +104,19 @@ parse_term <- function(terms, xlevels = NULL) {
     variable <- character(n_terms)
     group <- character(n_terms)
     
+    ## Interactions should not be parsed as factor variables
+    is_interaction <- grepl(":", terms, fixed = TRUE)
+    
     if (!is.null(xlevels) && length(xlevels) > 0) {
         ## OPTIMIZED: Vectorized approach
         xlevel_names <- names(xlevels)
         
         ## For each factor variable, find all matching terms at once
+        ## BUT SKIP INTERACTION TERMS
         for (var in xlevel_names) {
             ## Find which terms start with this variable name
             pattern <- paste0("^", var)
-            matches <- grepl(pattern, terms)
+            matches <- grepl(pattern, terms) & !is_interaction  # Skip interactions
             
             if (any(matches)) {
                 ## Extract levels for all matching terms at once
@@ -103,14 +125,14 @@ parse_term <- function(terms, xlevels = NULL) {
             }
         }
         
-        ## Any remaining unmatched terms are continuous variables
+        ## Any remaining unmatched terms (including interactions) are treated as-is
         unmatched <- variable == ""
         if (any(unmatched)) {
             variable[unmatched] <- terms[unmatched]
             ## group already initialized to "" for these
         }
     } else {
-        ## No factor variables - all continuous
+        ## No factor variables - all continuous (including interactions)
         variable <- terms
         ## group already initialized to ""
     }

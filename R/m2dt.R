@@ -223,7 +223,7 @@ m2dt <- function(model,
                  add_reference_rows = TRUE,
                  reference_label = "reference") {
     
-                                        # Handle intercept exclusion
+    ## Handle intercept exclusion
     if (!include_intercept) {
         if (is.null(terms_to_exclude)) {
             terms_to_exclude <- "(Intercept)"
@@ -232,8 +232,7 @@ m2dt <- function(model,
         }
     }
     
-                                        # For backward compatibility: if terms_to_exclude is still NULL at this point,
-                                        # set it to empty character vector (no exclusions)
+    ## If terms_to_exclude is still NULL at this point, set it to empty character vector (no exclusions)
     if (is.null(terms_to_exclude)) {
         terms_to_exclude <- character(0)
     }
@@ -729,6 +728,14 @@ m2dt <- function(model,
             
             ## Skip if already processed
             if (current_term %in% processed_terms) next
+            
+            ## Interaction terms contain ":" and should be treated as continuous-like terms
+            if (grepl(":", current_term, fixed = TRUE)) {
+                ## This is an interaction term - add it as-is
+                final_rows[[length(final_rows) + 1]] <- dt[term == current_term]
+                processed_terms <- c(processed_terms, current_term)
+                next
+            }
             
             ## Check if this term belongs to a factor variable
             factor_var <- NULL

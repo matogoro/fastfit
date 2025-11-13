@@ -82,16 +82,71 @@ format_model_table <- function(data,
         }
     }
     
-    ## Apply variable labels if provided - OPTIMIZED
+    ## Apply variable labels if provided - with interaction term support
     if (!is.null(var_labels) && "Variable" %in% names(result) && length(var_labels) > 0) {
-                                        # Vectorized lookup using data.table join
+        
+        ## Create lookup table for main effects
         label_dt <- data.table::data.table(
                                     var_orig = names(var_labels),
                                     var_new = unname(unlist(var_labels))
                                 )
         
-                                        # Update using merge (more efficient for many labels)
+        ## Update main effect variable names using merge
         result[label_dt, Variable := i.var_new, on = .(Variable = var_orig)]
+        
+        ## Handle interaction terms (contain ":")
+        interaction_rows <- grep(":", result$Variable, fixed = TRUE)
+        
+        if (length(interaction_rows) > 0) {
+            for (idx in interaction_rows) {
+                original_var <- result$Variable[idx]
+                
+                ## Check if there's a direct custom label for this exact interaction
+                if (original_var %in% names(var_labels)) {
+                    result$Variable[idx] <- var_labels[[original_var]]
+                    next
+                }
+                
+                ## Split on ":" to get components
+                components <- strsplit(original_var, ":", fixed = TRUE)[[1]]
+                
+                labeled_parts <- character(length(components))
+                
+                for (j in seq_along(components)) {
+                    comp <- components[j]
+                    found_label <- FALSE
+                    
+                    ## Try to match against base variable names
+                    ## Sort by length (longest first) to match more specific names first
+                    sorted_vars <- names(var_labels)[order(-nchar(names(var_labels)))]
+                    
+                    for (base_var in sorted_vars) {
+                        if (startsWith(comp, base_var)) {
+                            ## Get the level/category suffix
+                            suffix <- substring(comp, nchar(base_var) + 1)
+                            
+                            if (nchar(suffix) == 0) {
+                                ## Just the variable name (continuous)
+                                labeled_parts[j] <- var_labels[[base_var]]
+                            } else {
+                                ## Variable + category level
+                                labeled_parts[j] <- paste0(suffix, " ", var_labels[[base_var]])
+                            }
+                            found_label <- TRUE
+                            break
+                        }
+                    }
+                    
+                    ## If no match, keep original
+                    if (!found_label) {
+                        labeled_parts[j] <- comp
+                    }
+                }
+                
+                ## Combine with " × "
+                result$Variable[idx] <- paste(labeled_parts, collapse = " × ")
+            }
+        }
     }
     
     ## Clean up Group display (handle empty groups for continuous vars)

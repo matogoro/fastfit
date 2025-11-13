@@ -508,16 +508,16 @@ fit <- function(data,
     
     ## Add metadata from model fitting
     if (!is.null(interaction_terms)) {
-        setattr(result, "interaction_terms", interaction_terms)
+        setattr(formatted, "interaction_terms", interaction_terms)
     }
     if (!is.null(strata)) {
-        setattr(result, "strata", strata)
+        setattr(formatted, "strata", strata)
     }
     if (!is.null(cluster)) {
-        setattr(result, "cluster", cluster)
+        setattr(formatted, "cluster", cluster)
     }
     if (!is.null(weights)) {
-        setattr(result, "weights", weights)
+        setattr(formatted, "weights", weights)
     }
 
     class(formatted) <- c("fit_result", class(formatted))
