@@ -359,12 +359,12 @@ screen12 <- uscreen(
 print(screen12)
 
 # Example 13: Screening with weights
-# (if you have a weight variable)
 screen13 <- uscreen(
     data = clintrial,
-    outcome = "os_status",
+    outcome = "Surv(os_months, os_status)",
     predictors = c("age", "sex", "bmi"),
-    weights = "weight_var"  # if this column exists
+    model_type = "coxph",
+    weights = runif(nrow(clintrial), min = 0.5, max = 2)  # Random numbers for example
 )
 
 # Example 14: Strict significance filter (p < 0.05)
