@@ -434,8 +434,8 @@ parameters.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4:                                       Drug B    346    246</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5:                                  Sex  Female    474    317</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6:                                         Male    376    252</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7: Age (years) × Drug A Treatment Group       -    850    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8: Age (years) × Drug B Treatment Group       -    850    569</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7: Age (years) x Drug A Treatment Group       -    850    569</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8: Age (years) x Drug B Treatment Group       -    850    569</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Multivariable aOR (95% CI) p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        &lt;char&gt;  &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:           1.08 (1.04-1.11) &lt; 0.001</span>
@@ -1382,9 +1382,9 @@ parameters.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  5:                                       Drug A    295    170</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  6:                                       Drug B    346    246</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  7:              Body Mass Index (kg/m²)       -    838    562</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8: Age (years) × Drug A Treatment Group       -    838    562</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9: Age (years) × Drug B Treatment Group       -    838    562</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:   Male Sex × Body Mass Index (kg/m²)       -    838    562</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8: Age (years) x Drug A Treatment Group       -    838    562</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9: Age (years) x Drug B Treatment Group       -    838    562</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:   Male Sex x Body Mass Index (kg/m²)       -    838    562</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Multivariable aOR (95% CI) p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         &lt;char&gt;  &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1:           1.08 (1.05-1.12) &lt; 0.001</span>
@@ -1407,9 +1407,18 @@ parameters.</p></dd>
 <span class="r-in"><span>    show_events <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>    add_reference_rows <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in data.table::fcase(is_reference, reference_label, !is.na(get(effect_col)),     sprintf("%.*f (%.*f-%.*f)", digits, get(effect_col), digits,         CI_lower, digits, CI_upper), default = ""):</span> Argument #3 has length 4 which differs from that of argument #1 (1). Please make sure all logical conditions have the same length.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">minimal</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'minimal' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Multivariable Logistic Model</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Formula: os_status ~ age + sex + treatment</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> N = 850, Events = 569</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Variable  Group Multivariable aOR (95% CI) p-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;char&gt; &lt;char&gt;                     &lt;char&gt;  &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:       age      -           1.04 (1.02-1.05) &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:       sex   Male           1.03 (0.77-1.39)   0.821</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: treatment Drug A           0.51 (0.34-0.75) &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:           Drug B           0.93 (0.63-1.38)   0.724</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 13: Different confidence levels</span></span></span>
 <span class="r-in"><span><span class="va">ci90</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span></span></span>

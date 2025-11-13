@@ -4284,9 +4284,32 @@ you need:</p><ul><li><p>Model diagnostic plots</p></li>
 <span class="r-in"><span>    predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"treatment"</span>, <span class="st">"stage"</span>, <span class="st">"grade"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    add_reference_rows <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in data.table::fcase(is_reference, reference_label, !is.na(get(effect_col)),     sprintf("%.*f (%.*f-%.*f)", digits, get(effect_col), digits,         CI_lower, digits, CI_upper), default = ""):</span> Argument #3 has length 7 which differs from that of argument #1 (1). Please make sure all logical conditions have the same length.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">screen8</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'screen8' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Univariable Screening Results</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Outcome: os_status</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Model Type: Logistic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Predictors Screened: 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Significant (p &lt; 0.05): 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Variable                     Group      n Events Univariable OR (95% CI)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;char&gt;                    &lt;char&gt; &lt;char&gt; &lt;char&gt;                  &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: treatment                    Drug A    295    170        0.50 (0.34-0.73)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                              Drug B    346    246        0.90 (0.61-1.32)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:     stage                        II    240    154        1.88 (1.29-2.73)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                                 III    251    183        2.82 (1.92-4.14)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:                                  IV    139    123       8.05 (4.49-14.45)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:     grade Moderately differentiated    417    292        1.58 (1.09-2.29)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:               Poorly differentiated    252    167        1.33 (0.89-1.99)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    p-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.593</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4: &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5: &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:   0.015</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7:   0.165</span>
 <span class="r-in"><span><span class="co"># Reference categories not shown</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 9: Customize decimal places</span></span></span>
