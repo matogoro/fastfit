@@ -343,10 +343,9 @@ if (nzchar(Sys.which("pdflatex"))) {
   tbl2pdf(results, "no_bold.pdf",
           bold_significant = FALSE)
   
-  # Example 16: Custom column alignment (auto-detected by default)
-  # The align parameter uses automatic detection based on column content
-  # Text columns are left-aligned, numeric columns are right-aligned
-  tbl2pdf(results, "custom_align.pdf")
+  # Example 16: Custom column alignment
+  tbl2pdf(results, "custom_align.pdf",
+          align = c("c", "c", "c", "c", "c", "c", "c"))
   
   # Example 17: Descriptive statistics table
   desc_table <- desctbl(

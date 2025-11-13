@@ -319,11 +319,8 @@ tbl2tex(results, "relaxed.tex",
         booktabs = TRUE)
 
 # Example 9: Custom column alignment (auto-detected by default)
-# The align parameter can be NULL to auto-detect or specify per column
-# For a typical fit() result with 6 columns, you would need:
-# align = c("l", "l", "l", "r", "r", "c") for Variable, Group, n, Effect, p-value
-tbl2tex(results, "aligned.tex",
-        booktabs = TRUE)  # Uses automatic alignment
+tbl2tex(results, "custom_align.tex",
+        align = c("c", "c", "c", "c", "c", "c", "c"))
 
 # Example 10: No header formatting (keep original names)
 tbl2tex(results, "raw_headers.tex",
