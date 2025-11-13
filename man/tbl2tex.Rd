@@ -351,7 +351,7 @@ tbl2tex(results, "final_table1.tex",
 desc_table <- desctbl(
     data = clintrial,
     strata = "treatment",
-    vars = c("age", "sex", "bmi"),
+    variables = c("age", "sex", "bmi"),
     labels = clintrial_labels
 )
 
