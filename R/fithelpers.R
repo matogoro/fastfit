@@ -143,8 +143,8 @@ format_model_table <- function(data,
                     }
                 }
                 
-                ## Combine with " × "
-                result$Variable[idx] <- paste(labeled_parts, collapse = " × ")
+                ## Combine with " x "
+                result$Variable[idx] <- paste(labeled_parts, collapse = " x ")
             }
         }
     }
@@ -215,7 +215,8 @@ format_model_table <- function(data,
     
     ## Format effect sizes with CI
     if ("CI_lower" %in% names(result) && "CI_upper" %in% names(result)) {
-        is_reference <- FALSE
+        ## Initialize is_reference as a vector with same length as result
+        is_reference <- rep(FALSE, nrow(result))
         if ("reference" %in% names(result)) {
             is_reference <- !is.na(result$reference) & result$reference == reference_label
         }
