@@ -47,7 +47,7 @@
 #'   to column headers: converts underscores to spaces, italicizes statistical 
 #'   notation (\emph{n}, \emph{p}), and improves readability. Default is \code{TRUE}.
 #'   
-#' @param var_padding Logical. If \code{TRUE}, adds vertical spacing between 
+#' @param variable_padding Logical. If \code{TRUE}, adds vertical spacing between 
 #'   different variables in the table, creating visual grouping. Particularly 
 #'   useful for regression tables with multiple predictors. Default is \code{TRUE}.
 #'   
@@ -66,7 +66,7 @@
 #'   p-values below the significance threshold, making significant results stand 
 #'   out visually. Default is \code{TRUE}.
 #'   
-#' @param sig_threshold Numeric. P-value threshold for bold formatting. Only 
+#' @param p_threshold Numeric. P-value threshold for bold formatting. Only 
 #'   used when \code{bold_significant = TRUE}. Default is 0.05. Common alternatives: 
 #'   0.01, 0.10.
 #'   
@@ -305,7 +305,7 @@
 #'           indent_groups = TRUE,
 #'           zebra_stripes = TRUE,
 #'           bold_significant = TRUE,
-#'           sig_threshold = 0.05)
+#'           p_threshold = 0.05)
 #'   
 #'   # Example 13: Adjust cell padding
 #'   tbl2pdf(results, "relaxed_padding.pdf",
@@ -322,7 +322,7 @@
 #'   
 #'   # Example 16: Custom column alignment
 #'   tbl2pdf(results, "custom_align.pdf",
-#'           align = c("l", "l", "r", "r", "c"))
+#'           align = c("c", "c", "c", "c", "c", "c", "c"))
 #'   
 #'   # Example 17: Descriptive statistics table
 #'   desc_table <- desctbl(
@@ -386,10 +386,10 @@ tbl2pdf <- function (table,
                      font_size = 8,
                      caption = NULL, 
                      format_headers = TRUE,
-                     var_padding = TRUE,
+                     variable_padding = TRUE,
                      cell_padding = "normal",
                      bold_significant = TRUE, 
-                     sig_threshold = 0.05,
+                     p_threshold = 0.05,
                      align = NULL,
                      indent_groups = FALSE,
                      condense_table = FALSE,
@@ -450,7 +450,7 @@ tbl2pdf <- function (table,
     }
 
     if (bold_significant) {
-        df <- format_pvalues_export_tex(df, sig_threshold)
+        df <- format_pvalues_export_tex(df, p_threshold)
     }
     
     original_nrow <- nrow(df)
@@ -479,7 +479,7 @@ tbl2pdf <- function (table,
     }
     
     padding_rows <- NULL
-    if (var_padding && ("Variable" %in% names(df) || "variable" %in% names(df))) {
+    if (variable_padding && ("Variable" %in% names(df) || "variable" %in% names(df))) {
         if (!is.null(var_groups)) {
             padding_positions <- which(diff(var_groups) != 0)
             new_var_groups <- integer(nrow(df) + length(padding_positions))
@@ -513,7 +513,7 @@ tbl2pdf <- function (table,
                 if (i %% 2 != 0) {
                     start_idx <- var_starts[i]
                     end_idx <- if (i < length(var_starts)) {
-                                   if (var_padding) {
+                                   if (variable_padding) {
                                        var_starts[i + 1] - 2
                                    } else {
                                        var_starts[i + 1] - 1
@@ -545,7 +545,7 @@ tbl2pdf <- function (table,
                     if (i %% 2 != 0) {
                         start_idx <- var_starts[i]
                         end_idx <- if (i < length(var_starts)) {
-                                       if (var_padding) {
+                                       if (variable_padding) {
                                            var_starts[i + 1] - 2
                                        } else {
                                            var_starts[i + 1] - 1

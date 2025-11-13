@@ -12,7 +12,7 @@ tbl2docx(
   font_family = "Arial",
   format_headers = TRUE,
   bold_significant = TRUE,
-  sig_threshold = 0.05,
+  p_threshold = 0.05,
   indent_groups = FALSE,
   condense_table = FALSE,
   zebra_stripes = FALSE,
@@ -51,7 +51,7 @@ to spaces, and improving readability. Default is \code{TRUE}.}
 p-values below the significance threshold. Makes significant results stand 
 out. Default is \code{TRUE}.}
 
-\item{sig_threshold}{Numeric. P-value threshold for bold formatting. Only 
+\item{p_threshold}{Numeric. P-value threshold for bold formatting. Only 
 used when \code{bold_significant = TRUE}. Default is 0.05.}
 
 \item{indent_groups}{Logical. If \code{TRUE}, indents factor levels under 
@@ -421,7 +421,7 @@ tbl2docx(results, "no_bold.docx",
 # Example 15: Stricter significance threshold
 tbl2docx(results, "strict.docx",
          bold_significant = TRUE,
-         sig_threshold = 0.01)
+         p_threshold = 0.01)
 }
 
 }

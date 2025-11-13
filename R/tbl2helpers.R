@@ -209,7 +209,7 @@ format_indented_groups <- function (df, indent_string = "    ") {
 
 #' Format p-values for exported tables
 #' @keywords internal
-format_pvalues_export_tex <- function (df, sig_threshold = 0.05) {
+format_pvalues_export_tex <- function (df, p_threshold = 0.05) {
     for (col in names(df)) {
         if (col == "p-value" || col == "Uni p" || col == "Multi p" || 
             grepl("p.value|pvalue", col, ignore.case = TRUE)) {
@@ -227,7 +227,7 @@ format_pvalues_export_tex <- function (df, sig_threshold = 0.05) {
                          grepl("^0\\.[0-9]", cell_value)) {
                     p_numeric <- suppressWarnings(as.numeric(gsub("[^0-9.]", 
                                                                   "", cell_value)))
-                    if (!is.na(p_numeric) && p_numeric < sig_threshold) {
+                    if (!is.na(p_numeric) && p_numeric < p_threshold) {
                         is_significant <- TRUE
                     }
                 }
@@ -243,7 +243,7 @@ format_pvalues_export_tex <- function (df, sig_threshold = 0.05) {
 
 #' Format p-values for exported tables (HTML)
 #' @keywords internal
-format_pvalues_export_html <- function (df, sig_threshold = 0.05) {
+format_pvalues_export_html <- function (df, p_threshold = 0.05) {
     for (col in names(df)) {
         if (col == "p-value" || col == "Uni p" || col == "Multi p" || 
             grepl("p.value|pvalue", col, ignore.case = TRUE)) {
@@ -261,7 +261,7 @@ format_pvalues_export_html <- function (df, sig_threshold = 0.05) {
                          grepl("^0\\.[0-9]", cell_value)) {
                     p_numeric <- suppressWarnings(as.numeric(gsub("[^0-9.]", 
                                                                   "", cell_value)))
-                    if (!is.na(p_numeric) && p_numeric < sig_threshold) {
+                    if (!is.na(p_numeric) && p_numeric < p_threshold) {
                         is_significant <- TRUE
                     }
                 }
@@ -543,7 +543,7 @@ process_table_for_flextable <- function(table,
                                         font_family = "Arial",
                                         format_headers = TRUE,
                                         bold_significant = TRUE,
-                                        sig_threshold = 0.05,
+                                        p_threshold = 0.05,
                                         indent_groups = FALSE,
                                         condense_table = FALSE,
                                         zebra_stripes = FALSE,
@@ -611,7 +611,7 @@ process_table_for_flextable <- function(table,
     
     ## Bold significant p-values
     if (bold_significant) {
-        ft <- bold_pvalues_ft(ft, df, sig_threshold)
+        ft <- bold_pvalues_ft(ft, df, p_threshold)
     }
     
     ## Set alignment
@@ -808,7 +808,7 @@ format_headers_ft <- function(ft, has_n_row, n_row_data) {
 
 #' Bold significant p-values in DOCX
 #' @keywords internal
-bold_pvalues_ft <- function(ft, df, sig_threshold = 0.05) {
+bold_pvalues_ft <- function(ft, df, p_threshold = 0.05) {
     p_cols <- grep("p-value|p value|Uni p|Multi p|pvalue", names(df), 
                    ignore.case = TRUE, value = TRUE)
     
@@ -821,7 +821,7 @@ bold_pvalues_ft <- function(ft, df, sig_threshold = 0.05) {
                                         # Vectorized significance check
             is_very_small <- grepl("^<\\s*0\\.001", vals)
             p_numeric <- suppressWarnings(as.numeric(gsub("[^0-9.]", "", vals)))
-            is_small_numeric <- !is.na(p_numeric) & p_numeric < sig_threshold
+            is_small_numeric <- !is.na(p_numeric) & p_numeric < p_threshold
             
             sig_rows <- which((is_very_small | is_small_numeric) & 
                               vals != "" & !is.na(vals))

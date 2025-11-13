@@ -12,7 +12,7 @@
 #'   for one model. Can also be a single character vector to auto-generate nested models.
 #' @param model_names Character vector of names for each model. If NULL, uses
 #'   "Model 1", "Model 2", etc. Default is NULL.
-#' @param interaction_terms_list List of character vectors specifying interaction
+#' @param interactions_list List of character vectors specifying interaction
 #'   terms for each model. Each element corresponds to one model in model_list.
 #'   Use NULL for models without interactions. Use colon notation for interactions
 #'   (e.g., c("age:treatment")). If NULL, no interactions are added to any model.
@@ -62,7 +62,7 @@
 #' 
 #' \strong{Interaction Terms:}
 #' 
-#' When \code{interaction_terms_list} is provided, each element specifies the
+#' When \code{interactions_list} is provided, each element specifies the
 #' interaction terms for the corresponding model in \code{model_list}. This is
 #' particularly useful for testing whether adding interactions improves model fit:
 #' \itemize{
@@ -110,7 +110,7 @@
 #'   outcome = "os_status",
 #'   model_list = models_interaction,
 #'   model_names = c("Main Effects", "With Interaction"),
-#'   interaction_terms_list = list(
+#'   interactions_list = list(
 #'     NULL,                    # No interactions in first model
 #'     c("age:treatment")       # Add interaction in second model
 #'   )
@@ -127,7 +127,7 @@
 #'   data = mydata,
 #'   outcome = "os_status",
 #'   model_list = models_complex,
-#'   interaction_terms_list = list(
+#'   interactions_list = list(
 #'     NULL,
 #'     c("age:treatment"),
 #'     c("age:treatment", "sex:treatment")
@@ -165,7 +165,7 @@ compfit <- function(data,
                     outcome,
                     model_list,
                     model_names = NULL,
-                    interaction_terms_list = NULL,
+                    interactions_list = NULL,
                     model_type = "auto",
                     family = "binomial",
                     conf_level = 0.95,
@@ -200,20 +200,20 @@ compfit <- function(data,
         model_names <- paste("Model", seq_along(model_list))
     }
     
-    ## Validate interaction_terms_list if provided
-    if (!is.null(interaction_terms_list)) {
-        if (!is.list(interaction_terms_list)) {
-            stop("interaction_terms_list must be a list")
+    ## Validate interactions_list if provided
+    if (!is.null(interactions_list)) {
+        if (!is.list(interactions_list)) {
+            stop("interactions_list must be a list")
         }
-        if (length(interaction_terms_list) != length(model_list)) {
-            stop("interaction_terms_list must have the same length as model_list (", 
+        if (length(interactions_list) != length(model_list)) {
+            stop("interactions_list must have the same length as model_list (", 
                  length(model_list), " models)")
         }
         ## Check each element is either NULL or character vector
-        for (i in seq_along(interaction_terms_list)) {
-            if (!is.null(interaction_terms_list[[i]])) {
-                if (!is.character(interaction_terms_list[[i]])) {
-                    stop("Each element of interaction_terms_list must be NULL or a character vector")
+        for (i in seq_along(interactions_list)) {
+            if (!is.null(interactions_list[[i]])) {
+                if (!is.character(interactions_list[[i]])) {
+                    stop("Each element of interactions_list must be NULL or a character vector")
                 }
             }
         }
@@ -229,7 +229,7 @@ compfit <- function(data,
     ## Fit each model
     for (i in seq_along(model_list)) {
         ## Get interaction count for message
-        n_interact <- if (!is.null(interaction_terms_list) && !is.null(interaction_terms_list[[i]])) length(interaction_terms_list[[i]]) else 0
+        n_interact <- if (!is.null(interactions_list) && !is.null(interactions_list[[i]])) length(interactions_list[[i]]) else 0
         if (n_interact > 0) {
             message(sprintf("Fitting %s with %d predictors + %d interaction%s...", model_names[i], length(model_list[[i]]), n_interact, if(n_interact > 1) "s" else ""))
         } else {
@@ -237,8 +237,8 @@ compfit <- function(data,
         }
         
         ## Extract interaction terms for this model BEFORE tryCatch
-        current_interactions <- if (!is.null(interaction_terms_list)) {
-                                    interaction_terms_list[[i]]
+        current_interactions <- if (!is.null(interactions_list)) {
+                                    interactions_list[[i]]
                                 } else {
                                     NULL
                                 }
@@ -247,7 +247,7 @@ compfit <- function(data,
         model_result <- tryCatch({
             fit(data = data,
                 outcome = outcome,
-                interaction_terms = current_interactions,
+                interactions = current_interactions,
                 predictors = model_list[[i]],
                 model_type = model_type,
                 family = family,

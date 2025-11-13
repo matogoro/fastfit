@@ -4,7 +4,7 @@
 \alias{bold_pvalues_ft}
 \title{Bold significant p-values in DOCX}
 \usage{
-bold_pvalues_ft(ft, df, sig_threshold = 0.05)
+bold_pvalues_ft(ft, df, p_threshold = 0.05)
 }
 \description{
 Bold significant p-values in DOCX

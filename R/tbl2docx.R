@@ -31,7 +31,7 @@
 #'   p-values below the significance threshold. Makes significant results stand 
 #'   out. Default is \code{TRUE}.
 #'   
-#' @param sig_threshold Numeric. P-value threshold for bold formatting. Only 
+#' @param p_threshold Numeric. P-value threshold for bold formatting. Only 
 #'   used when \code{bold_significant = TRUE}. Default is 0.05.
 #'   
 #' @param indent_groups Logical. If \code{TRUE}, indents factor levels under 
@@ -401,7 +401,7 @@
 #' # Example 15: Stricter significance threshold
 #' tbl2docx(results, "strict.docx",
 #'          bold_significant = TRUE,
-#'          sig_threshold = 0.01)
+#'          p_threshold = 0.01)
 #' }
 #'
 #' @export
@@ -412,7 +412,7 @@ tbl2docx <- function(table,
                      font_family = "Arial",
                      format_headers = TRUE,
                      bold_significant = TRUE,
-                     sig_threshold = 0.05,
+                     p_threshold = 0.05,
                      indent_groups = FALSE,
                      condense_table = FALSE,
                      zebra_stripes = FALSE,
@@ -447,7 +447,7 @@ tbl2docx <- function(table,
         font_family = font_family,
         format_headers = format_headers,
         bold_significant = bold_significant,
-        sig_threshold = sig_threshold,
+        p_threshold = p_threshold,
         indent_groups = indent_groups,
         condense_table = condense_table,
         zebra_stripes = zebra_stripes,

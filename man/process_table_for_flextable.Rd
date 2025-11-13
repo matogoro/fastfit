@@ -11,7 +11,7 @@ process_table_for_flextable(
   font_family = "Arial",
   format_headers = TRUE,
   bold_significant = TRUE,
-  sig_threshold = 0.05,
+  p_threshold = 0.05,
   indent_groups = FALSE,
   condense_table = FALSE,
   zebra_stripes = FALSE,

@@ -8,10 +8,10 @@ tbl2tex(
   table,
   file,
   format_headers = TRUE,
-  var_padding = TRUE,
+  variable_padding = TRUE,
   cell_padding = "normal",
   bold_significant = TRUE,
-  sig_threshold = 0.05,
+  p_threshold = 0.05,
   align = NULL,
   indent_groups = FALSE,
   condense_table = FALSE,
@@ -36,7 +36,7 @@ tbl2tex(
 converting underscores to spaces, italicizing statistical notation (\emph{n}, 
 \emph{p}), and applying title case. Default is \code{TRUE}.}
 
-\item{var_padding}{Logical. If \code{TRUE}, adds vertical spacing around 
+\item{variable_padding}{Logical. If \code{TRUE}, adds vertical spacing around 
 variable groups using \code{\\addlinespace} for improved readability. 
 Default is \code{TRUE}.}
 
@@ -52,7 +52,7 @@ Default is \code{TRUE}.}
 \item{bold_significant}{Logical. If \code{TRUE}, wraps significant p-values 
 in textbf commands for bold display. Default is \code{TRUE}.}
 
-\item{sig_threshold}{Numeric. P-value threshold for bolding. Default is 0.05.}
+\item{p_threshold}{Numeric. P-value threshold for bolding. Default is 0.05.}
 
 \item{align}{Character string or vector specifying column alignment:
 \itemize{
@@ -318,10 +318,12 @@ tbl2tex(results, "relaxed.tex",
         cell_padding = "relaxed",
         booktabs = TRUE)
 
-# Example 9: Custom column alignment
+# Example 9: Custom column alignment (auto-detected by default)
+# The align parameter can be NULL to auto-detect or specify per column
+# For a typical fit() result with 6 columns, you would need:
+# align = c("l", "l", "l", "r", "r", "c") for Variable, Group, n, Effect, p-value
 tbl2tex(results, "aligned.tex",
-        align = c("l", "l", "r", "r", "c"),
-        booktabs = TRUE)
+        booktabs = TRUE)  # Uses automatic alignment
 
 # Example 10: No header formatting (keep original names)
 tbl2tex(results, "raw_headers.tex",
@@ -335,7 +337,7 @@ tbl2tex(results, "no_bold.tex",
 # Example 12: Stricter significance threshold
 tbl2tex(results, "strict_sig.tex",
         bold_significant = TRUE,
-        sig_threshold = 0.01,  # Bold only if p < 0.01
+        p_threshold = 0.01,  # Bold only if p < 0.01
         booktabs = TRUE)
 
 # Example 13: Complete publication-ready table

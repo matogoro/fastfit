@@ -14,10 +14,10 @@ tbl2pdf(
   font_size = 8,
   caption = NULL,
   format_headers = TRUE,
-  var_padding = TRUE,
+  variable_padding = TRUE,
   cell_padding = "normal",
   bold_significant = TRUE,
-  sig_threshold = 0.05,
+  p_threshold = 0.05,
   align = NULL,
   indent_groups = FALSE,
   condense_table = FALSE,
@@ -70,7 +70,7 @@ See Details for formatting guidance. Default is \code{NULL}.}
 to column headers: converts underscores to spaces, italicizes statistical 
 notation (\emph{n}, \emph{p}), and improves readability. Default is \code{TRUE}.}
 
-\item{var_padding}{Logical. If \code{TRUE}, adds vertical spacing between 
+\item{variable_padding}{Logical. If \code{TRUE}, adds vertical spacing between 
 different variables in the table, creating visual grouping. Particularly 
 useful for regression tables with multiple predictors. Default is \code{TRUE}.}
 
@@ -89,7 +89,7 @@ Adjusts \code{\\arraystretch} in LaTeX.}
 p-values below the significance threshold, making significant results stand 
 out visually. Default is \code{TRUE}.}
 
-\item{sig_threshold}{Numeric. P-value threshold for bold formatting. Only 
+\item{p_threshold}{Numeric. P-value threshold for bold formatting. Only 
 used when \code{bold_significant = TRUE}. Default is 0.05. Common alternatives: 
 0.01, 0.10.}
 
@@ -328,7 +328,7 @@ if (nzchar(Sys.which("pdflatex"))) {
           indent_groups = TRUE,
           zebra_stripes = TRUE,
           bold_significant = TRUE,
-          sig_threshold = 0.05)
+          p_threshold = 0.05)
   
   # Example 13: Adjust cell padding
   tbl2pdf(results, "relaxed_padding.pdf",
@@ -343,9 +343,10 @@ if (nzchar(Sys.which("pdflatex"))) {
   tbl2pdf(results, "no_bold.pdf",
           bold_significant = FALSE)
   
-  # Example 16: Custom column alignment
-  tbl2pdf(results, "custom_align.pdf",
-          align = c("l", "l", "r", "r", "c"))
+  # Example 16: Custom column alignment (auto-detected by default)
+  # The align parameter uses automatic detection based on column content
+  # Text columns are left-aligned, numeric columns are right-aligned
+  tbl2pdf(results, "custom_align.pdf")
   
   # Example 17: Descriptive statistics table
   desc_table <- desctbl(

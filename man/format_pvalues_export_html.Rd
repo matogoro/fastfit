@@ -4,7 +4,7 @@
 \alias{format_pvalues_export_html}
 \title{Format p-values for exported tables (HTML)}
 \usage{
-format_pvalues_export_html(df, sig_threshold = 0.05)
+format_pvalues_export_html(df, p_threshold = 0.05)
 }
 \description{
 Format p-values for exported tables (HTML)

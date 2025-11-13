@@ -20,7 +20,7 @@
 #'   converting underscores to spaces, italicizing statistical notation (\emph{n}, 
 #'   \emph{p}), and applying title case. Default is \code{TRUE}.
 #'   
-#' @param var_padding Logical. If \code{TRUE}, adds vertical spacing around 
+#' @param variable_padding Logical. If \code{TRUE}, adds vertical spacing around 
 #'   variable groups using \code{\\addlinespace} for improved readability. 
 #'   Default is \code{TRUE}.
 #'   
@@ -36,7 +36,7 @@
 #' @param bold_significant Logical. If \code{TRUE}, wraps significant p-values 
 #'   in textbf commands for bold display. Default is \code{TRUE}.
 #'   
-#' @param sig_threshold Numeric. P-value threshold for bolding. Default is 0.05.
+#' @param p_threshold Numeric. P-value threshold for bolding. Default is 0.05.
 #'   
 #' @param align Character string or vector specifying column alignment:
 #'   \itemize{
@@ -299,10 +299,9 @@
 #'         cell_padding = "relaxed",
 #'         booktabs = TRUE)
 #' 
-#' # Example 9: Custom column alignment
-#' tbl2tex(results, "aligned.tex",
-#'         align = c("l", "l", "r", "r", "c"),
-#'         booktabs = TRUE)
+#' # Example 9: Custom column alignment (auto-detected by default)
+#' tbl2tex(results, "custom_align.tex",
+#'         align = c("c", "c", "c", "c", "c", "c", "c"))
 #' 
 #' # Example 10: No header formatting (keep original names)
 #' tbl2tex(results, "raw_headers.tex",
@@ -316,7 +315,7 @@
 #' # Example 12: Stricter significance threshold
 #' tbl2tex(results, "strict_sig.tex",
 #'         bold_significant = TRUE,
-#'         sig_threshold = 0.01,  # Bold only if p < 0.01
+#'         p_threshold = 0.01,  # Bold only if p < 0.01
 #'         booktabs = TRUE)
 #' 
 #' # Example 13: Complete publication-ready table
@@ -391,10 +390,10 @@
 tbl2tex <- function (table,
                      file,
                      format_headers = TRUE,
-                     var_padding = TRUE, 
+                     variable_padding = TRUE, 
                      cell_padding = "normal",
                      bold_significant = TRUE,
-                     sig_threshold = 0.05,
+                     p_threshold = 0.05,
                      align = NULL, 
                      indent_groups = FALSE,
                      condense_table = FALSE,
@@ -473,11 +472,11 @@ tbl2tex <- function (table,
     }
 
     if (bold_significant) {
-        df <- format_pvalues_export_tex(df, sig_threshold)
+        df <- format_pvalues_export_tex(df, p_threshold)
     }
     
                                         # Track padding rows if adding padding
-    if (var_padding && ("Variable" %in% names(df) || "variable" %in% names(df))) {
+    if (variable_padding && ("Variable" %in% names(df) || "variable" %in% names(df))) {
                                         # Before adding padding, adjust var_groups if necessary
         if (!is.null(var_groups)) {
                                         # Find where padding rows will be inserted
@@ -518,7 +517,7 @@ tbl2tex <- function (table,
                 if (i %% 2 != 0) {  # Odd variable groups get shading
                     start_idx <- var_starts[i]
                     end_idx <- if (i < length(var_starts)) {
-                                   if (var_padding) {
+                                   if (variable_padding) {
                                        var_starts[i + 1] - 2
                                    } else {
                                        var_starts[i + 1] - 1
@@ -550,7 +549,7 @@ tbl2tex <- function (table,
                 if (i %% 2 != 0) {
                     start_idx <- var_starts[i]
                     end_idx <- if (i < length(var_starts)) {
-                                   if (var_padding) {
+                                   if (variable_padding) {
                                        var_starts[i + 1] - 2
                                    } else {
                                        var_starts[i + 1] - 1

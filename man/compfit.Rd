@@ -9,7 +9,7 @@ compfit(
   outcome,
   model_list,
   model_names = NULL,
-  interaction_terms_list = NULL,
+  interactions_list = NULL,
   model_type = "auto",
   family = "binomial",
   conf_level = 0.95,
@@ -31,7 +31,7 @@ for one model. Can also be a single character vector to auto-generate nested mod
 \item{model_names}{Character vector of names for each model. If NULL, uses
 "Model 1", "Model 2", etc. Default is NULL.}
 
-\item{interaction_terms_list}{List of character vectors specifying interaction
+\item{interactions_list}{List of character vectors specifying interaction
 terms for each model. Each element corresponds to one model in model_list.
 Use NULL for models without interactions. Use colon notation for interactions
 (e.g., c("age:treatment")). If NULL, no interactions are added to any model.
@@ -95,7 +95,7 @@ Models that fail to converge are flagged and penalized in the FastFit Score.
 
 \strong{Interaction Terms:}
 
-When \code{interaction_terms_list} is provided, each element specifies the
+When \code{interactions_list} is provided, each element specifies the
 interaction terms for the corresponding model in \code{model_list}. This is
 particularly useful for testing whether adding interactions improves model fit:
 \itemize{
@@ -143,7 +143,7 @@ comp_interact <- compfit(
   outcome = "os_status",
   model_list = models_interaction,
   model_names = c("Main Effects", "With Interaction"),
-  interaction_terms_list = list(
+  interactions_list = list(
     NULL,                    # No interactions in first model
     c("age:treatment")       # Add interaction in second model
   )
@@ -160,7 +160,7 @@ comp_complex <- compfit(
   data = mydata,
   outcome = "os_status",
   model_list = models_complex,
-  interaction_terms_list = list(
+  interactions_list = list(
     NULL,
     c("age:treatment"),
     c("age:treatment", "sex:treatment")

@@ -27,7 +27,7 @@
 #'   in \code{<b>} tags for bold display. Makes important results stand out 
 #'   visually. Default is \code{TRUE}.
 #'   
-#' @param sig_threshold Numeric. P-value threshold for significance highlighting. 
+#' @param p_threshold Numeric. P-value threshold for significance highlighting. 
 #'   Only used when \code{bold_significant = TRUE}. Default is 0.05.
 #'   
 #' @param indent_groups Logical. If \code{TRUE}, indents grouped rows using 
@@ -323,7 +323,7 @@
 #'   # Example 11: Stricter significance threshold
 #'   tbl2html(results, "strict.html",
 #'            bold_significant = TRUE,
-#'            sig_threshold = 0.01)
+#'            p_threshold = 0.01)
 #'   
 #'   # Example 12: No header formatting
 #'   tbl2html(results, "raw_headers.html",
@@ -406,7 +406,7 @@ tbl2html <- function(table,
                      format_headers = TRUE,
                      variable_padding = FALSE, 
                      bold_significant = TRUE,
-                     sig_threshold = 0.05,
+                     p_threshold = 0.05,
                      indent_groups = FALSE,
                      condense_table = FALSE,
                      zebra_stripes = FALSE,
@@ -447,7 +447,7 @@ tbl2html <- function(table,
     }
 
     if (bold_significant) {
-        df <- format_pvalues_export_html(df, sig_threshold)
+        df <- format_pvalues_export_html(df, p_threshold)
     }
     
                                         # NOW calculate var_groups on the FINAL dataframe structure

@@ -40,7 +40,7 @@
 #'   }
 #'   See \code{\link[stats]{family}} for all options. Ignored for non-GLM models.
 #'   
-#' @param interaction_terms Character vector of interaction terms using colon 
+#' @param interactions Character vector of interaction terms using colon 
 #'   notation (e.g., \code{c("age:sex", "treatment:stage")}). Interaction terms 
 #'   are added to the model in addition to main effects. Default is \code{NULL} 
 #'   (no interactions).
@@ -126,7 +126,7 @@
 #'     \item{model_scope}{Character. "Univariable" (one predictor) or 
 #'       "Multivariable" (multiple predictors)}
 #'     \item{model_type}{Character. The regression model type used}
-#'     \item{interaction_terms}{Character vector (if interactions specified). 
+#'     \item{interactions}{Character vector (if interactions specified). 
 #'       The interaction terms included}
 #'     \item{strata}{Character (if stratification used). The stratification variable}
 #'     \item{cluster}{Character (if clustering used). The cluster variable}
@@ -152,7 +152,7 @@
 #' 
 #' Interactions are specified using colon notation and added to the model:
 #' \itemize{
-#'   \item \code{interaction_terms = c("age:treatment")} creates interaction 
+#'   \item \code{interactions = c("age:treatment")} creates interaction 
 #'     between age and treatment
 #'   \item Main effects for both variables are automatically included
 #'   \item Multiple interactions can be specified: 
@@ -246,7 +246,7 @@
 #'     data = clintrial,
 #'     outcome = "os_status",
 #'     predictors = c("age", "treatment", "sex"),
-#'     interaction_terms = c("age:treatment"),
+#'     interactions = c("age:treatment"),
 #'     labels = clintrial_labels
 #' )
 #' print(interact_model)
@@ -322,7 +322,7 @@
 #'     data = clintrial,
 #'     outcome = "os_status",
 #'     predictors = c("age", "sex", "treatment", "bmi"),
-#'     interaction_terms = c("age:treatment", "sex:bmi"),
+#'     interactions = c("age:treatment", "sex:bmi"),
 #'     labels = clintrial_labels
 #' )
 #' print(complex_model)
@@ -375,7 +375,7 @@ fit <- function(data,
                 predictors,
                 model_type = "glm",
                 family = "binomial",
-                interaction_terms = NULL,
+                interactions = NULL,
                 strata = NULL,
                 cluster = NULL,
                 weights = NULL,
@@ -399,9 +399,9 @@ fit <- function(data,
     data_name <- deparse(substitute(data))
     
     ## Build formula
-    if (!is.null(interaction_terms)) {
+    if (!is.null(interactions)) {
         formula_str <- paste(outcome, "~", 
-                             paste(c(predictors, interaction_terms), collapse = " + "))
+                             paste(c(predictors, interactions), collapse = " + "))
     } else {
         formula_str <- paste(outcome, "~", paste(predictors, collapse = " + "))
     }
@@ -468,8 +468,8 @@ fit <- function(data,
     data.table::setattr(model, "model_type", model_type)
     data.table::setattr(model, "data_name", data_name)
     
-    if (!is.null(interaction_terms)) {
-        data.table::setattr(model, "interaction_terms", interaction_terms)
+    if (!is.null(interactions)) {
+        data.table::setattr(model, "interactions", interactions)
     }
     if (!is.null(strata)) {
         data.table::setattr(model, "strata", strata)
@@ -507,8 +507,8 @@ fit <- function(data,
     data.table::setattr(formatted, "model_type", raw_data$model_type[1])
     
     ## Add metadata from model fitting
-    if (!is.null(interaction_terms)) {
-        setattr(formatted, "interaction_terms", interaction_terms)
+    if (!is.null(interactions)) {
+        setattr(formatted, "interactions", interactions)
     }
     if (!is.null(strata)) {
         setattr(formatted, "strata", strata)

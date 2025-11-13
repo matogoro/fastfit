@@ -10,7 +10,7 @@ fit(
   predictors,
   model_type = "glm",
   family = "binomial",
-  interaction_terms = NULL,
+  interactions = NULL,
   strata = NULL,
   cluster = NULL,
   weights = NULL,
@@ -61,7 +61,7 @@ options include:
 }
 See \code{\link[stats]{family}} for all options. Ignored for non-GLM models.}
 
-\item{interaction_terms}{Character vector of interaction terms using colon 
+\item{interactions}{Character vector of interaction terms using colon 
 notation (e.g., \code{c("age:sex", "treatment:stage")}). Interaction terms 
 are added to the model in addition to main effects. Default is \code{NULL} 
 (no interactions).}
@@ -148,7 +148,7 @@ A data.table with S3 class \code{"fit_result"} containing formatted
     \item{model_scope}{Character. "Univariable" (one predictor) or 
       "Multivariable" (multiple predictors)}
     \item{model_type}{Character. The regression model type used}
-    \item{interaction_terms}{Character vector (if interactions specified). 
+    \item{interactions}{Character vector (if interactions specified). 
       The interaction terms included}
     \item{strata}{Character (if stratification used). The stratification variable}
     \item{cluster}{Character (if clustering used). The cluster variable}
@@ -181,7 +181,7 @@ The function automatically detects whether the model is:
 
 Interactions are specified using colon notation and added to the model:
 \itemize{
-  \item \code{interaction_terms = c("age:treatment")} creates interaction 
+  \item \code{interactions = c("age:treatment")} creates interaction 
     between age and treatment
   \item Main effects for both variables are automatically included
   \item Multiple interactions can be specified: 
@@ -269,7 +269,7 @@ interact_model <- fit(
     data = clintrial,
     outcome = "os_status",
     predictors = c("age", "treatment", "sex"),
-    interaction_terms = c("age:treatment"),
+    interactions = c("age:treatment"),
     labels = clintrial_labels
 )
 print(interact_model)
@@ -345,7 +345,7 @@ complex_model <- fit(
     data = clintrial,
     outcome = "os_status",
     predictors = c("age", "sex", "treatment", "bmi"),
-    interaction_terms = c("age:treatment", "sex:bmi"),
+    interactions = c("age:treatment", "sex:bmi"),
     labels = clintrial_labels
 )
 print(complex_model)
